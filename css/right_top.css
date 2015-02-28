@@ -1,0 +1,21 @@
+.extenionMain
+{
+	position:absolute;
+	width:350px;
+	height:100%;
+	border:1px solid red;
+	float:right;
+	z-index:100;
+	right:0;
+	top:0;
+	min-height:250px;
+	overflow-y:auto;
+	max-height:600px;
+ 	background-color: #F2F2F2;
+}
+.username{
+	font-size: 14px;
+	font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;
+	line-height: 46px;
+  	padding-top: 2px;
+}
