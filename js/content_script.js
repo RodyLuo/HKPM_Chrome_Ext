@@ -14,7 +14,7 @@ $(window).load(function() {
 	htmlContent+= "</span>"
 	htmlContent+= "</div>"
 	htmlContent+= "<div class='ExentionContent'>"
-	htmlContent+= "<div>"
+	htmlContent+= "<div class='whereCondition'>"
 	htmlContent+= "</div>"
 	htmlContent+= "</div>";
 	$("body").append(htmlContent);
