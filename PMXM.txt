@@ -1,0 +1,286 @@
+http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=1&m=HK&c=3
+http://ksifvch.ctb988.com/Q.jsp?race_type=3H&race_date=01-03-2015&sml=s
+
+
+http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=1&m=HK&c=3
+http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=0&m=HK&c=3
+
+
+
+
+"No conversion from text to text/html"
+
+
+
+
+
+
+
+
+
+
+var browser_height=getWinHeight();
+var browser_width=getWinWidth();
+var loc_str = "tote_hbo.gif";
+var tmrBRDCST = null;
+var show_HK_JPRPWN_comma=true;
+
+var currency='RB';
+var en_sml=true;
+
+var fcfrm1=null;//do not delete
+var fcfrm2=null;//do not delete
+var div_amount=null;
+var div_amount2=null;
+var div_fclmt_fc0=null;
+var div_fclmt_pft0=null;
+var div_fclmt_9U_pft=null;
+
+var race_type='3H';
+var race_date = '01-03-2015';
+var tnum=0;
+
+var card_uid='sr002a';
+var q_page_type= 'Qtote';
+
+if(isIE9){
+	browser_width -= 3;
+}else if(isFF){
+	browser_width += 1;
+}else if(isSafari){
+	browser_height -= 58;
+}
+
+function initImage() {
+    MM_preloadImages('main_images/system01.png');
+    MM_preloadImages('main_images/system02.png');
+    MM_preloadImages('main_images/close.png');
+    MM_preloadImages('main_images/error.png');
+    MM_preloadImages('main_images/news_wrapper01.png');
+    MM_preloadImages('main_images/news_wrapper02.png');
+    MM_preloadImages('main_images/news_wrapper03.png');
+    MM_preloadImages('main_images/news_arrow.jpg');
+    MM_preloadImages('main_images/news_close.jpg');
+    MM_preloadImages('main_images/nav_bg_over.jpg');
+    MM_preloadImages('themeA_images/result_table_th.jpg');
+    MM_preloadImages('themeA_images/caption_colors_all.jpg');
+    MM_preloadImages('themeA_images/caption_bg.jpg');
+    MM_preloadImages('themeA_images/results_totes.png');
+}
+
+var old_b = "";
+var exit_initSML_2003 = false;
+function initHorseFilter(){
+	setBEQPO('divBQO','visible');
+	setBEQPO('divBQPO','visible');
+	setBEQPO('divEQO','visible');
+	setBEQPO('divEQPO','visible');	
+}
+
+function Init() {
+	hide();
+	
+	I18N.setResource({
+		"Q.LockLimit.error1":"错误！\n限额无效。请检查您的限额\n或参考投注规则指南.",
+		"currently_viewing_Race" : "你正在观看第{0} 场，为了避免发生场次错误的交易；所以你只能进行第 {0} 场的交易。如要进行第 {1} 场的下注或吃票等待，请选择观看第 {1} 场或每场。",
+		"MIN_TIX_INFO" : "'最低交易数额是 $2'",
+		"MAX_TIX_INFO" : "'每交易最多数额是 $50000'",
+		"no_race" : "无赛事 : ",
+		"Bets.horse_not_found" : "割马或无此号马",
+		"hint_info_race" : "请输入场次",
+		"hint_info_input_horse" : "请输入马号 ",
+		"hint_info_check_horse" : "请检查马号",
+		"betq" : '<span style=\"background:url(/main_images/mb/title02_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;赌 连赢&nbsp;</span><br/>呈交动作需要下述资料或验证输入。 <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>请检查 !',
+		"betqp" : '<span style=\"background:url(/main_images/mb/title01_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;赌 位置Q&nbsp;</span><br/>呈交动作需要下述资料或验证输入。 <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>请检查 !',
+		"eatq" : '<span style=\"background:url(/main_images/mb/title03_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;吃 连赢&nbsp;</span><br/>呈交动作需要下述资料或验证输入。 <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>请检查 !',
+		"eatqp" : '<span style=\"background:url(/main_images/mb/title04_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;吃 位置Q&nbsp;</span><br/>呈交动作需要下述资料或验证输入。 <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>请检查 !',
+		"hint_info_1" : "请输入第一匹马号",
+		"hint_info_2" : "请输入第二匹马号",
+		"hint_info_3" : "请输入票数",
+		"hint_info_4" : "请输入%",
+		"hint_info_5" : "请输入限额"
+	});
+	
+	
+	
+	var view1 = document.getElementById("view1");
+	if (!isElementExists('frmTRANS', 'TRANS_DATA') || !isElementExists('frmFC_1', 'FC_DATA') || !isElementExists('frmFC_2', 'FC_DATA') || !isElementExists('frmFC_3', 'FC_DATA') || !isElementExists('frmFC_4', 'FC_DATA')) {
+		setTimeout("Init()", 250);
+	} else {
+		var y = view1.options[view1.selectedIndex].value;
+		
+		vrtTRANS.location = "/datastore?l=x&race_date=" + PageConfig.race_date + "&race_type=" + PageConfig.race_type + "&d=p&rc=" + y + "&q=q&x=" + Math.random() + "&tnum=" + tnum + "&txnrnd=" + txnrnd;
+		
+		if (view1.length > 2) {
+			vrtTOTE.location = "/totedata?race_date=" + PageConfig.race_date + "&qMode=QQ&race_type=" + PageConfig.race_type + "&rc=" + y + "&x=" + Math.random() + "&rcs=" + view1.options[1].value;
+		} else {
+			vrtTOTE.location = "/totedata?race_date=" + PageConfig.race_date + "&qMode=QQ&race_type=" + PageConfig.race_type + "&rc=" + y + "&x=" + Math.random() + "&rcs=";
+		}
+		
+		vrtFC_1.location = urlY + "/qdata?q=1&race_date=" + PageConfig.race_date + "&race_type=" + PageConfig.race_type + "&rc=" + y + "&m=" + PageConfig.mode + "&c=" + PageConfig.cur_slot + "";
+		vrtFC_2.location = urlY + "/qdata?q=2&race_date=" + PageConfig.race_date + "&race_type=" + PageConfig.race_type + "&rc=" + y + "&m=" + PageConfig.mode + "&c=" + PageConfig.cur_slot + "";
+		vrtFC_3.location = urlY + "/qdata?q=3&race_date=" + PageConfig.race_date + "&race_type=" + PageConfig.race_type + "&rc=" + y + "&m=" + PageConfig.mode + "&c=" + PageConfig.cur_slot + "";
+		vrtFC_4.location = urlY + "/qdata?q=4&race_date=" + PageConfig.race_date + "&race_type=" + PageConfig.race_type + "&rc=" + y + "&m=" + PageConfig.mode + "&c=" + PageConfig.cur_slot + "";
+		
+		tmrBRDCST = setBroadcast();
+		b = location.href.substr(0, location.href.lastIndexOf("/"));
+		old_b = b;
+	}
+	
+	//basically to let all other betting windows to know 
+   	//tv windows' existence, so when they got clicked on tv, it wont do 
+   	//window.open again, ie., no refresh
+   	//to solve tv get refreshed when it is not supposed to
+	try{
+		if(typeof(winOTHER[window.name]) == 'undefined' || winOTHER[window.name].name == ""){
+			winOTHER[window.name] = window;
+		}
+	} catch (e) { }
+	setInterval("sync();", 20000);
+	initSML();
+	if (exit_initSML_2003) {
+		return;
+	}
+	hideBetEatPopup();
+	HDR_TOTE = HDR_TOTE_1;
+	
+	Forecast.init();
+	
+	sync();
+
+	//web adjust only for Opear browser
+	if(browser.isOpera) {
+		Forecast.toggleQP(1);
+		setTimeout("Forecast.toggleQP(0)", 1);  
+	}
+
+	initHorseFilter();
+	LockLimitQHandler.init();
+	startList();
+	initImage();
+}
+
+
+<script>document.domain = 'ctb988.com';</script><meta http-equiv=refresh content=3><pre id=FC_DATA_1>
+1	1-4	5627	81	650
+1	1-4	4649	80	700
+1	1-5	1070	82	700
+1	1-5	371	81	650
+1	1-5	231	81	700
+1	1-5	3280	80	700
+1	1-7	361	82	700
+1	1-7	80	81	700
+1	1-7	1097	80	700
+1	1-10	5769	82	700
+1	1-10	6471	80	650
+1	1-10	4849	80	700
+1	1-12	12	82	700
+1	1-12	6258	80	600
+1	1-12	2427	80	650
+1	1-12	5658	80	700
+1	4-7	361	82	700
+1	4-7	7473	80	700
+1	5-7	266	80	650
+1	5-7	2123	80	700
+1	5-12	808	80	700
+1	7-8	2056	80	700
+1	7-10	81	83	700
+1	7-10	6187	82	700
+1	7-10	6471	80	650
+1	7-10	3940	80	700
+1	7-12	238	82	700
+1	7-12	7472	80	700</pre><script>top.getFC();</script><pre id=FC_DATA_1></pre><script>top.getFC();</script>
+
+
+<script>document.domain = 'ctb988.com';</script><meta http-equiv=refresh content=3><pre id=FC_DATA_3>
+1	(1-4)	809	80	200
+1	(1-4)	2	80	350
+1	(1-4)	1414	80	400
+1	(1-5)	1000	81	400
+1	(1-5)	784	80	300
+1	(1-5)	1618	80	400
+1	(1-6)	809	80	300
+1	(1-6)	405	80	400
+1	(1-7)	4025	82	300
+1	(1-7)	294	82	350
+1	(1-7)	8544	82	400
+1	(1-7)	809	80	150
+1	(1-7)	3236	80	400
+1	(1-10)	809	80	200
+1	(1-10)	1576	80	400
+1	(1-12)	358	81	200
+1	(1-12)	809	80	200
+1	(1-12)	2399	80	400
+1	(1-14)	2	80	350
+1	(1-14)	207	80	400
+1	(4-7)	483	83	300
+1	(4-7)	1691	83	400
+1	(4-7)	326	82	350
+1	(4-7)	8494	82	400
+1	(4-7)	809	80	200
+1	(4-7)	2022	80	400
+1	(4-10)	191	80	400
+1	(4-12)	194	80	400
+1	(5-7)	44	83	200
+1	(5-7)	67	81	200
+1	(5-7)	809	80	300
+1	(5-7)	2	80	350
+1	(5-7)	3236	80	400
+1	(5-12)	799	80	400
+1	(6-7)	17	86	400
+1	(6-7)	88	85	100
+1	(6-7)	3869	82	300
+1	(6-7)	809	80	200
+1	(6-7)	1272	80	400
+1	(6-12)	782	80	300
+1	(6-12)	1176	80	400
+1	(7-8)	1989	80	400
+1	(7-9)	1618	80	400
+1	(7-10)	404	82	400
+1	(7-10)	809	80	200
+1	(7-10)	1985	80	400
+1	(7-12)	404	82	400
+1	(7-12)	784	80	300
+1	(7-12)	2004	80	400
+1	(7-14)	798	80	400
+1	(10-12)	394	80	400
+1	(10-14)	998	80	400
+1	(12-14)	194	80	400</pre><script>top.getPFT();</script><pre id=FC_DATA_3></pre><script>top.getPFT();</script>
+
+
+document.domain = 'ctb988.com';top.getFC_EAT();
+
+$(data).text().replace("top.getFC_EAT();","").replace("document.domain = 'ctb988.com';","").replare("\r\n",";")
+
+post(urlX+'/forecast?
+flag='+f.flag.value+'
+&Tix=' + f.Tix.value + '
+&Race=' + f.Race.value + '
+&Hs1=' + f.Hs1.value + '
+&Hs2=' + f.Hs2.value + '
+&fctype=' + f.fctype.value + '
+&Q=' + f.Q.value + '
+&type=' + f.type.value+ '
+&overflow=' + f.overflow.value + '
+&amount=' + f.amount.value + '
+&fclmt=' + f.fclmt.value  + '
+&race_type=' + f.race_type.value + '
+&race_date=' + f.race_date.value );
+
+提交交易的URL参数列表
+
+flag 
+Tix
+Race
+Hs1 第一个马的编号 如1
+Hs2 第二个马的编号 如2
+fctype
+Q
+type
+overflow
+amount
+fclmt
+race_type 香港3H
+race_date 跑马日期
+y 场数
+rd Math.random()
