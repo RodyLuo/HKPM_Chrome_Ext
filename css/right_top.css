@@ -13,9 +13,25 @@
 	max-height:600px;
  	background-color: #F2F2F2;
 }
+#ExentionHead{
+	padding-left: 5px;
+}
 .username{
 	font-size: 14px;
 	font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;
-	line-height: 46px;
-  	padding-top: 2px;
+  	padding-top: 5px;
+}
+.currentUserName{
+	font-size: 14px;
+	font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;
+  	padding-left: 15px;
+}
+.whereCondition{
+	padding: 5px,5px,5px,5px;
+	margin: 5px;
+}
+
+.whereCondition input{
+	padding: 5px,5px,5px,5px;
+	margin: 5px;
 }

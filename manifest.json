@@ -24,7 +24,10 @@
   "incognito": "split",
   "offline_enabled": false,
   "content_scripts": [ 
-  						{ "matches": ["*://*/*"],
+  						{ "matches": ["http://ksifvch.ctb988.com/*","https://ksifvch.ctb988.com/*",
+  							"http://www.ctb988.com/*","https://www.ctb988.com/*",
+  							"http://racing.ctb988.com/*","https://racing.ctb988.com/*"
+  							],
   						  "js": ["js/jquery-1.7.1.min.js","js/content_script.js"],
   						  "css": ["css/right_top.css"]
   						}
@@ -38,7 +41,7 @@
     "*://*.ctb988.com/*",
     "*://*.ctb988.net/*"
   ],
-  "content_security_policy": "script-src 'self' https://use.typekit.net; object-src 'self'",
+  "content_security_policy": "script-src 'self' https://use.ctb988.com; object-src 'self'",
   "commands": {
     "_execute_browser_action": {
       "suggested_key": {
