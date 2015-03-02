@@ -63,7 +63,7 @@ ContentScript ={
 	EventOnInit:function(){
 		//绑定删除事件
 		$("input[name='delete']").bind("click",function(){
-			ContentScript.DelteLine();
+			ContentScript.DelteLine(this);
 		});
 		//绑定交易事件
 		$("input[name='transactionButton']").bind("click",function(){
@@ -136,7 +136,7 @@ ContentScript ={
 			html += '<td>'+result[index].limit+'</td>'
 			html += "<td><input type='number' name='groupLimit' style='width:50px' type='number' value='"+$("#limitCount").val()+"' min='0' max='10000' /></td>"
 			
-			html += "<td><input type='button' name='transactionButton' value='交易'/><input type='button' name='delete' value='删'/></td><input type='hidden' name='jsonValue' value='"+JSON.stringify(jsonArray)+"'/>"
+			html += "<td><input type='button' name='transactionButton' value='交易'/><input type='button' name='delete' value='删'/></td><input type='hidden' name='jsonValue' value='"+JSON.stringify(result[index])+"'/>"
 			html += '</tr>'
 		})
 		
