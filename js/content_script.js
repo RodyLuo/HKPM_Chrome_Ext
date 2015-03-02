@@ -8,7 +8,7 @@ $(window).load(function() {
 	htmlContent+= "折头:<input style='width:50px' type='number' min='0' max='100' id='minPrecent' value='80' />--<input style='width:50px' type='number' min='0' max='100' value='90'  id='maxPrecent'/><br/>"
 	htmlContent+= "极限:<input type='number' style='width:50px' type='number' min='0' max='10000' value='110'  id='minLimit' />--<input type='number' size='5' style='width:50px' id='maxLimit' value='700' type='number' min='0' max='10000'/><br/>"
 	htmlContent+= "限注:<input type='number' style='width:50px' type='number' value='2' min='0' max='10000' id='limitCount' />条<br/>"
-	htmlContent+= "<div><input style='display:in-line' type='button' id='startSearch' value='开始'/><br/><div id='countQ'></div></div>"
+	htmlContent+= "<div><input style='display:inline-block' type='button' id='startSearch' value='开始'/><br/><div id='countQ'></div></div>"
 	htmlContent+= "</div>"
 	htmlContent+="<div id='extenionContent'></div>";
 	htmlContent+= "</div>";
@@ -35,7 +35,9 @@ ContentScript ={
 				var result3 = ContentScript.GetQData("3");
 				var result4 = ContentScript.GetQData("4");
 				$("#countQ").empty();
-				$("#countQ").append("吃:(<font color='red'>"+(result1.length+result3.length)+"</font>) 赌(<font color='red'>"+(result2.length+result4.length)+"</font>)");
+				var chi= (result1.length+result3.length);
+				var du = (result2.length+result4.length);
+				$("#countQ").append("吃:(<font color='red'>"+chi+"</font>) 赌(<font color='green'>"+du+"</font>)");
 				//Area1
 				if( result1!=null && result1!=undefined && result1.length >0) {
 					$("#extenionContent").append(ContentScript.buildHtml(result1));
@@ -62,22 +64,84 @@ ContentScript ={
 	},
 	EventOnInit:function(){
 		//绑定删除事件
-		$("input[name='delete']").bind("click",function(){
-			ContentScript.DelteLine();
+		$("a[name='deleteLine']").bind("click",function(){
+			ContentScript.DelteLine(this);
 		});
 		//绑定交易事件
 		$("input[name='transactionButton']").bind("click",function(){
-			ContentScript.TranactionEvent();
+			ContentScript.TranactionEvent(this);
 		})
 	},
 	DelteLine:function(obj){
 		$(obj).parent().parent().hide();
+		$(obj).parent().parent().empty();
 	},
 	TranactionEvent:function(obj){
 		var jsonText = $(obj).parent().parent().find("input[name='jsonValue']").val();
-		var jsonValue = $.JSON(jsonText);
+		var jsonValue = $.parseJSON(jsonText);
 		
-		//添加后续提交交易的方法
+		//添加后续提交交易的方法		
+		if(ContentScript.checkTransactionValidation(obj,jsonValue)){
+			ContentScript.TranactionSubmit(obj,jsonValue);
+		}else{
+			$(obj).parent().parent().find("input[name='groupLimit']:first").get(0).focus();
+		}
+	},
+	checkTransactionValidation:function(obj,jsonValue){
+		var tixObj = $(obj).parent().parent().find("input[name='groupLimit']:first")
+		if(tixObj){
+			var tix = parseInt(tixObj.val());
+			if(isNaN(tix)){alert("票数不合法，请输入数字");return false;}
+			if(tix<=0){alert("票数必须大于零");return false;}
+			if(tix>parseInt(jsonValue.tickets)){alert("票数必须小于等于现有数量");return false;}
+			return true;
+		}
+	},
+	TranactionSubmit:function(obj,jsonValue){
+		var tix = $(obj).parent().parent().find("input[name='groupLimit']").val()
+		var f;
+		var index = jsonValue.area;
+		//area1
+		if(parseInt(index)==1){
+			f = $("#boxFcBET").get(0);			
+		}
+		//area2
+		if(parseInt(index)==2){
+			f = $("#boxFcEAT").get(0);
+		}
+		//area3
+		if(parseInt(index)==3){
+			f = $("#boxPfcBET").get(0);
+		}
+		//area4
+		if(parseInt(index)==4){
+			f = $("#boxPfcEAT").get(0);
+		}
+		f.Tix.value = tix;
+		//如果含有括号特殊处理一下
+		if(jsonValue.complex.indexOf("(")<0){
+			f.Hs1.value = jsonValue.complex.split("-")[0];
+			f.Hs2.value = jsonValue.complex.split("-")[1];
+		}else{
+			f.Hs1.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
+			f.Hs2.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
+		}			
+		f.Race.value = jsonValue.matches;
+		f.amount.value = jsonValue.tickets;
+		f.fclmt.value = jsonValue.limit;
+		ContentScript.TransactionPost('http://'+window.location.host+'/forecast?flag='+f.flag.value+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		
+		$(obj).parent().html("<font color='green'>已交易</font>");
+	},
+	TransactionPost:function(url){
+		var view1=document.getElementById("view1");
+		var vrtPOST = window.frames["vrtPOST"];
+		if(view1) {
+			var y = view1.options[view1.selectedIndex].value;
+			if(vrtPOST) {
+				vrtPOST.location = url  + "&show="+y+ "&rd=" + Math.random();
+			}
+		}
 	},
 	GetQData:function(index){
 		var QdataResult = [];
@@ -113,10 +177,10 @@ ContentScript ={
 	},
 	buildHtml:function(result){
 		var area = "";
-		try	{ area = $($("ul a span~span")[parseInt(result[0].area)]).text();}catch(e){} 
-		var html='<p><h4>区域 <font color="green">('+ area +')</font></h3></p><table class="bettable">'
+		try	{ area = $($("ul a span~span")[parseInt(result[0].area)-1]).text();}catch(e){} 
+		var html='<p><h4>区域 '+result[0].area+'<font color="green">('+ area +')</font></h3></p><table class="bettable">'
 		html += '<tr>'
-		html += '<th>批</th>'
+		html += '<th>删</th>'
 		html += '<th width="16%">场</th>'
 		html += '<th width="20%">马</th>'
 		html += '<th width="34%">票数$</th>'
@@ -128,7 +192,7 @@ ContentScript ={
 		//{"area":area,"matches":tempArray[0],"complex":"'"+tempArray[1]+"'","tickets":tempArray[2],"precent":tempArray[3],"limit":tempArray[4]});
 		$(result).each(function(index){
 			html += '<tr>'
-			html += '<td><input type="checkbox" name="chkLine"/></td>'
+			html += '<td><a href="javasript:void(0)" name="deleteLine">☒</a></td>'
 			html += '<td>'+result[index].matches+'</td>'
 			html += '<td>'+result[index].complex+'</td>'
 			html += '<td>'+result[index].tickets+'</td>'
@@ -136,7 +200,7 @@ ContentScript ={
 			html += '<td>'+result[index].limit+'</td>'
 			html += "<td><input type='number' name='groupLimit' style='width:50px' type='number' value='"+$("#limitCount").val()+"' min='0' max='10000' /></td>"
 			
-			html += "<td><input type='button' name='transactionButton' value='交易'/><input type='button' name='delete' value='删'/></td><input type='hidden' name='jsonValue' value='"+JSON.stringify(jsonArray)+"'/>"
+			html += "<td><input type='button' name='transactionButton' value='交易'/><input type='hidden' name='jsonValue' value='"+JSON.stringify(result[index])+"'/></td>"
 			html += '</tr>'
 		})
 		
