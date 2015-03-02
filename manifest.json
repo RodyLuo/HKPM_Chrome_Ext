@@ -24,10 +24,7 @@
   "incognito": "split",
   "offline_enabled": false,
   "content_scripts": [ 
-  						{ "matches": ["http://ksifvch.ctb988.com/*","https://ksifvch.ctb988.com/*",
-  							"http://www.ctb988.com/*","https://www.ctb988.com/*",
-  							"http://racing.ctb988.com/*","https://racing.ctb988.com/*"
-  							],
+  						{ "matches": ["*://*.ctb988.com/*"],
   						  "js": ["js/jquery-1.7.1.min.js","js/content_script.js"],
   						  "css": ["css/right_top.css"]
   						}
