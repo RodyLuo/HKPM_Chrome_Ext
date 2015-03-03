@@ -5,9 +5,6 @@ $(window).load(function() {
 	htmlContent+= "</div>"
 	htmlContent+= "<div class='ExentionContent'>"
 	htmlContent+= "<div class='whereCondition'>"
-	htmlContent+= "折头:<input style='width:50px' type='number' min='0' max='100' id='minPrecent' value='80' />--<input style='width:50px' type='number' min='0' max='100' value='90'  id='maxPrecent'/><br/>"
-	htmlContent+= "极限:<input type='number' style='width:50px' type='number' min='0' max='10000' value='110'  id='minLimit' />--<input type='number' size='5' style='width:50px' id='maxLimit' value='700' type='number' min='0' max='10000'/><br/>"
-	htmlContent+= "限注:<input type='number' style='width:50px' type='number' value='2' min='0' max='10000' id='limitCount' />条<br/>"
 	htmlContent+= "<div><input style='display:inline-block' type='button' id='startSearch' value='开始'/><br/><div id='countQ'></div></div>"
 	htmlContent+= "</div>"
 	htmlContent+="<div id='extenionContent'></div>";
