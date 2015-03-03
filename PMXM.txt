@@ -252,6 +252,12 @@ document.domain = 'ctb988.com';top.getFC_EAT();
 
 $(data).text().replace("top.getFC_EAT();","").replace("document.domain = 'ctb988.com';","").replare("\r\n",";")
 
+boxFcBET
+boxFcEAT
+boxPfcBET
+boxPfcEAT
+
+
 post(urlX+'/forecast?
 flag='+f.flag.value+'
 &Tix=' + f.Tix.value + '
@@ -284,3 +290,22 @@ race_type 香港3H
 race_date 跑马日期
 y 场数
 rd Math.random()
+
+
+
+
+
+  if(typeof parent.document.getElementById('eatRace1').innerText=='undefined'){
+	  	parent.document.getElementById('eatRace1').textContent=   b.Race.value  = newy[0];
+	  	parent.document.getElementById('eatHorse1').textContent  = newy[1];
+	  	parent.document.getElementById('eatTix1').textContent  = newy[2];
+	  	parent.document.getElementById('eatPrice1').textContent = b.amount.value = newy[3];
+	  	parent.document.getElementById('eatLimit1').textContent   = b.fclmt.value = newy[4];
+	  	
+}else{parent.document.getElementById('eatRace1').innerText=   b.Race.value  = newy[0];
+		parent.document.getElementById('eatHorse1').innerText    = newy[1];
+	    parent.document.getElementById('eatTix1').innerText    = newy[2];
+		parent.document.getElementById('eatPrice1').innerText    = b.amount.value = newy[3];
+		parent.document.getElementById('eatLimit1').innerText    = b.fclmt.value = newy[4];
+}
+
