@@ -1,229 +1,142 @@
+var timerClock=null;
+
 $(window).load(function() {
-	var htmlContent = "<div class='extenionMain' style='display:none'>";
-    htmlContent+= "<div id='ExentionHead'>";
-    htmlContent+= "	<h3 >	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
-	htmlContent+= "</div>"
-	htmlContent+= "<div class='ExentionContent'>"
-	htmlContent+= "<div class='whereCondition'>"
-	htmlContent+= "<div><input style='display:inline-block' type='button' id='startSearch' value='开始'/><br/><div id='countQ'></div></div>"
-	htmlContent+= "</div>"
-	htmlContent+="<div id='extenionContent'></div>";
-	htmlContent+= "</div>";
-	$("body").append(htmlContent);
-	this.ContentScript.onInit();
-	
-	$(".extenionMain").show(1000);
+	var currentUrl = window.location.href;
+	if(currentUrl.indexOf("Q.jsp?")>=0){
+		var htmlContent = "<div style='display:none,position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
+	    htmlContent+= "<div id='ExentionHead'>";
+	    htmlContent+= "	<h3 >	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
+		htmlContent+= "</div>"
+		htmlContent+= "<div class='ExentionContent'>"
+		htmlContent+= "<div><input style='display:none' type='button' id='startSearch' value='全部交易'/><br/><div id='countQ'></div></div>"
+		htmlContent+="<div id='extenionContent' style='padding: 5px,5px,5px,5px;'></div>";
+		htmlContent+= "</div>";
+		$("body").append(htmlContent);
+		ContentScript.timeClock();
+		$(".extenionMain").show(1000);
+	}
 });
 
 ContentScript ={
+	timeClock:function(){
+		timerClock = setInterval(ContentScript.onInit(),1000); 
+	},
 	onInit:function(){
-		$("#startSearch").bind('click',function(){
-			ContentScript.onButtonClick();
-		});
-	},
-	onButtonClick:function(){
-		if(this.checkCondition()){
-			//如果是Q 
-			var currentUrl = window.location.href;
-			if(currentUrl.indexOf("Q.jsp?")>=0){
-				$("#extenionContent").empty();
-				var result1 = ContentScript.GetQData("1");
-				var result2 = ContentScript.GetQData("2");
-				var result3 = ContentScript.GetQData("3");
-				var result4 = ContentScript.GetQData("4");
-				$("#countQ").empty();
-				var chi= (result1.length+result3.length);
-				var du = (result2.length+result4.length);
-				$("#countQ").append("吃:(<font color='red'>"+chi+"</font>) 赌(<font color='green'>"+du+"</font>)");
-				//Area1
-				if( result1!=null && result1!=undefined && result1.length >0) {
-					$("#extenionContent").append(ContentScript.buildHtml(result1));
-				}
-				//Area2
-				if( result2!=null && result2!=undefined && result2.length >0) {
-					$("#extenionContent").append(ContentScript.buildHtml(result2));
-				}
-				//Area3
-				if( result3!=null && result3!=undefined && result3.length >0) {
-					$("#extenionContent").append(ContentScript.buildHtml(result3));
-				}
-				//Area4
-				if( result4!=null && result4!=undefined && result4.length >0) {
-					$("#extenionContent").append(ContentScript.buildHtml(result4));
-				}
-				
-				ContentScript.EventOnInit();
-			}else{
-				alert("目前外挂只支持Q功能，更多功能请期待后续更新( ⊙o⊙ )")
-				$(".extenionMain").hide(1000);
-			}
+		var result = ContentScript.GetQData();
+		if(result!=null&&result!=undefined&&result.length>0){
+			ContentScript.buildHtml(result);
+			ContentScript.EventOnInit();
 		}
-	},
+	},	
 	EventOnInit:function(){
-		//绑定删除事件
-		$("a[name='deleteLine']").bind("click",function(){
-			ContentScript.DelteLine(this);
-		});
 		//绑定交易事件
 		$("input[name='transactionButton']").bind("click",function(){
+			clearInterval(timerClock);
 			ContentScript.TranactionEvent(this);
+			ContentScript.timeClock();
 		})
-	},
-	DelteLine:function(obj){
-		$(obj).parent().parent().hide();
-		$(obj).parent().parent().empty();
 	},
 	TranactionEvent:function(obj){
 		var jsonText = $(obj).parent().parent().find("input[name='jsonValue']").val();
 		var jsonValue = $.parseJSON(jsonText);
 		
-		//添加后续提交交易的方法		
-		if(ContentScript.checkTransactionValidation(obj,jsonValue)){
-			ContentScript.TranactionSubmit(obj,jsonValue);
+		//添加后续提交交易的方法
+		ContentScript.TranactionSubmit(obj,jsonValue,false);
+	},
+	TranactionSubmit:function(obj,jsonValue,isAll){
+		if(isAll){
+			//点击全部删除
+			$(window.frames["frmTRANS"].document).find("tbody[id^='DAmr'] tr").find(".del_ch").click();
 		}else{
-			$(obj).parent().parent().find("input[name='groupLimit']:first").get(0).focus();
+			var key = $(obj).parent().parent("td :gt(1)").tex();
+			$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr td :eq(2)").each(function(){
+				if($(this).text()==key){
+					$(this).parent().parent().find(".del_ch").click();
+				}
+			});
 		}
 	},
-	checkTransactionValidation:function(obj,jsonValue){
-		var tixObj = $(obj).parent().parent().find("input[name='groupLimit']:first")
-		if(tixObj){
-			var tix = parseInt(tixObj.val());
-			if(isNaN(tix)){alert("票数不合法，请输入数字");return false;}
-			if(tix<=0){alert("票数必须大于零");return false;}
-			if(tix>parseInt(jsonValue.tickets)){alert("票数必须小于等于现有数量");return false;}
-			return true;
-		}
-	},
-	TranactionSubmit:function(obj,jsonValue){
-		var tix = $(obj).parent().parent().find("input[name='groupLimit']").val()
-		var f;
-		var index = jsonValue.area;
-		//area1
-		if(parseInt(index)==1){
-			f = $("#boxFcBET").get(0);			
-		}
-		//area2
-		if(parseInt(index)==2){
-			f = $("#boxFcEAT").get(0);
-		}
-		//area3
-		if(parseInt(index)==3){
-			f = $("#boxPfcBET").get(0);
-		}
-		//area4
-		if(parseInt(index)==4){
-			f = $("#boxPfcEAT").get(0);
-		}
-		f.Tix.value = tix;
-		//如果含有括号特殊处理一下
-		if(jsonValue.complex.indexOf("(")<0){
-			f.Hs1.value = jsonValue.complex.split("-")[0];
-			f.Hs2.value = jsonValue.complex.split("-")[1];
-		}else{
-			f.Hs1.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
-			f.Hs2.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
-		}			
-		f.Race.value = jsonValue.matches;
-		f.amount.value = jsonValue.tickets;
-		f.fclmt.value = jsonValue.limit;
-		ContentScript.TransactionPost('http://'+window.location.host+'/forecast?flag='+f.flag.value+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
-		
-		$(obj).parent().html("<font color='green'>已交易</font>");
-	},
-	TransactionPost:function(url){
-		var view1=document.getElementById("view1");
-		var vrtPOST = window.frames["vrtPOST"];
-		if(view1) {
-			var y = view1.options[view1.selectedIndex].value;
-			if(vrtPOST) {
-				vrtPOST.location = url  + "&show="+y+ "&rd=" + Math.random();
-			}
-		}
-	},
-	GetQData:function(index){
+	GetQData:function(){
 		var QdataResult = [];
-		var urlConfig = window.frames["vrtFC_"+index].location.href.split("&");
-		var mode = "";
-		var cur_slot ="";
-		$(urlConfig).each(function(index){
-			if(urlConfig[index].indexOf("m=")>=0){
-				mode = urlConfig[index].split("=")[1];
+		var item = {};
+		var type = 0;
+		$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td :lt(6)").each(function(item){
+				//<tr onclick="mr('47021643,3,0,04-03-2015,3H,1')" class=""><td>1</td><td class="RD F_B"></td>
+				//<td class="F_B ">4-5</td><td id="DBmr('47021643_3_0_04-03-2015_3H_1')B">2</td><td>80</td>
+				//<td class="RD ">700</td><td><span class="del_ch">删</span></td></tr> 
+				temp += $(this).text()+"$";
+			})
+			if(temp.length>0){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr .del_ch").length
+				var arrayList = temp.split("$");
+				if(tempArray[2].indexOf(/\(/g)>=0){
+					type=2
+				}else{
+					type=1;
+				}
+				item={"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
 			}
-			if(urlConfig[index].indexOf("c=")==0){
-				cur_slot = urlConfig[index].split("=")[1];
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td :lt(6)").each(function(item){
+				//<tr onclick="mr('47021643,3,0,04-03-2015,3H,1')" class=""><td>1</td><td class="RD F_B"></td>
+				//<td class="F_B ">4-5</td><td id="DBmr('47021643_3_0_04-03-2015_3H_1')B">2</td><td>80</td>
+				//<td class="RD ">700</td><td><span class="del_ch">删</span></td></tr> 
+				temp += $(this).text()+"$";
+			})
+			if(temp.length>0){
+				var arrayList = temp.split("$");
+				if(tempArray[2].indexOf(/\(/g)>=0){
+					type=4
+				}else{
+					type=3;
+				}
+				item={"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
 			}
-		})
-		$.ajax(
-				{
-		             type: "GET",
-		             url: "http://"+window.location.host+"/qdata",		             
-		             data: {'q':index,'race_date':$("input[name='race_date']:first").val(),'race_type':$("input[name='race_type']:first").val(),'rc':$("#view1").val(),m:mode,'c':cur_slot},
-		             dataType: "text",
-		             async:false,
-		             success: function(da)
-		             {
-		                  var result = PAOMAHelper.TexToJson(da,index);
-		                  QdataResult = result;
-		             },
-		             error:function (da, status, e){   
-	     				 QdataResult = [] ;
-	   				 }   
-	   				 
-	             });	
+		});
 	    return QdataResult;
 	},
 	buildHtml:function(result){
-		var area = "";
-		try	{ area = $($("ul a span~span")[parseInt(result[0].area)-1]).text();}catch(e){} 
-		var html='<p><h4>区域 '+result[0].area+'<font color="green">('+ area +')</font></h3></p><table class="bettable">'
+		var doResult = [] ;
+		var keyList = [];
+		result.each(function(index){
+			if(keyList.indexOf(result[index].complex+result[index].type)>=0){
+				doResult[keyList.indexOf(result[index].complex)].count+=1;
+				doResult[keyList.indexOf(result[index].complex)].tickets+=result[index].tickets;
+				doResult[keyList.indexOf(result[index].complex)].collectionData.push(result[index]);				
+			}else{
+				keyList.push(result[index].complex+result[index].type);
+				doResult.push({"key":result[index].complex,"matches":result[index].matches,"tickets":result[index].tickets,"count":1,"collectionData":[result[index]]});
+			}
+		});
+		
+		var html='<p><h4>待操作统计</h4></p><table class="bettable">'
 		html += '<tr>'
-		html += '<th>删</th>'
 		html += '<th width="16%">场</th>'
 		html += '<th width="20%">马</th>'
 		html += '<th width="34%">票数$</th>'
-		html += '<th width="12%">%</th>'
-		html += '<th width="18%">限额</th>'
-		html += '<th>条</th>'
+		html += '<th>总</th>'
 		html += '<th>操作</th>'
 		html += '</tr>'
-		//{"area":area,"matches":tempArray[0],"complex":"'"+tempArray[1]+"'","tickets":tempArray[2],"precent":tempArray[3],"limit":tempArray[4]});
 		$(result).each(function(index){
 			html += '<tr>'
-			html += '<td><a href="javasript:void(0)" name="deleteLine">☒</a></td>'
 			html += '<td>'+result[index].matches+'</td>'
 			html += '<td>'+result[index].complex+'</td>'
 			html += '<td>'+result[index].tickets+'</td>'
-			html += '<td>'+result[index].precent+'</td>'
-			html += '<td>'+result[index].limit+'</td>'
-			html += "<td><input type='number' name='groupLimit' style='width:50px' type='number' value='"+$("#limitCount").val()+"' min='0' max='10000' /></td>"
-			
-			html += "<td><input type='button' name='transactionButton' value='交易'/><input type='hidden' name='jsonValue' value='"+JSON.stringify(result[index])+"'/></td>"
+			html += '<td>'+result[index].count+'</td>'
+			if(result)
+			html += "<td><input type='button' style='back-ground:#f18200' name='transactionButton' value='交易'/><input type='hidden' name='jsonValue' value='"+JSON.stringify(result[index])+"'/></td>"
 			html += '</tr>'
 		})
 		
 		html += '</table><br/>'
 		
 		return html;
-	},
-	checkCondition:function(){
-		var minPrecent = $("#minPrecent")
-		var maxPrecent = $("#maxPrecent")
-		var minLimit = $("#minLimit")
-		var maxLimit = $("#maxLimit")
-		var limitCount = $("#limitCount")
-		
-		if(minPrecent.val().length==0&&maxPrecent.val().length==0){ alert("请输入折头！");return false;}
-		if(parseInt(minPrecent.val())>parseInt(maxPrecent.val())){
-			alert("折头范围错误！");
-			return false;
-		}
-		if(minLimit.val().length==0&&maxLimit.val().length==0){ alert("请输入极限！");return false;}
-		if(parseInt(minLimit.val())>parseInt(maxLimit.val())){
-			alert("极限范围错误！");
-			return false;
-		}
-		if(limitCount.val().length==0){ alert("请输入限注！");return false;}
-		return true;
 	}
 };
 /*帮助类 对数据进行格式化*/
