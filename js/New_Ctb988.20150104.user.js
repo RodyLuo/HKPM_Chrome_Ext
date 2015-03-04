@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name       Ctrip Attendance Summarizer
+// @name       Rody WaiGua Programming
 // @version    20150104
 // @match http://*.ctb988.com/Q.jsp*  
 // @match https://*.ctb988.com/Q.jsp* 
@@ -48,13 +48,61 @@ ContentScript ={
 			ContentScript.TranactionSubmit(obj,jsonValue,false);
 		}
 	},
-	TranactionSubmit:function(obj,jsonValue,isAll){	
+	TranactionSubmitAjax:function(jsonValue){
+		var f;
+		var index = jsonValue.type;
+		//area1
+		if(parseInt(index)==1){
+			f = $("#boxFcBET").get(0);			
+		}
+		//area2
+		if(parseInt(index)==2){
+			f = $("#boxFcEAT").get(0);
+		}
+		//area3
+		if(parseInt(index)==3){
+			f = $("#boxPfcBET").get(0);
+		}
+		//area4
+		if(parseInt(index)==4){
+			f = $("#boxPfcEAT").get(0);
+		}
+		f.Tix.value = jsonValue.tickets;
+		//如果含有括号特殊处理一下
+		if(jsonValue.complex.indexOf("(")<0){
+			f.Hs1.value = jsonValue.complex.split("-")[0];
+			f.Hs2.value = jsonValue.complex.split("-")[1];
+		}else{
+			f.Hs1.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
+			f.Hs2.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
+		}			
+		f.Race.value = jsonValue.collectionData[0].matches;
+		f.amount.value = jsonValue.collectionData[0].tickets;
+		f.fclmt.value = jsonValue.collectionData[0].limit;
+		ContentScript.TransactionPost('http://'+window.location.host+'/forecast?flag='+f.flag.value+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+	},
+	TransactionPost:function(url){
+		var view1=document.getElementById("view1");
+		var vrtPOST = window.frames["vrtPOST"];
+		if(view1) {
+			var y = view1.options[view1.selectedIndex].value;
+			if(vrtPOST) {
+				vrtPOST.location = url  + "&show="+y+ "&rd=" + Math.random();
+			}
+		}
+	},
+	TranactionSubmit:function(obj,jsonValue,isAll){		
+		if(jsonValue!=null && jsonValue!=undefined){
+			if( jsonValue.collectionData!=null && jsonValue.collectionData!=undefined){
+					   ContentScript.TranactionSubmitAjax(jsonValue);
+			}
+		}
 		
 		var key = $($(obj).parent().parent().find("td")[1]).text();
 			if(parseInt(jsonValue.type)<3){
 				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(){
 					if($($(this).find("td")[2]).text()==key){
-						$(this).find(".del_ch").parent().parent().click();
+						$(this).find(".del_ch").click();
 					}
 				});
 			}
@@ -62,66 +110,10 @@ ContentScript ={
 			if(parseInt(jsonValue.type)>2){
 				$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(){
 					if($($(this).find("td")[2]).text()==key){
-						$(this).find(".del2_ch").parent().parent().click();
+						$(this).find(".del2_ch").click();
 					}
 				});
 			}
-		
-		setTimeout(ContentScript.SubmitLast(jsonValue),1000);
-		
-		
-	},
-	SubmitLast:function(jsonValue){
-		if(jsonValue!=null && jsonValue!=undefined){
-			if( jsonValue.collectionData!=null && jsonValue.collectionData!=undefined){
-					   if(parseInt(jsonValue.type)>2){
-							try{
-								if(parseInt(jsonValue.type)==3){
-									$("#zQ_tab3").click();
-								}
-								if(parseInt(jsonValue.type)==4){
-									$("#zQ_tab4").click();
-								}
-								var complex1 = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"");
-								var hss1=complex1.split("-")[0];
-								var hss2=complex1.split("-")[1];
-								$("#fcfrm2").find("#Hss").val(hss1+"+"+hss2);
-								$("#fcfrm2").find("input[name='Tix']").val(jsonValue.tickets);
-								$("#fcfrm2").find("input[name='amount']").val("100");
-								$("#fcfrm2").find("input[type='submit']").click();
-								
-								$("#fcfrm2").find("#Hss").val();
-								$("#fcfrm2").find("input[name='Tix']").val();
-								$("#fcfrm2").find("input[name='amount']").val("80");
-							}catch(e){
-								alert("插件异常，请使用原来网站的功能！");
-							}
-						}
-						if(parseInt(jsonValue.type)<3){
-							try{
-								if(parseInt(jsonValue.type)==1){
-									$("#zQ_tab1").click();
-								}
-								if(parseInt(jsonValue.type)==2){
-									$("#zQ_tab2").click();
-								}
-								var complex1 = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"");
-								var hss1=complex1.split("-")[0];
-								var hss2=complex1.split("-")[1];
-								$("#fcfrm1").find("#Hss").val(hss1+"+"+hss2);
-								$("#fcfrm1").find("input[name='Tix']").val(jsonValue.tickets);
-								$("#fcfrm1").find("input[name='amount']").val("100");
-								$("#fcfrm1").find("input[type='submit']").click();
-								
-								$("#fcfrm1").find("#Hss").val();
-								$("#fcfrm1").find("input[name='Tix']").val();
-								$("#fcfrm1").find("input[name='amount']").val("80");
-							}catch(e){
-								alert("插件异常，请使用原来网站的功能！");
-							}
-						}		
-			}
-		}
 	},
 	GetQData:function(){
 		var QdataResult = [];
