@@ -14,14 +14,11 @@ var Zepto=function(){function L(t){return null==t?String(t):j[T.call(t)]||"objec
 
 ContentScript ={
 	timerClock:null,
-	deleteClock:null,
-	deleteObjList:[],
 	currentUrl:window.location.href,
 	timeClock:function(){
-		ContentScript.onInit();
 		ContentScript.timerClock = self.setInterval(function(){
 			ContentScript.onInit();
-		},100);
+		},1000);
 	},
 	onInit:function(){
 		var result = ContentScript.GetQData();
@@ -38,9 +35,7 @@ ContentScript ={
 	EventOnInit:function(){
 		//绑定交易事件
 		$("input[name='transactionButton']").bind("click",function(){
-			if(ContentScript.timerClock!=null){
-				clearInterval(ContentScript.timerClock);
-			}
+			clearInterval(ContentScript.timerClock);
 			ContentScript.TranactionEvent(this);
 			ContentScript.timeClock();
 		})
@@ -51,53 +46,78 @@ ContentScript ={
 		
 		//添加后续提交交易的方法
 		if(jsonValue!=null && jsonValue!=undefined){
-			ContentScript.TranactionSubmit(obj,jsonValue);
+			ContentScript.TranactionSubmit(obj,jsonValue,false);
 		}
 	},
-	ClickTrigger:function(obj){
-		if(ContentScript.deleteClock!=null){
-			$(obj).trigger("click");
+	TranactionSubmitAjax:function(jsonValue){
+		var f;
+		var index = jsonValue.type;
+		//area1
+		if(parseInt(index)==1){
+			f = $("#boxFcBET").get(0);			
 		}
+		//area2
+		if(parseInt(index)==2){
+			f = $("#boxFcEAT").get(0);
+		}
+		//area3
+		if(parseInt(index)==3){
+			f = $("#boxPfcBET").get(0);
+		}
+		//area4
+		if(parseInt(index)==4){
+			f = $("#boxPfcEAT").get(0);
+		}
+		f.Tix.value = jsonValue.tickets;
+		//如果含有括号特殊处理一下
+		if(jsonValue.complex.indexOf("(")<0){
+			f.Hs1.value = jsonValue.complex.split("-")[0];
+			f.Hs2.value = jsonValue.complex.split("-")[1];
+		}else{
+			f.Hs1.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
+			f.Hs2.value = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
+		}			
+		f.Race.value = jsonValue.collectionData[0].matches;
+		f.amount.value = jsonValue.collectionData[0].tickets;
+		f.fclmt.value = jsonValue.collectionData[0].limit;
+		ContentScript.TransactionPost('http://'+window.location.host+'/forecast?flag='+f.flag.value+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
 	},
-	TranactionSubmit:function(obj,jsonValue){	
-		ContentScript.deleteClock = self.setInterval(function(){
-			var key = $($(obj).parent().parent().find("td")[1]).text();
-			var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
-			var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
-			if((greenList!=null || yellowList !=null)
-			   && (greenList!=undefined || yellowList!=undefined)
-			   && (greenList.length>0 || yellowList.length>0)
-			){
-					if(parseInt(jsonValue.type)<3){
-						$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
-							if($($(this).find("td")[2]).text()==key){
-								var obj = $($(this).find(".del_ch").parent().parent());
-								setTimeout(ContentScript.ClickTrigger(obj),100);
-							}
-						});
-					}
-					
-					if(parseInt(jsonValue.type)>2){
-						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
-							if($($(this).find("td")[2]).text()==key){
-								var obj = $($(this).find(".del2_ch").parent().parent());
-								setTimeout(ContentScript.ClickTrigger(obj),200);
-							}
-						});
-					}
-			}else{
-				if(ContentScript.deleteClock!=null){
-					clearInterval(ContentScript.deleteClock);
-					ContentScript.deleteClock = null;
-				}
+	TransactionPost:function(url){
+		var view1=document.getElementById("view1");
+		var vrtPOST = window.frames["vrtPOST"];
+		if(view1) {
+			var y = view1.options[view1.selectedIndex].value;
+			if(vrtPOST) {
+				vrtPOST.location = url  + "&show="+y+ "&rd=" + Math.random();
 			}
-			
-		},100);
-		setTimeout(ContentScript.SubmitLast(jsonValue),100);
+		}
 	},
-	SubmitLast:function(jsonValue){
+	TranactionSubmit:function(obj,jsonValue,isAll){		
 		if(jsonValue!=null && jsonValue!=undefined){
 			if( jsonValue.collectionData!=null && jsonValue.collectionData!=undefined){
+					   ContentScript.TranactionSubmitAjax(jsonValue);
+			}
+		}
+		
+		var key = $($(obj).parent().parent().find("td")[1]).text();
+			if(parseInt(jsonValue.type)<3){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(){
+					if($($(this).find("td")[2]).text()==key){
+						$(this).find(".del_ch").click();
+					}
+				});
+			}
+			
+			if(parseInt(jsonValue.type)>2){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(){
+					if($($(this).find("td")[2]).text()==key){
+						$(this).find(".del2_ch").click();
+					}
+				});
+			}
+			
+			if(jsonValue!=null && jsonValue!=undefined){
+				if( jsonValue.collectionData!=null && jsonValue.collectionData!=undefined){
 					   if(parseInt(jsonValue.type)>2){
 							try{
 								if(parseInt(jsonValue.type)==3){
@@ -154,6 +174,9 @@ ContentScript ={
 		$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
 			var temp = "";
 			$(this).find("td").each(function(item){
+				//<tr onclick="mr('47021643,3,0,04-03-2015,3H,1')" class=""><td>1</td><td class="RD F_B"></td>
+				//<td class="F_B ">4-5</td><td id="DBmr('47021643_3_0_04-03-2015_3H_1')B">2</td><td>80</td>
+				//<td class="RD ">700</td><td><span class="del_ch">删</span></td></tr> 
 				if($(this).text()!="删"){
 					temp += $(this).text()+"$";
 				}
@@ -173,6 +196,9 @@ ContentScript ={
 		$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
 			var temp = "";
 			$(this).find("td").each(function(item){
+				//<tr onclick="mr('47021643,3,0,04-03-2015,3H,1')" class=""><td>1</td><td class="RD F_B"></td>
+				//<td class="F_B ">4-5</td><td id="DBmr('47021643_3_0_04-03-2015_3H_1')B">2</td><td>80</td>
+				//<td class="RD ">700</td><td><span class="del_ch">删</span></td></tr> 
 				if($(this).text()!="删"){
 					temp += $(this).text()+"$";
 				}
@@ -203,7 +229,7 @@ ContentScript ={
 			}
 		});
 		
-		var html='<p><h4>待操作统计</h4></p><table class="bettable" style="padding-left: 10px;">'
+		var html='<p><h4>待操作统计</h4></p><table class="bettable">'
 		html += '<tr>'
 		html += '<th width="16%">场</th>'
 		html += '<th width="20%">马</th>'
@@ -216,7 +242,7 @@ ContentScript ={
 			html += '<td>'+doResult[index].complex+'</td>'
 			html += '<td>'+doResult[index].tickets+'</td>'
 			if(parseInt(doResult.type)>2){
-				html += "<td><input type='button' style='background-color: #f18200;' name='transactionButton' value='交易'/><input type='hidden' name='jsonValue' value='"+JSON.stringify(doResult[index])+"'/></td>"
+				html += "<td><input type='button' style='background-color:#f18200' name='transactionButton' value='交易'/><input type='hidden' name='jsonValue' value='"+JSON.stringify(doResult[index])+"'/></td>"
 			}else{
 				html += "<td><input type='button' name='transactionButton' value='交易'/><input type='hidden' name='jsonValue' value='"+JSON.stringify(doResult[index])+"'/></td>"
 			}
@@ -232,12 +258,12 @@ ContentScript ={
 
 if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
 		var htmlContent = "<div style='position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
-	    htmlContent+= "<div id='ExentionHead' style='padding-left: 10px;'>";
+	    htmlContent+= "<div id='ExentionHead'>";
 	    htmlContent+= "	<h3 >	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
 		htmlContent+= "</div>"
 		htmlContent+= "<div class='ExentionContent'>"
 		htmlContent+= "<div><input style='display:none' type='button' id='startSearch' value='全部交易'/><br/><div id='countQ'></div></div>"
-		htmlContent+="<div id='extenionContent' style='padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
+		htmlContent+="<div id='extenionContent' style='padding: 5px,5px,5px,5px;'></div>";
 		htmlContent+= "</div>";
 		$("body").append(htmlContent);
 		ContentScript.timeClock();
