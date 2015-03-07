@@ -116,11 +116,14 @@ ContentScript ={
 		   && $("#hidTransactionCountData").length>0 ){
 		   	var val = $("#hidTransactionCountData").val();
 		   	if(val==""){
-		   		val=="[]";
+		   		oldResult = [];
+		   	}else{
+		   		oldResult = $.parseJSON($("#hidTransactionCountData").val());
 		   	}
-			oldResult = $.parseJSON(val);
 		}
-		if(JSONHelper.compArray(result,oldResult)){
+		   
+		if(result!=null && oldResult!=null && 
+		   (JSON.stringify(result)==JSON.stringify(oldResult))){
 			if(result==null || result==undefined || result.length==0){
 				ContentScript.clearResultList();
 			}
@@ -138,8 +141,10 @@ ContentScript ={
 	EventOnInit:function(){
 		//绑定交易事件
 		$("input[name='transactionButton']").bind("click",function(){
+			$(this).parent().parent().hide();
 			if(ContentScript.timerClock!=null){
 				clearInterval(ContentScript.timerClock);
+				ContentScript.timerClock=null
 			}
 			ContentScript.TranactionEvent(this);
 			ContentScript.timeClock();
@@ -154,14 +159,34 @@ ContentScript ={
 			ContentScript.TranactionSubmit(obj,jsonValue);
 		}
 	},
-	ClickTrigger:function(obj){
+	ClickTrigger:function(obj,key1,type){
 		if(ContentScript.deleteClock!=null){
-			$(obj).trigger("click");
+			if(ContentScript.CheckObjExists(key1,type)){
+				$(obj).trigger("click");
+			}
 		}
+	},
+	CheckObjExists:function(key1,type){
+		var result = false;
+		if(type=="del_ch"){
+			$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+				if($($(this).find("td")[2]).text()==key1){
+					result = true;
+				}
+			});
+		}
+		if(type=="del2_ch"){
+			$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
+				if($($(this).find("td")[2]).text()==key1){
+					result = true;
+				}
+			});
+		}
+		return result;
 	},
 	TranactionSubmit:function(obj,jsonValue){	
 		ContentScript.deleteClock = self.setInterval(function(){
-			var key = $($(obj).parent().parent().find("td")[1]).text();
+			var key1 = $($(obj).parent().parent().find("td")[1]).text();
 			var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
 			var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
 			if((greenList!=null || yellowList !=null)
@@ -170,18 +195,20 @@ ContentScript ={
 			){
 					if(parseInt(jsonValue.type)<3){
 						$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
-							if($($(this).find("td")[2]).text()==key){
+							if($($(this).find("td")[2]).text()==key1){
 								var obj = $($(this).find(".del_ch").parent().parent());
-								ContentScript.ClickTrigger(obj);
+								ContentScript.ClickTrigger(obj,key1,"del_ch");
+								$($(this).find(".del_ch").parent().parent()).hide(200);
 							}
 						});
 					}
 					
 					if(parseInt(jsonValue.type)>2){
 						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
-							if($($(this).find("td")[2]).text()==key){
+							if($($(this).find("td")[2]).text()==key1){
 								var obj = $($(this).find(".del2_ch").parent().parent());
-								ContentScript.ClickTrigger(obj);
+								ContentScript.ClickTrigger(obj,key1,"del2_ch");
+								$($(this).find(".del2_ch").parent().parent()).hide(200);
 							}
 						});
 					}
@@ -209,31 +236,22 @@ ContentScript ={
 								var complex1 = jsonValue.complex.replace(/\(/g,"").replace(/\)/g,"");
 								var hss1=complex1.split("-")[0];
 								var hss2=complex1.split("-")[1];
+								$("#fcfrm2").find("input[name='Hs1']").val(hss1);
+								$("#fcfrm2").find("input[name='Hs2']").val(hss2);
+								$("#fcfrm2").find("input[name='Tix']").val(jsonValue.tickets);
+								$("#fcfrm2").find("input[name='amount']").val("100");
 								
 								if($("#fcfrm2").find("#Hss")!=null
 								   && $("#fcfrm2").find("#Hss")!=undefined
 								   && $("#fcfrm2").find("#Hss").length > 0 
 								){
 									$("#fcfrm2").find("#Hss").val(hss1+"+"+hss2);
-									$("#fcfrm2").find("input[name='Tix']").val(jsonValue.tickets);
-									$("#fcfrm2").find("input[name='amount']").val("100");
-									$("#fcfrm2").find("input[type='submit']").click();
-									
+									PostHelp.chkKBEat($("#fcfrm2"));
 									$("#fcfrm2").find("#Hss").val("");
 									$("#fcfrm2").find("input[name='Tix']").val("");
 									$("#fcfrm2").find("input[name='amount']").val("80");
-								}
-								
-								if($("#fcfrm2").find("input[name='Hs1']")!=null
-								   && $("#fcfrm2").find("input[name='Hs1']")!=undefined
-								   && $("#fcfrm2").find("input[name='Hs1']").length > 0 
-								){
-									$("#fcfrm2").find("input[name='Hs1']").val(hss1);
-									$("#fcfrm2").find("input[name='Hs2']").val(hss2);
-									$("#fcfrm2").find("input[name='Tix']").val(jsonValue.tickets);
-									$("#fcfrm2").find("input[name='amount']").val("100");
-									$("#fcfrm2").find("input[type='submit']").click();
-									
+								}else{
+								    PostHelp.chkActEat($("#fcfrm2"));	
 									$("#fcfrm2").find("input[name='Hs1']").val("");
 									$("#fcfrm2").find("input[name='Hs2']").val("");
 									$("#fcfrm2").find("input[name='Tix']").val("");
@@ -255,34 +273,20 @@ ContentScript ={
 								var hss1=complex1.split("-")[0];
 								var hss2=complex1.split("-")[1];
 								
+								$("#fcfrm1").find("input[name='Hs1']").val(hss1);
+								$("#fcfrm1").find("input[name='Hs2']").val(hss2);
+								$("#fcfrm1").find("input[name='Tix']").val(jsonValue.tickets);
+								$("#fcfrm1").find("input[name='amount']").val("100");
+								
 								if($("#fcfrm1").find("#Hss")!=null
 								   && $("#fcfrm1").find("#Hss")!=undefined
 								   && $("#fcfrm1").find("#Hss").length > 0 
 								){
-									$("#fcfrm1").find("#Hss").val(hss1+"+"+hss2);									
-									$("#fcfrm1").find("input[name='Tix']").val(jsonValue.tickets);
-									$("#fcfrm1").find("input[name='amount']").val("100");
-									$("#fcfrm1").find("input[type='submit']").click();
-									
-									$("#fcfrm1").find("#Hss").val("");
-									$("#fcfrm1").find("input[name='Tix']").val("");
+									$("#fcfrm1").find("#Hss").val(hss1+"+"+hss2);	
+									PostHelp.chkActBet($("#fcfrm1"));
 									$("#fcfrm1").find("input[name='amount']").val("80");
-								}
-								
-								if($("#fcfrm1").find("input[name='Hs1']")!=null
-								   && $("#fcfrm1").find("input[name='Hs1']")!=undefined
-								   && $("#fcfrm1").find("input[name='Hs1']").length > 0 
-								){
-									$("#fcfrm1").find("input[name='Hs1']").val(hss1);
-									$("#fcfrm1").find("input[name='Hs2']").val(hss2);
-									
-									$("#fcfrm1").find("input[name='Tix']").val(jsonValue.tickets);
-									$("#fcfrm1").find("input[name='amount']").val("100");
-									$("#fcfrm1").find("input[type='submit']").click();
-									
-									$("#fcfrm1").find("input[name='Hs1']").val("");
-									$("#fcfrm1").find("input[name='Hs2']").val("");
-									$("#fcfrm1").find("input[name='Tix']").val("");
+								}else{
+									PostHelp.chkKBBet($("#fcfrm1"));
 									$("#fcfrm1").find("input[name='amount']").val("80");
 								}
 							}catch(e){
@@ -372,7 +376,102 @@ ContentScript ={
 		html += "</table><input type='hidden' id='hidTransactionCountData' value='"+JSON.stringify(result)+"' /><br/>";		
 		return html;
 	}
-};
+}
+
+PostHelp={
+	urlX: "http://"+window.location.host,
+	fcfrm1 : document.getElementById("fcfrm1"),
+	fcfrm2 : document.getElementById("fcfrm2"),
+	chkKBBet:function(f){
+		f = PostHelp.fcfrm1;
+		if(f.fctype.value == 0){
+			PostHelp.chkKB1(f);
+		} else if(f.fctype.value == 1){
+			PostHelp.chkKB3(f);
+		}
+	},
+    chkKBEat:function(f){
+		f = PostHelp.fcfrm2;
+		if(f.fctype.value == 0){
+			PostHelp.chkKB2(f);
+		} else if(f.fctype.value == 1){
+			PostHelp.chkKB4(f);
+		}
+	},
+    chkKB1:function(f){
+		f=PostHelp.fcfrm1;
+		var combo;
+		if(f.Hss.value.indexOf('>')>-1) {
+			combo=1;
+		} else {
+			combo=0;
+		}
+		if(true){
+			f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		}
+	},
+    chkKB2:function(f){
+		f=PostHelp.fcfrm2;
+		var combo=f.banker2.value;
+		if(true){
+			f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		}
+	},
+    chkKB3:function(f){
+		f=PostHelp.fcfrm1;
+		var combo;
+		if(f.Hss.value.indexOf('>')>-1) {
+			combo=1;
+		} else {
+			combo=0;
+		}
+		if(true){
+			f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		}
+	},
+	chkKB4:function(f){
+		f=PostHelp.fcfrm2;
+		var combo=f.banker2.value;
+		if(true){
+			f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		}
+	},
+	chkActBet:function(f){
+		f = PostHelp.fcfrm1;
+		var combo;
+		if(f.banker1.checked) {
+			combo=1;
+		} else {
+			combo=0;
+		}
+		if(true){
+			f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&Hs3=' + f.Hs3.value+ '&Hs4=' + f.Hs4.value+ '&Hs5=' + f.Hs5.value+ '&Hs6=' + f.Hs6.value+ '&Hs7=' + f.Hs7.value+ '&Hs8=' + f.Hs8.value +'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		}
+	},
+	chkActEat:function(f){
+		f = PostHelp.fcfrm2;
+		var combo=f.banker2.value;
+		if(true){
+			f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&Hs3=' + f.Hs3.value+ '&Hs4=' + f.Hs4.value+ '&Hs5=' + f.Hs5.value + '&Hs6=' + f.Hs6.value+ '&Hs7=' + f.Hs7.value+ '&Hs8=' + f.Hs8.value+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+		}
+	},
+	postData:function(url){
+		var view1=document.getElementById("view1");
+		var vrtPOST = window.frames["vrtPOST"];
+		if(view1) {
+			var y = view1.options[view1.selectedIndex].value;
+			if(vrtPOST) {
+				vrtPOST.location = url  + "&show="+y+ "&rd=" + Math.random();
+			}
+		}
+	}
+}
 
 if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
 		var htmlContent = "<div style='position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
