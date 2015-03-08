@@ -346,12 +346,33 @@ PostHelp={
 	},
 	postData:function(url){
 		var view1=document.getElementById("view1");
-		var vrtPOST = window.frames["vrtPOST"];
 		if(view1) {
-			var y = view1.options[view1.selectedIndex].value;
-			if(vrtPOST) {
-				vrtPOST.location = url  + "&show="+y+ "&rd=" + Math.random();
-			}
+				var y = view1.options[view1.selectedIndex].value;
+				var postion = url  + "&show="+y+ "&rd=" + Math.random();
+				var postionArray = postion.split("?");
+				var postUrl = postionArray[0];
+				var dataUrl = postionArray[1];
+				var dataArray = dataUrl.split('&');
+				var postString ="{";
+				foreach(var item in dataArray){
+					var itemArray = item.split("=");
+					postString +="'"+itemArray[0]+"': '"+itemArray[1]+"',";
+				}
+				postString = postString.substr(0,postString.length-1);
+				postString+="}";
+				var dataJson = $.parseJSON(postString);
+				$.ajax(
+				{
+		             type: "GET",
+		             url: postUrl,		             
+		             data: dataJson,
+		             dataType: "text",
+		             success: function(da)
+		             {
+		             },
+		             error:function (da, status, e){   
+	   				 }
+	     		});
 		}
 	},
 	PostDeleteData:function(info){
@@ -390,7 +411,6 @@ PostHelp={
 						"rd":Math.random()
 		             },
 		             dataType: "text",
-		             async:false,
 		             success: function(da)
 		             {
 		             },
