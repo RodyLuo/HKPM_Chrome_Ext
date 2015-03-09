@@ -19,7 +19,7 @@ ContentScript ={
 		ContentScript.onInit();
 		ContentScript.timerClock = self.setInterval(function(){
 			ContentScript.onInit();
-		},100);
+		},1000);
 	},
 	clearResultList:function(){
 		$("#extenionContent").empty();
@@ -27,6 +27,10 @@ ContentScript ={
 	},
 	onInit:function(){
 		var result = ContentScript.GetQData();
+		if(result==null || result==undefined || result.length==0){
+			ContentScript.clearResultList();
+			return false;
+		}
 		var oldResult = [];
 		if($("#hidTransactionCountData")!=null
 		   && $("#hidTransactionCountData")!=undefined
@@ -38,21 +42,31 @@ ContentScript ={
 		   		oldResult = $.parseJSON($("#hidTransactionCountData").val());
 		   	}
 		}
-		   
-		if(result!=null && oldResult!=null && 
-		   (JSON.stringify(result)==JSON.stringify(oldResult))){
-			if(result==null || result==undefined || result.length==0){
-				ContentScript.clearResultList();
-			}
-		}else{
-			if(result!=null&&result!=undefined&&result.length>0){
+		
+		if(result!=null && result!=undefined 
+		   && oldResult!=null && oldResult!=undefined
+		   && oldResult.length != result.length
+			){
 				var html = ContentScript.buildHtml(result);
 				$("#extenionContent").empty();
 				$("#extenionContent").append(html);
 				ContentScript.EventOnInit();
 			}else{
-				 ContentScript.clearResultList();
-			}	
+				if(result!=null && oldResult!=null && 
+				   (JSON.stringify(result)==JSON.stringify(oldResult))){
+					if(result==null || result==undefined || result.length==0){
+						ContentScript.clearResultList();
+					}
+				 }else{
+					if(result!=null&&result!=undefined&&result.length>0){
+						var html = ContentScript.buildHtml(result);
+						$("#extenionContent").empty();
+						$("#extenionContent").append(html);
+						ContentScript.EventOnInit();
+					}else{
+						 ContentScript.clearResultList();
+				    }	
+				}
 		}
 	},	
 	EventOnInit:function(){
@@ -75,7 +89,7 @@ ContentScript ={
 			ContentScript.TranactionSubmit(obj,jsonValue);
 		}
 	},
-	TranactionSubmit:function(obj,jsonValue){	
+	DeleteOperator:function(obj,jsonValue){
 		var key1 = $($(obj).parent().parent().find("td")[1]).text();
 		var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
 		var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
@@ -84,31 +98,38 @@ ContentScript ={
 			&& (greenList.length>0 || yellowList.length>0)
 		){
 			if(parseInt(jsonValue.type)<3){
-					$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
 							if($($(this).find("td")[2]).text()==key1){
 								var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
 								PostHelp.AjaxDeleteData(obj);
-								//$($(this).find(".del_ch").parent().parent()).hide(200);
+								$($(this).find(".del_ch").parent().parent()).hide();
 							}
 						});
-					}
-					if(parseInt(jsonValue.type)>2){
+				}
+			if(parseInt(jsonValue.type)>2){
 						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
 							if($($(this).find("td")[2]).text()==key1){
 								var obj = $($(this).find(".del2_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
 								PostHelp.AjaxDeleteData(obj);
-								//$($(this).find(".del2_ch").parent().parent()).hide(200);
+								$($(this).find(".del2_ch").parent().parent()).hide();
 							}
 						});
 					}	
 		}
+	},
+	TranactionSubmit:function(obj,jsonValue){	
+		setTimeout(function(){
+			ContentScript.DeleteOperator(obj,jsonValue);
+		},0);
 		//提交真实交易
-		ContentScript.SubmitLast(jsonValue);
+		setTimeout(function(){
+			ContentScript.SubmitLast(jsonValue);
+		},0);
 	},
 	SubmitLast:function(jsonValue){
 		if(jsonValue!=null && jsonValue!=undefined){
 			if( jsonValue.collectionData!=null && jsonValue.collectionData!=undefined){
-					   if(parseInt(jsonValue.type)>2){
+				if(parseInt(jsonValue.type)>2){
 							try{
 								if(parseInt(jsonValue.type)==3){
 									$("#zQ_tab3").click();
@@ -131,20 +152,19 @@ ContentScript ={
 									$("#fcfrm2").find("#Hss").val(hss1+"+"+hss2);
 									PostHelp.chkKBEat($("#fcfrm2"));
 									$("#fcfrm2").find("#Hss").val("");
-									$("#fcfrm2").find("input[name='Tix']").val("");
-									$("#fcfrm2").find("input[name='amount']").val("80");
+									
 								}else{
 								    PostHelp.chkActEat($("#fcfrm2"));	
-									$("#fcfrm2").find("input[name='Hs1']").val("");
-									$("#fcfrm2").find("input[name='Hs2']").val("");
-									$("#fcfrm2").find("input[name='Tix']").val("");
-									$("#fcfrm2").find("input[name='amount']").val("80");
 								}	
+								$("#fcfrm2").find("input[name='Hs1']").val("");
+								$("#fcfrm2").find("input[name='Hs2']").val("");
+								$("#fcfrm2").find("input[name='Tix']").val("");
+								$("#fcfrm2").find("input[name='amount']").val("80");
 							}catch(e){
 								alert("插件异常，请使用原来网站的功能！");
 							}
 						}
-						if(parseInt(jsonValue.type)<3){
+				if(parseInt(jsonValue.type)<3){
 							try{
 								if(parseInt(jsonValue.type)==1){
 									$("#zQ_tab1").click();
@@ -167,11 +187,13 @@ ContentScript ={
 								){
 									$("#fcfrm1").find("#Hss").val(hss1+"+"+hss2);	
 									PostHelp.chkActBet($("#fcfrm1"));
-									$("#fcfrm1").find("input[name='amount']").val("80");
 								}else{
 									PostHelp.chkKBBet($("#fcfrm1"));
-									$("#fcfrm1").find("input[name='amount']").val("80");
 								}
+								$("#fcfrm1").find("input[name='Hs1']").val("");
+								$("#fcfrm1").find("input[name='Hs2']").val("");
+								$("#fcfrm1").find("input[name='Tix']").val("");
+								$("#fcfrm1").find("input[name='amount']").val("80");
 							}catch(e){
 								alert("插件异常，请使用原来网站的功能！");
 							}
@@ -353,13 +375,13 @@ PostHelp={
 				var postUrl = postionArray[0];
 				var dataUrl = postionArray[1];
 				var dataArray = dataUrl.split('&');
-				var postString ="{";
-				foreach(var item in dataArray){
-					var itemArray = item.split("=");
-					postString +="'"+itemArray[0]+"': '"+itemArray[1]+"',";
+				var postString ='{';
+				for(var item in dataArray){
+					var itemArray = dataArray[item].split('=');
+					postString +='"'+itemArray[0]+'": "'+itemArray[1]+'",';
 				}
 				postString = postString.substr(0,postString.length-1);
-				postString+="}";
+				postString+='}';
 				var dataJson = $.parseJSON(postString);
 				$.ajax(
 				{
