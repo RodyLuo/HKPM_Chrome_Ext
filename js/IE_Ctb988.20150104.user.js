@@ -387,7 +387,8 @@ ContentScript ={
 								$("#fcfrm2").find("input[name='Tix']").val("");
 								$("#fcfrm2").find("input[name='amount']").val("80");
 							}catch(e){
-								alert("插件异常，请使用原来网站的功能！");
+								alert(e);
+								//alert("插件异常，请使用原来网站的功能！");
 							}
 						}
 				if(parseInt(jsonValue.type)<3){
@@ -421,7 +422,8 @@ ContentScript ={
 								$("#fcfrm1").find("input[name='Tix']").val("");
 								$("#fcfrm1").find("input[name='amount']").val("80");
 							}catch(e){
-								alert("插件异常，请使用原来网站的功能！");
+								alert(e);
+								//alert("插件异常，请使用原来网站的功能！");
 							}
 						}		
 			}
@@ -511,99 +513,198 @@ ContentScript ={
 
 PostHelp={
 	urlX: "http://"+window.location.host,
-	fcfrm1 : document.getElementById("fcfrm1"),
-	fcfrm2 : document.getElementById("fcfrm2"),
+	fcfrm1 :  $("#fcfrm1"),
+	fcfrm2 :  $("#fcfrm2"),
 	chkKBBet:function(f){
 		f = PostHelp.fcfrm1;
-		if(f.fctype.value == 0){
+		if(f.find("input[name='fctype']").val()  == "0"){
 			PostHelp.chkKB1(f);
-		} else if(f.fctype.value == 1){
+		} else if(f.find("input[name='fctype']").val() == "1"){
 			PostHelp.chkKB3(f);
 		}
 	},
     chkKBEat:function(f){
 		f = PostHelp.fcfrm2;
-		if(f.fctype.value == 0){
+		if(f.find("input[name='fctype']").val()  == "0"){
 			PostHelp.chkKB2(f);
-		} else if(f.fctype.value == 1){
+		} else if(f.find("input[name='fctype']").val() == "1"){
 			PostHelp.chkKB4(f);
 		}
 	},
     chkKB1:function(f){
 		f=PostHelp.fcfrm1;
 		var combo;
-		if(f.Hss.value.indexOf('>')>-1) {
+		var hssA = "";
+		if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined
+		   && f.find("input[name='Hss']").val() != undefined
+		){
+			hssA = f.find("input[name='Hss']").val();
+		}
+		if(hssA.indexOf('>')>-1) {
 			combo=1;
 		} else {
 			combo=0;
 		}
 		if(true){
-			f.Order.disabled = true;
-			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			var hss = "";
+			if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined
+			   && f.find("input[name='Hss']").val() != undefined	
+			){
+				if(f.find("input[name='Hss']").val().length>0){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}
+			if(hss=="")
+			{
+				hss=  f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
 		}
 	},
     chkKB2:function(f){
 		f=PostHelp.fcfrm2;
-		var combo=f.banker2.value;
+		var combo=f.find("input[name='banker2']").val();
 		if(true){
-			f.Order.disabled = true;
-			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			//PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			var hss = "";
+			if(f.find("input[name='Hss']")){
+				if(f.find("input[name='Hss']").val().length>0){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}	
+			if(hss=="")
+			{
+				hss= f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
+		
 		}
 	},
     chkKB3:function(f){
 		f=PostHelp.fcfrm1;
 		var combo;
-		if(f.Hss.value.indexOf('>')>-1) {
+		var hssA = "";
+		if(f.find("input[name='Hss']") !=null && f.find("input[name='Hss']") != undefined
+			&& f.find("input[name='Hss']").val() != undefined
+		){
+			hssA = f.find("input[name='Hss']").val()
+		}
+		if(hssA.indexOf('>')>-1) {
 			combo=1;
 		} else {
 			combo=0;
 		}
 		if(true){
-			f.Order.disabled = true;
-			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			//PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			var hss = "";
+			if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined
+			   && f.find("input[name='Hss']").val() != undefined
+			){
+				if(f.find("input[name='Hss']").val()!=""){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}			
+			if(hss=="")
+			{
+				hss=  f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
+		
 		}
 	},
 	chkKB4:function(f){
 		f=PostHelp.fcfrm2;
-		var combo=f.banker2.value;
+		var combo= f.find("input[name='banker2']").val();
 		if(true){
 			f.Order.disabled = true;
-			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			var hss = "";
+			if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined){
+				if(f.find("input[name='Hss']").val()!=""){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}		
+			if(hss=="")
+			{
+				hss = f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
 		}
 	},
 	chkActBet:function(f){
 		f = PostHelp.fcfrm1;
 		var combo;
-		if(f.banker1.checked) {
+		var check = f.find("input[name='banker1'] :checked");
+		if(check) {
 			combo=1;
 		} else {
 			combo=0;
 		}
 		if(true){
-			f.Order.disabled = true;
-			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&Hs3=' + f.Hs3.value+ '&Hs4=' + f.Hs4.value+ '&Hs5=' + f.Hs5.value+ '&Hs6=' + f.Hs6.value+ '&Hs7=' + f.Hs7.value+ '&Hs8=' + f.Hs8.value +'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + 
+			f.find("input[name='Tix']").val() + '&Race=' + 
+			f.find("input[name='Race']").val() + '&Hs1=' + 
+			f.find("input[name='Hs1']").val() + '&Hs2=' + 
+			f.find("input[name='Hs2']").val()  + '&Hs3=' + 
+			f.find("input[name='Hs3']").val() + '&Hs4=' + 
+			f.find("input[name='Hs4']").val() + '&Hs5=' + 
+			f.find("input[name='Hs5']").val()  + '&Hs6=' + 
+			f.find("input[name='Hs6']").val() + '&Hs7=' + 
+			f.find("input[name='Hs7']").val() + '&Hs8=' + 
+			f.find("input[name='Hs8']").val() +'&fctype=' + 
+			f.find("input[name='fctype']").val()  + '&Q=' + 
+			f.find("input[name='Q']").val() + '&type=' + 
+			f.find("input[name='type']").val() + '&overflow=' + 
+			f.find("input[name='overflow']").val() + '&amount=' + 
+			f.find("input[name='amount']").val() + '&fclmt=' + 
+			f.find("input[name='fclmt']").val()  + '&race_type=' + 
+			f.find("input[name='race_type']").val()  + '&race_date=' + 
+			f.find("input[name='race_date']").val()  );	
 		}
 	},
 	chkActEat:function(f){
 		f = PostHelp.fcfrm2;
-		var combo=f.banker2.value;
+		var combo= f.find("input[name='banker2']").val();
 		if(true){
-			f.Order.disabled = true;
-			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hs1=' + f.Hs1.value + '&Hs2=' + f.Hs2.value + '&Hs3=' + f.Hs3.value+ '&Hs4=' + f.Hs4.value+ '&Hs5=' + f.Hs5.value + '&Hs6=' + f.Hs6.value+ '&Hs7=' + f.Hs7.value+ '&Hs8=' + f.Hs8.value+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + 
+			f.find("input[name='Tix']").val() + '&Race=' + 
+			f.find("input[name='Race']").val() + '&Hs1=' + 
+			f.find("input[name='Hs1']").val() + '&Hs2=' + 
+			f.find("input[name='Hs2']").val()  + '&Hs3=' + 
+			f.find("input[name='Hs3']").val() + '&Hs4=' + 
+			f.find("input[name='Hs4']").val() + '&Hs5=' + 
+			f.find("input[name='Hs5']").val()  + '&Hs6=' + 
+			f.find("input[name='Hs6']").val() + '&Hs7=' + 
+			f.find("input[name='Hs7']").val() + '&Hs8=' + 
+			f.find("input[name='Hs8']").val() +'&fctype=' + 
+			f.find("input[name='fctype']").val()  + '&Q=' + 
+			f.find("input[name='Q']").val() + '&type=' + 
+			f.find("input[name='type']").val() + '&overflow=' + 
+			f.find("input[name='overflow']").val() + '&amount=' + 
+			f.find("input[name='amount']").val() + '&fclmt=' + 
+			f.find("input[name='fclmt']").val()  + '&race_type=' + 
+			f.find("input[name='race_type']").val()  + '&race_date=' + 
+			f.find("input[name='race_date']").val()  );
 		}
 	},
 	postData:function(url){
-		var view1=document.getElementById("view1");
+		var view1 = $("#view1");
 		if(view1) {
-				var y = view1.options[view1.selectedIndex].value;
+				var y = $("#view1").val();
 				var postion = url  + "&show="+y+ "&rd=" + Math.random();
 				var postionArray = postion.split("?");
 				var postUrl = postionArray[0];
 				var dataUrl = postionArray[1];
 				var dataArray = dataUrl.split('&');
 				var postString ='{';
-				for(var item in dataArray){
-					var itemArray = dataArray[item].split('=');
+				for(var i=0;i< dataArray.length;i++){
+					var itemArray = dataArray[i].split('=');
 					postString +='"'+itemArray[0]+'": "'+itemArray[1]+'",';
 				}
 				postString = postString.substr(0,postString.length-1);

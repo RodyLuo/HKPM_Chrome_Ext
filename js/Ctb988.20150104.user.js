@@ -285,8 +285,8 @@ ContentScript ={
 
 PostHelp={
 	urlX: "http://"+window.location.host,
-	fcfrm1 : document.getElementById("fcfrm1"),
-	fcfrm2 : document.getElementById("fcfrm2"),
+	fcfrm1 : eval(document.getElementById('fcfrm1')),
+	fcfrm2 : eval(document.getElementById("fcfrm2")),
 	chkKBBet:function(f){
 		f = PostHelp.fcfrm1;
 		if(f.fctype.value == 0){
