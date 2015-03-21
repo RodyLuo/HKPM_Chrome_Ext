@@ -956,10 +956,10 @@ PostHelp={
 }
 
 if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
-		var htmlContent = "<div style='position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
+		var htmlContent = "<div id='paoMaExtension' style='position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
 	    htmlContent+= "<div id='ExentionHead' style='padding-left: 10px;'>";
-	    htmlContent+= "	<h3 >	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
-		htmlContent+= "</div>"
+	    htmlContent+= "	<h3 id='currentUser'>	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
+		htmlContent+= "<a href='javascript:void(0)' id='showSmall'>切换</a></div>"
 		htmlContent+= "<div class='ExentionContent'>"
 		htmlContent+= "<div><input style='display:none' type='button' id='startSearch' value='全部交易'/><br/><div id='countQ'></div></div>"
 		htmlContent+="<div id='extenionWContent' style='padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
@@ -967,6 +967,21 @@ if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
 		htmlContent+= "</div>";
 		$("body").append(htmlContent);
 		ContentScript.timeClock();
+		
+		$("#showSmall").bind("click",function(){
+			var width =$("#paoMaExtension").width();
+			if(width>100){
+				$("#paoMaExtension").width(25);
+				$("#currentUser").hide();
+				$("#ExentionContent").hide();
+			}
+			else{
+				$("#paoMaExtension").width(350);
+				$("#currentUser").show();
+				$("#ExentionContent").show();
+			}
+			
+		});
 }
 
 
