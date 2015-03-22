@@ -242,10 +242,10 @@ ContentScript ={
 	timerClock:null,
 	currentUrl:window.location.href,
 	timeClock:function(){
-		ContentScript.onInit();
+		//ContentScript.onInit();
 		ContentScript.onCJInit();
 		ContentScript.timerClock = self.setInterval(function(){
-			ContentScript.onInit();
+			//ContentScript.onInit();
 			ContentScript.onCJInit();
 		},1000);
 	},
@@ -269,7 +269,7 @@ ContentScript ={
 			if(result==""){
 				return 0;
 			}
-			return parseInt(result);
+			return parseFloat(result);
 		}catch(e){
 			return 0;
 		}
@@ -606,6 +606,72 @@ ContentScript ={
 				QdataResult.push(item);
 			}
 		});
+		
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QB'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="赌"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				type=1;
+				var tempArray = temp.split("$");
+				var x = tempArray[2].split('-')[0];
+				var y = tempArray[2].split('-')[1];
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QPB'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="赌"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 2;
+				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
+				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QE'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="吃"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 3;
+				var x = tempArray[2].split('-')[0];
+				var y = tempArray[2].split('-')[1];
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QPE'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="吃"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 4;
+				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
+				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		
 	    return QdataResult;
 	},
 	
@@ -674,7 +740,7 @@ ContentScript ={
 			}
 		});
 		//排序
-		doResult.sort(ContentScript.sortBy('PL', false, parseInt))
+		doResult.sort(ContentScript.sortBy('PL', false, parseFloat))
 		var html='<p><h4>已成交统计</h4></p><table class="bettable" style="padding-left: 10px;">'
 		html += '<tr>'
 		html += '<th width="16%">场</th>'
@@ -683,12 +749,22 @@ ContentScript ={
 		html += '<th>赔率</th>'
 		html += '</tr>'
 		$(doResult).each(function(index){
-			html += '<tr>'
-			html += '<td>'+doResult[index].matches+'</td>'
-			html += '<td>'+doResult[index].complex+'</td>'
-			html += '<td>'+doResult[index].tickets+'</td>'
-			html += '<td>'+doResult[index].PL+'</td>'
-			html += '</tr>'
+			if(parseFloat(doResult[index].PL)>=24){
+				html += '<tr>'
+				html += '<td class="color1">'+doResult[index].matches+'</td>'
+				html += '<td class="color1">'+doResult[index].complex+'</td>'
+				html += '<td class="color1">'+doResult[index].tickets+'</td>'
+				html += '<td class="color1">'+doResult[index].PL+'</td>'
+				html += '</tr>'
+			}else{
+				html += '<tr>'
+				html += '<td>'+doResult[index].matches+'</td>'
+				html += '<td>'+doResult[index].complex+'</td>'
+				html += '<td>'+doResult[index].tickets+'</td>'
+				html += '<td>'+doResult[index].PL+'</td>'
+				html += '</tr>'
+			}
+			
 		})
 		
 		html += "</table><input type='hidden' id='hidTransactionCountCJData' value='"+JSON.stringify(result)+"' /><br/>";		
@@ -962,7 +1038,7 @@ if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
 		htmlContent+= "<a href='javascript:void(0)' id='showSmall'>切换</a></div>"
 		htmlContent+= "<div class='ExentionContent'>"
 		htmlContent+= "<div><input style='display:none' type='button' id='startSearch' value='全部交易'/><br/><div id='countQ'></div></div>"
-		htmlContent+="<div id='extenionWContent' style='padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
+		htmlContent+="<div id='extenionWContent' style='diaplay:none;padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
 		htmlContent+="<div id='extenionCJContent' style='padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
 		htmlContent+= "</div>";
 		$("body").append(htmlContent);
