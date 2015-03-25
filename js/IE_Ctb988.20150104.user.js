@@ -261,7 +261,7 @@ ContentScript ={
 		try{
 			var len =0;
 			if(parseInt(x)>7 && parseInt(y)>8){
-				len = 13*(x-7)+(y-8);
+				len = 13*(x-8)+(y-7);
 			}else{
 				len = 13*(x-1)+(y-1);
 			}
