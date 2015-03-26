@@ -242,14 +242,38 @@ ContentScript ={
 	timerClock:null,
 	currentUrl:window.location.href,
 	timeClock:function(){
-		ContentScript.onInit();
+		//ContentScript.onInit();
+		ContentScript.onCJInit();
 		ContentScript.timerClock = self.setInterval(function(){
-			ContentScript.onInit();
+			//ContentScript.onInit();
+			ContentScript.onCJInit();
 		},1000);
 	},
 	clearResultList:function(){
-		$("#extenionContent").empty();
-		$("#extenionContent").append("<font color='green'>没有相关的数据！</>");
+		$("#extenionWContent").empty();
+		$("#extenionWContent").append("<font color='green'>没有相关的数据！</>");
+	},
+	clearCJResultList:function(){
+		$("#extenionCJContent").empty();
+		$("#extenionCJContent").append("<font color='green'>没有相关的数据！</>");
+	},
+	getBSData:function(x,y){
+		try{
+			var len =0;
+			if(parseInt(x)>7 && parseInt(y)>8){
+				len = 13*(y-8)+(x-7);
+			}else{
+				len = 13*(x-1)+(y-1);
+			}
+			var result = $($("#frmTOTE2").find("td")[len-1]).text();
+			if(result==""){
+				return 0;
+			}
+			return parseFloat(result);
+		}catch(e){
+			return 0;
+		}
+		
 	},
 	onInit:function(){
 		var result = ContentScript.GetQData();
@@ -274,8 +298,8 @@ ContentScript ={
 		   && oldResult.length != result.length
 			){
 				var html = ContentScript.buildHtml(result);
-				$("#extenionContent").empty();
-				$("#extenionContent").append(html);
+				$("#extenionWContent").empty();
+				$("#extenionWContent").append(html);
 				ContentScript.EventOnInit();
 			}else{
 				if(result!=null && oldResult!=null && 
@@ -286,11 +310,53 @@ ContentScript ={
 				 }else{
 					if(result!=null&&result!=undefined&&result.length>0){
 						var html = ContentScript.buildHtml(result);
-						$("#extenionContent").empty();
-						$("#extenionContent").append(html);
+						$("#extenionWContent").empty();
+						$("#extenionWContent").append(html);
 						ContentScript.EventOnInit();
 					}else{
 						 ContentScript.clearResultList();
+				    }	
+				}
+		}
+	},	
+	onCJInit:function(){
+		var result = ContentScript.GetCJData();
+		if(result==null || result==undefined || result.length==0){
+			ContentScript.clearCJResultList();
+			return false;
+		}
+		var oldResult = [];
+		if($("#hidTransactionCountCJData")!=null
+		   && $("#hidTransactionCountCJData")!=undefined
+		   && $("#hidTransactionCountCJData").length>0 ){
+		   	var val = $("#hidTransactionCountCJData").val();
+		   	if(val==""){
+		   		oldResult = [];
+		   	}else{
+		   		oldResult = $.parseJSON($("#hidTransactionCountCJData").val());
+		   	}
+		}
+		
+		if(result!=null && result!=undefined 
+		   && oldResult!=null && oldResult!=undefined
+		   && oldResult.length != result.length
+			){
+				var html = ContentScript.buildCJHtml(result);
+				$("#extenionCJContent").empty();
+				$("#extenionCJContent").append(html);
+			}else{
+				if(result!=null && oldResult!=null && 
+				   (JSON.stringify(result)==JSON.stringify(oldResult))){
+					if(result==null || result==undefined || result.length==0){
+						ContentScript.clearCJResultList();
+					}
+				 }else{
+					if(result!=null&&result!=undefined&&result.length>0){
+						var html = ContentScript.buildCJHtml(result);
+						$("#extenionCJContent").empty();
+						$("#extenionCJContent").append(html);
+					}else{
+						 ContentScript.clearCJResultList();
 				    }	
 				}
 		}
@@ -472,6 +538,143 @@ ContentScript ={
 		});
 	    return QdataResult;
 	},
+	GetCJData:function(){
+		var QdataResult = [];
+		var item = {};
+		var type = 0;
+		$(window.frames["frmTRANS"].document).find("tbody[id^='FCB'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="赌"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				type=1;
+				var tempArray = temp.split("$");
+				var x = tempArray[2].split('-')[0];
+				var y = tempArray[2].split('-')[1];
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='PFTB'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="赌"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 2;
+				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
+				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='FCE'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="吃"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 3;
+				var x = tempArray[2].split('-')[0];
+				var y = tempArray[2].split('-')[1];
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='PFTE'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="吃"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 4;
+				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
+				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QB'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="赌"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				type=1;
+				var tempArray = temp.split("$");
+				var x = tempArray[2].split('-')[0];
+				var y = tempArray[2].split('-')[1];
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QPB'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="赌"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 2;
+				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
+				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QE'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="吃"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 3;
+				var x = tempArray[2].split('-')[0];
+				var y = tempArray[2].split('-')[1];
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		$(window.frames["frmTRANS"].document).find("tbody[id^='QPE'] tr").each(function(index){
+			var temp = "";
+			$(this).find("td").each(function(item){
+				if($(this).text()!="吃"){
+					temp += $(this).text()+"$";
+				}
+			})
+			if(temp.length>0){
+				var tempArray = temp.split("$");
+				type = 4;
+				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
+				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
+				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
+				QdataResult.push(item);
+			}
+		});
+		
+	    return QdataResult;
+	},
+	
 	buildHtml:function(result){
 		var doResult = [] ;
 		var keyList = [];
@@ -507,6 +710,64 @@ ContentScript ={
 		})
 		
 		html += "</table><input type='hidden' id='hidTransactionCountData' value='"+JSON.stringify(result)+"' /><br/>";		
+		return html;
+	},
+	sortBy:function (filed, rev, primer) {
+	    rev = (rev) ? -1 : 1;
+	    return function (a, b) {
+	        a = a[filed];
+	        b = b[filed];
+	        if (typeof (primer) != 'undefined') {
+	            a = primer(a);
+	            b = primer(b);
+	        }
+	        if (a < b) { return rev * -1; }
+	        if (a > b) { return rev * 1; }
+	        return 1;
+	    }
+	},
+	buildCJHtml:function(result){
+		var doResult = [] ;
+		var keyList = [];
+		//分类
+		$(result).each(function(index){
+			if(keyList.indexOf(result[index].complex+result[index].type)>=0){
+				doResult[keyList.indexOf(result[index].complex+result[index].type)].tickets+=parseInt(result[index].tickets);	
+				doResult[keyList.indexOf(result[index].complex+result[index].type)].PL = parseInt(result[index].PL);	
+			}else{
+				keyList.push(result[index].complex+result[index].type);
+				doResult.push({"PL":result[index].PL,"type":result[index].type,"complex":result[index].complex,"matches":result[index].matches,"tickets":parseInt(result[index].tickets),"count":1});
+			}
+		});
+		//排序
+		doResult.sort(ContentScript.sortBy('PL', false, parseFloat))
+		var html='<p><h4>已成交统计</h4></p><table class="bettable" style="padding-left: 10px;">'
+		html += '<tr>'
+		html += '<th width="16%">场</th>'
+		html += '<th width="20%">马</th>'
+		html += '<th width="34%">票数$</th>'
+		html += '<th>赔率</th>'
+		html += '</tr>'
+		$(doResult).each(function(index){
+			if(parseFloat(doResult[index].PL)>=24){
+				html += '<tr>'
+				html += '<td class="color1">'+doResult[index].matches+'</td>'
+				html += '<td class="color1">'+doResult[index].complex+'</td>'
+				html += '<td class="color1">'+doResult[index].tickets+'</td>'
+				html += '<td class="color1">'+doResult[index].PL+'</td>'
+				html += '</tr>'
+			}else{
+				html += '<tr>'
+				html += '<td>'+doResult[index].matches+'</td>'
+				html += '<td>'+doResult[index].complex+'</td>'
+				html += '<td>'+doResult[index].tickets+'</td>'
+				html += '<td>'+doResult[index].PL+'</td>'
+				html += '</tr>'
+			}
+			
+		})
+		
+		html += "</table><input type='hidden' id='hidTransactionCountCJData' value='"+JSON.stringify(result)+"' /><br/>";		
 		return html;
 	}
 }
@@ -771,16 +1032,32 @@ PostHelp={
 }
 
 if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
-		var htmlContent = "<div style='position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
+		var htmlContent = "<div id='paoMaExtension' style='position:absolute;width:350px;height:100%;border:1px solid red;float:right;z-index:100;right:0;top:0;min-height:250px;overflow-y:auto;max-height:600px;background-color: #F2F2F2;'>";
 	    htmlContent+= "<div id='ExentionHead' style='padding-left: 10px;'>";
-	    htmlContent+= "	<h3 >	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
-		htmlContent+= "</div>"
+	    htmlContent+= "	<h3 id='currentUser'>	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
+		htmlContent+= "<a href='javascript:void(0)' id='showSmall'>切换</a></div>"
 		htmlContent+= "<div class='ExentionContent'>"
 		htmlContent+= "<div><input style='display:none' type='button' id='startSearch' value='全部交易'/><br/><div id='countQ'></div></div>"
-		htmlContent+="<div id='extenionContent' style='padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
+		htmlContent+="<div id='extenionWContent' style='diaplay:none;padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
+		htmlContent+="<div id='extenionCJContent' style='padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
 		htmlContent+= "</div>";
 		$("body").append(htmlContent);
 		ContentScript.timeClock();
+		
+		$("#showSmall").bind("click",function(){
+			var width =$("#paoMaExtension").width();
+			if(width>100){
+				$("#paoMaExtension").width(25);
+				$("#currentUser").hide();
+				$("#ExentionContent").hide();
+			}
+			else{
+				$("#paoMaExtension").width(350);
+				$("#currentUser").show();
+				$("#ExentionContent").show();
+			}
+			
+		});
 }
 
 
