@@ -244,10 +244,21 @@ ContentScript ={
 	timeClock:function(){
 		//ContentScript.onInit();
 		ContentScript.onCJInit();
+		ContentScript.filterWhere();
 		ContentScript.timerClock = self.setInterval(function(){
 			//ContentScript.onInit();
 			ContentScript.onCJInit();
+			
 		},1000);
+	},
+	filterWhere:function(){
+		$("#filterWhere").show();
+		$("#btnFilter").bind("click",function(){
+			var result = ContentScript.GetCJData();
+			var html = ContentScript.buildCJHtml(result);
+			$("#extenionCJContent").empty();
+			$("#extenionCJContent").append(html);
+		});
 	},
 	clearResultList:function(){
 		$("#extenionWContent").empty();
@@ -748,23 +759,54 @@ ContentScript ={
 		html += '<th width="34%">票数$</th>'
 		html += '<th>赔率</th>'
 		html += '</tr>'
+		
+		var smallValue = $("#smallValue").val();
+		var bigValue = $("#bigValue").val();
+		
+		var smallVal = parseFloat(smallValue==""?0:smallValue);
+		var bigVal = parseFloat(bigValue==""?0:bigValue);
+		
+		
 		$(doResult).each(function(index){
-			if(parseFloat(doResult[index].PL)>=24){
-				html += '<tr>'
-				html += '<td class="color1">'+doResult[index].matches+'</td>'
-				html += '<td class="color1">'+doResult[index].complex+'</td>'
-				html += '<td class="color1">'+doResult[index].tickets+'</td>'
-				html += '<td class="color1">'+doResult[index].PL+'</td>'
-				html += '</tr>'
+			if(smallVal > 0 && bigVal> 0){
+				var pl = parseFloat(doResult[index].PL);
+				var showHead = "<tr style='display:none'>";
+				if(pl>=smallVal && pl<=bigVal){
+					showHead = "<tr style='display:block'>";
+				}
+				
+				if(pl>=24){
+					html += showHead;
+					html += '<td class="color1">'+doResult[index].matches+'</td>'
+					html += '<td class="color1">'+doResult[index].complex+'</td>'
+					html += '<td class="color1">'+doResult[index].tickets+'</td>'
+					html += '<td class="color1">'+doResult[index].PL+'</td>'
+					html += '</tr>'
+				}else{
+					html += showHead;
+					html += '<td>'+doResult[index].matches+'</td>'
+					html += '<td>'+doResult[index].complex+'</td>'
+					html += '<td>'+doResult[index].tickets+'</td>'
+					html += '<td>'+doResult[index].PL+'</td>'
+					html += '</tr>'
+				}
 			}else{
-				html += '<tr>'
-				html += '<td>'+doResult[index].matches+'</td>'
-				html += '<td>'+doResult[index].complex+'</td>'
-				html += '<td>'+doResult[index].tickets+'</td>'
-				html += '<td>'+doResult[index].PL+'</td>'
-				html += '</tr>'
+				if(parseFloat(doResult[index].PL)>=24){
+					html += '<tr>'
+					html += '<td class="color1">'+doResult[index].matches+'</td>'
+					html += '<td class="color1">'+doResult[index].complex+'</td>'
+					html += '<td class="color1">'+doResult[index].tickets+'</td>'
+					html += '<td class="color1">'+doResult[index].PL+'</td>'
+					html += '</tr>'
+				}else{
+					html += '<tr>'
+					html += '<td>'+doResult[index].matches+'</td>'
+					html += '<td>'+doResult[index].complex+'</td>'
+					html += '<td>'+doResult[index].tickets+'</td>'
+					html += '<td>'+doResult[index].PL+'</td>'
+					html += '</tr>'
+				}
 			}
-			
 		})
 		
 		html += "</table><input type='hidden' id='hidTransactionCountCJData' value='"+JSON.stringify(result)+"' /><br/>";		
@@ -1036,6 +1078,12 @@ if(ContentScript.currentUrl.indexOf("Q.jsp?")>=0){
 	    htmlContent+= "<div id='ExentionHead' style='padding-left: 10px;'>";
 	    htmlContent+= "	<h3 id='currentUser'>	当前用户:<font id='popuserName' style='color: red;'>"+$.trim($("#username").text())+"</font></h3>"
 		htmlContent+= "<a href='javascript:void(0)' id='showSmall'>切换</a></div>"
+		
+		htmlContent+= "<div id='filterWhere' style='padding: 5px,5px,5px,5px;padding-left: 10px;' > <input size='4' style='display:inline' type='text' id='smallValue'></input>";
+		htmlContent+= "--<input type='text' size='4' id='bigValue' style='display:inline'></input>";
+		htmlContent+= "<input type='button' id='btnFilter' value='过滤' style='display:inline'></input>";
+		htmlContent+= "</div>";
+		
 		htmlContent+= "<div class='ExentionContent'>"
 		htmlContent+= "<div><input style='display:none' type='button' id='startSearch' value='全部交易'/><br/><div id='countQ'></div></div>"
 		htmlContent+="<div id='extenionWContent' style='diaplay:none;padding: 5px,5px,5px,5px;padding-left: 10px;'></div>";
