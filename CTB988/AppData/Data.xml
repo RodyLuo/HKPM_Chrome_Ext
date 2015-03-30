@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PushDataList>
+  <PushData>
+    <ModeType>Q</ModeType>
+    <Hourse1>1</Hourse1>
+    <Hourse2>2</Hourse2>
+    <Ticket>2</Ticket>
+    <Discount>80</Discount>
+    <LimitStart>300</LimitStart>
+    <LimitEnd></LimitEnd>
+    <W></W>
+    <P></P>
+  </PushData>
+</PushDataList>
