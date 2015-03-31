@@ -6,8 +6,8 @@ using System.Web;
 public class Handler : IHttpHandler {
     
     public void ProcessRequest (HttpContext context) {
-        string type = context.Request["type"];
-        switch (type) {
+        string type = string.IsNullOrEmpty(context.Request["type"]) ? "" : context.Request["type"];
+        switch (type.ToLower()) {
             case "get": {
                 string status = XMLData.GetStatus();
                 context.Response.ContentType = "text/plain";
@@ -17,7 +17,7 @@ public class Handler : IHttpHandler {
             case "update":
                 {
                     string status = context.Request["status"];
-                    if (string.IsNullOrWhiteSpace(status))
+                    if (string.IsNullOrEmpty(status))
                     {
                         status = "0";
                     } 

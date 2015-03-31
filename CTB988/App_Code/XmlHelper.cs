@@ -82,22 +82,23 @@ public class XmlHelper
 
         }
     }
-    /// <summary>
-    /// 更新节点
-    /// </summary>
-    /// <param name="XmlFile">Xml文件路径</param>
-    /// <param name="fatherNode">需要更新节点的上级节点,要匹配的XPath表达式(例如:"//节点名//子节点名)</param>
-    /// <param name="htAtt">需要更新的属性表，Key代表需要更新的属性，Value代表更新后的值</param>
-    /// <param name="htSubNode">需要更新的子节点的属性表，Key代表需要更新的子节点名字Name,Value代表更新后的值InnerText</param>
-    /// <returns>返回真为更新成功，否则失败</returns>
-    public bool UpdateNode(string XmlFile, string fatherNode, Hashtable htAtt,Hashtable first,Hashtable second)
+
+    /// <summary>    
+    /// 更新节点    
+    /// </summary>    
+    /// <param name="XmlFile">Xml文件路径</param>    
+    /// <param name="fatherNode">需要更新节点的上级节点</param>    
+    /// <param name="htAtt">需要更新的属性表，Key代表需要更新的属性，Value代表更新后的值</param>    
+    /// <param name="htSubNode">需要更新的子节点的属性表，Key代表需要更新的子节点名字Name,Value代表更新后的值InnerText</param>    
+    /// <returns>返回真为更新成功，否则失败</returns>    
+    public bool UpdateNode(string XmlFile, string fatherNode, Hashtable htAtt, Hashtable htSubNode)
     {
         try
         {
             xmldoc = new XmlDocument();
             xmldoc.Load(XmlFile);
             XmlNodeList root = xmldoc.SelectSingleNode(fatherNode).ChildNodes;
-            UpdateNodes(root, htAtt,first,second);
+            UpdateNodes(root, htAtt, htSubNode);
             xmldoc.Save(XmlFile);
             return true;
         }
@@ -106,6 +107,33 @@ public class XmlHelper
             throw new Exception(e.Message);
         }
     }
+
+    /// <summary>    
+    /// 更新节点    
+    /// </summary>    
+    /// <param name="XmlFile">Xml文件路径</param>    
+    /// <param name="fatherNode">需要更新节点的上级节点</param>    
+    /// <param name="htAtt">需要更新的属性表，Key代表需要更新的属性，Value代表更新后的值</param>    
+    /// <param name="htSubNode">需要更新的子节点的属性表，Key代表需要更新的子节点名字Name,Value代表更新后的值InnerText</param>    
+    /// <returns>返回真为更新成功，否则失败</returns>    
+    public bool UpdateNodeByWhere(string XmlFile, string fatherNode, Hashtable htAtt, Hashtable htSubNode, Hashtable htWhere)
+    {
+        try
+        {
+            xmldoc = new XmlDocument();
+            xmldoc.Load(XmlFile);
+            XmlNodeList root = xmldoc.SelectSingleNode(fatherNode).ChildNodes;
+            UpdateNodesByWhere(root, htAtt, htSubNode,htWhere);
+            xmldoc.Save(XmlFile);
+            return true;
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
+
 
     /// <summary>
     /// 删除指定节点下的子节点
@@ -137,6 +165,87 @@ public class XmlHelper
     /// <param name="xpath">要匹配的XPath表达式(例如:"//节点名//子节点名</param>
     /// <returns>成功返回true,失败返回false</returns>
     public bool DeleteXmlNodeByXPath(string xmlFileName, string xpath)
+    {
+        bool isSuccess = false;
+        xmldoc = new XmlDocument();
+        try
+        {
+            xmldoc.Load(xmlFileName); //加载XML文档
+            XmlNode xmlNode = xmldoc.SelectSingleNode(xpath);
+            if (xmlNode != null)
+            {
+                //删除节点
+                xmldoc.ParentNode.RemoveChild(xmlNode);
+            }
+            xmldoc.Save(xmlFileName); //保存到XML文档
+            isSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            throw ex; //这里可以定义你自己的异常处理
+        }
+        return isSuccess;
+    }
+
+    /* keleyi.com */
+    /// <summary>
+    /// 删除匹配XPath表达式的第一个节点中的匹配参数xmlAttributeName的属性
+    /// </summary>
+    /// <param name="xmlFileName">XML文档完全文件名(包含物理路径)</param>
+    /// <param name="xpath">要匹配的XPath表达式(例如:"//节点名//子节点名</param>
+    /// <param name="xmlAttributeName">要删除的xmlAttributeName的属性名称</param>
+    /// <returns>成功返回true,失败返回false</returns>
+    public bool DeleteXmlByWhere(string xmlFileName, string xpath, Hashtable htWhere)
+    {
+        bool isSuccess = false;
+        xmldoc = new XmlDocument();
+        try
+        {
+            xmldoc.Load(xmlFileName); //加载XML文档
+            XmlNode xmlNode = xmldoc.SelectSingleNode(xpath);
+            if (xmlNode != null)
+            {
+                XmlNodeList xnl = xmlNode.ChildNodes;
+                foreach (XmlNode node2 in xnl)
+                {
+                    if (htWhere != null && htWhere.Count > 0)
+                    {
+                        int count = 0;
+                        foreach (XmlNode xn1 in node2)
+                        {
+                            XmlElement xe = (XmlElement)xn1;
+                            if (htWhere.ContainsKey(xe.Name) && xe.InnerText.ToString().Equals(htWhere[xe.Name].ToString()))
+                            {
+                                count++;
+                            }
+                        }
+
+                        if (count != htWhere.Count)
+                        {
+                            continue;
+                        }
+                    }
+                    xmlNode.RemoveChild(node2);
+                }
+            }
+            xmldoc.Save(xmlFileName); //保存到XML文档
+            isSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            throw ex; //这里可以定义你自己的异常处理
+        }
+        return isSuccess;
+    }
+
+    /*ｋｅｌｅｙｉ*/
+    /// <summary>
+    /// 删除匹配XPath表达式的第一个节点(节点中的子元素同时会被删除)
+    /// </summary>
+    /// <param name="xmlFileName">XML文档完全文件名(包含物理路径)</param>
+    /// <param name="xpath">要匹配的XPath表达式(例如:"//节点名//子节点名</param>
+    /// <returns>成功返回true,失败返回false</returns>
+    public bool DeleteXmlNodeByXPathByWhere(string xmlFileName, string xpath, Hashtable htWhere)
     {
         bool isSuccess = false;
         xmldoc = new XmlDocument();
@@ -269,59 +378,111 @@ public class XmlHelper
             rootXe.AppendChild(subNode);
         }
     }
-    /// <summary>
-    /// 更新节点属性和子节点InnerText值。柯 乐 义
-    /// </summary>
-    /// <param name="root">根节点名字</param>
-    /// <param name="htAtt">需要更改的属性名称和值</param>
-    /// <param name="htSubNode">需要更改InnerText的子节点名字和值</param>
-    private void UpdateNodes(XmlNodeList root, Hashtable htAtt,Hashtable childFirst,Hashtable childSecond)
+
+    /// <summary>    
+    /// 更新节点属性和子节点InnerText值    
+    /// </summary>    
+    /// <param name="root">根节点名字</param>    
+    /// <param name="htAtt">需要更改的属性名称和值</param>    
+    /// <param name="htSubNode">需要更改InnerText的子节点名字和值</param>    
+    private void UpdateNodes(XmlNodeList root, Hashtable htAtt, Hashtable htSubNode)
     {
         foreach (XmlNode xn in root)
         {
             xmlelem = (XmlElement)xn;
-            if (!xmlelem.HasChildNodes)
+            if (xmlelem.HasAttributes)//如果节点如属性，则先更改它的属性    
             {
-                if (htAtt.ContainsKey(xmlelem.Name))
+                foreach (DictionaryEntry de in htAtt)//遍历属性哈希表    
                 {
-                    xmlelem.InnerText = htAtt[xmlelem.Name].ToString();
+                    if (xmlelem.HasAttribute(de.Key.ToString()))//如果节点有需要更改的属性    
+                    {
+                        xmlelem.SetAttribute(de.Key.ToString(), de.Value.ToString());//则把哈希表中相应的值Value赋给此属性Key    
+                    }
                 }
             }
-            else {
-                if (xmlelem.Name == "Eat")
+            if (xmlelem.HasChildNodes)//如果有子节点，则修改其子节点的InnerText    
+            {
+                try
                 {
-                    var list = xmlelem.ChildNodes;
-                    foreach (XmlNode xc in list)
+                    XmlNodeList xnl = xmlelem.ChildNodes;
+                    foreach (XmlNode xn1 in xnl)
                     {
-                        var xmlc = (XmlElement)xc;
-                        if (childFirst != null)
+                        XmlElement xe = (XmlElement)xn1;
+                        foreach (DictionaryEntry de in htSubNode)
                         {
-                            if (childFirst.ContainsKey(xmlc.Name))
+                            if (xe.Name == de.Key.ToString())//htSubNode中的key存储了需要更改的节点名称，    
                             {
-                                xmlc.InnerText = childFirst[xmlc.Name].ToString();
+                                xe.InnerText = de.Value.ToString();//htSubNode中的Value存储了Key节点更新后的数据    
                             }
                         }
                     }
                 }
-                if (xmlelem.Name == "Bat")
+                catch (Exception)
                 {
-                    var list = xmlelem.ChildNodes;
-                    foreach (XmlNode xc in list)
-                    {
-                        var xmlc = (XmlElement)xc;
-                        if (childSecond != null)
-                        {
-                            if (childSecond.ContainsKey(xmlc.Name))
-                            {
-                                xmlc.InnerText = childSecond[xmlc.Name].ToString();
-                            }
-                        }
-                    }
+                    xmlelem.InnerText = htSubNode[xmlelem.Name].ToString();
                 }
             }
         }
     }
+
+    /// <summary>    
+    /// 更新节点属性和子节点InnerText值    
+    /// </summary>    
+    /// <param name="root">根节点名字</param>    
+    /// <param name="htAtt">需要更改的属性名称和值</param>    
+    /// <param name="htSubNode">需要更改InnerText的子节点名字和值</param>    
+    private void UpdateNodesByWhere(XmlNodeList root, Hashtable htAtt, Hashtable htSubNode, Hashtable htWhere)
+    {
+        foreach (XmlNode xn in root)
+        {
+            xmlelem = (XmlElement)xn;
+            if (xmlelem.HasChildNodes)//如果有子节点，则修改其子节点的InnerText    
+            {
+                try
+                {
+                    XmlNodeList xnl = xmlelem.ChildNodes;
+
+                    if (htWhere != null && htWhere.Count > 0)
+                    {
+                        int count = 0;
+                        foreach (XmlNode xn1 in xnl)
+                        {
+                            XmlElement xe = (XmlElement)xn1;
+                            if (htWhere.ContainsKey(xe.Name) && xe.InnerText.ToString().Equals(htWhere[xe.Name]))
+                            {
+                                count++;
+                            }
+                        }
+
+                        if (count != htWhere.Count)
+                        {
+                            continue;
+                        }
+                    }
+
+                    foreach (XmlNode xn1 in xnl)
+                    {
+                        XmlElement xe = (XmlElement)xn1;
+                        foreach (DictionaryEntry de in htSubNode)
+                        {
+                            if (xe.Name == de.Key.ToString())//htSubNode中的key存储了需要更改的节点名称，    
+                            {
+                                xe.InnerText = de.Value.ToString();//htSubNode中的Value存储了Key节点更新后的数据    
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    xmlelem.InnerText = htSubNode[xmlelem.Name].ToString();
+                }
+            }
+        }
+    }
+
+
     #endregion
+
     #region XML文档节点查询和读取
     /**/
     /// <summary>
