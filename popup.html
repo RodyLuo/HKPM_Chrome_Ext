@@ -1,33 +1,125 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<script type="text/javascript" src="js/jquery-1.7.1.min.js"></script>
-  		<link rel="stylesheet" href="css/popup.css"/>
-  		<title>
-    		PaoMa Context PopUp
-  		</title>
-	</head>
-	<body>
-		<div id="login_view">
-    		<div class="banner">
-      			<div class="left-column">
-        			<div id="logo" class="sprite"></div>
-      			</div>
-	      		<div class="middle-column">
-		        	<span class="banner-add">
-		          		当前用户:<font id="popuserName" style="color: red;"></font>
-		        	</span>
-	      		</div>
-		      	<div class="right-column">
-		        	<a id="close_login" class="sprite close-x" tabindex="-1"></a>
-		      	</div>
-    		</div>
-		    <div class="content">
-		         	待扩展
-		    </div>
-		</div>
-		<!-- Adds event handlers to elements, so we include at the end -->
-		<script type="text/javascript" src="js/popup.js"></script>
-	</body>
-</html>
+<!DOCTYPE html>  
+<html>  
+    <head>  
+        <meta charset="utf-8">  
+        <title>使用数据库实现web留言板</title>  
+        <script language="JavaScript">  
+            var datatable = null;     
+            //使用openDatabase方法来创建一个访问数据库的对象   
+            var db = openDatabase('MyData', '', 'My Database', 102400);  
+              
+            // 初始化操作  
+            function init() {         
+                datatable = document.getElementById("datatable");         
+                showAllData();     
+            }     
+  
+            // 删除所有数据  
+            function removeAllData() {         
+                for (var i =datatable.childNodes.length-1; i>=0; i--)      {             
+                    datatable.removeChild(datatable.childNodes[i]);         
+                }         
+                var tr = document.createElement('tr');         
+                var th1 = document.createElement('th');         
+                var th2 = document.createElement('th');         
+                var th3 = document.createElement('th');         
+                th1.innerHTML = '姓名';         
+                th2.innerHTML = '留言';         
+                th3.innerHTML = '时间';         
+                tr.appendChild(th1);         
+                tr.appendChild(th2);         
+                tr.appendChild(th3);         
+                datatable.appendChild(tr);     
+            }     
+              
+            // 展示每行数据  
+            function showData(row)  {         
+                var tr = document.createElement('tr');         
+                var td1 = document.createElement('td');         
+                td1.innerHTML = row.NAME;         
+                var td2 = document.createElement('td');         
+                td2.innerHTML = row.MESSAGE;         
+                var td3 = document.createElement('td');         
+                var t = new Date();         
+                t.setTime(row.TIME);         
+                td3.innerHTML=t.toLocaleDateString()+" "+t.toLocaleTimeString();         
+                tr.appendChild(td1);         
+                tr.appendChild(td2);         
+                tr.appendChild(td3);         
+                datatable.appendChild(tr);       
+            }     
+  
+            // 展示所有数据  
+            function showAllData()  {         
+                db.transaction(function(tx)      {             
+                    tx.executeSql('CREATE TABLE IF NOT EXISTS MsgData(name TEXT, message TEXT, time INTEGER)',[]);             
+                    tx.executeSql('SELECT * FROM MsgData', [], function(tx, rs)          {                 
+                        removeAllData();                 
+                        for(var i = 0; i < rs.rows.length; i++)              {                     
+                            showData(rs.rows.item(i));                 
+                        }             
+                    });         
+                });     
+            }     
+              
+            // 新增数据  
+            function addData(name, message, time)  {           
+                db.transaction(function(tx)      {             
+                    tx.executeSql('INSERT INTO MsgData VALUES(?, ?, ?)',[name, message, time],function(tx, rs)          {                 
+                            //document.getElementById("msg").innerHTML = "成功保存数据!";          
+                    },             
+                    function(tx, error)          {                 
+                            alert(error.source + "::" + error.message);              
+                    });         
+                });     
+            }     
+  
+            // 保存数据  
+            function saveData() {         
+                var name = document.getElementById('name').value;         
+                var memo = document.getElementById('memo').value;         
+                var time = new Date().getTime();         
+                addData(name,memo,time);         
+                showAllData();     
+            }   
+  
+            // 删除表中数据  
+            function deleteData(){  
+                db.transaction(function(tx){  
+                    tx.executeSql("DELETE FROM MsgData",[],function(tx, rs)          {                 
+                            //alert("数据删除成功!");             
+                    },             
+                    function(tx, error)          {                 
+                            alert(error.source + "::" + error.message);             
+                    });  
+                });  
+                showAllData();  
+            }  
+        </script>  
+    </head>  
+    <body onload="init()">  
+        <h1>使用数据库实现web留言板</h1>  
+        <table>  
+            <tr>  
+                <td><label>姓名：</label></td>  
+                <td><input type="text" id="name" /> </td>  
+            </tr>  
+            <tr>  
+                <td><label>留言：</label></td>  
+                <td><input type="text" id="memo" /> </td>  
+            </tr>  
+            <tr>  
+                <td ><input type="button" value="保存" onclick="saveData();"/> </td>  
+                <td ><input type="button" value="删除" onclick="deleteData();"/> </td>  
+            </tr>  
+            <tr>  
+                <td colspan="2">  
+                    <p id="msg"></p>  
+                </td>  
+            </tr>  
+        </table>  
+        <hr />  
+        <table id="datatable" border="1">  
+        </table>  
+    </body>  
+</html>  
