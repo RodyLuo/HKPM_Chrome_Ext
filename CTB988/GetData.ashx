@@ -30,6 +30,9 @@ public class Handler : IHttpHandler {
                            result += XMLData.EntityToJson(item)+",";
                         }
                     }
+                    if (result.EndsWith(",")) {
+                        result = result.Substring(0, result.Length - 1);
+                    }
                     result += "]";
                     context.Response.ContentType = "text/plain";
                     context.Response.Write(result);
