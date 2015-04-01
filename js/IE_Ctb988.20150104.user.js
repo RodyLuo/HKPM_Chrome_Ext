@@ -772,7 +772,7 @@ ContentScript ={
 				var pl = parseFloat(doResult[index].PL);
 				var showHead = "<tr style='display:none'>";
 				if(pl>=smallVal && pl<=bigVal){
-					showHead = "<tr style='display:block'>";
+					showHead = "<tr>";
 				}
 				
 				if(pl>=24){
