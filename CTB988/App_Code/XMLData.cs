@@ -39,30 +39,6 @@ public class XMLData
                 item.SetValue(entity, pValue, null);
             }
 
-            //entity.Direction = int.Parse(node.Item(3).InnerText);
-            //entity.Discount = int.Parse(node.Item(2).InnerText);
-            //entity.EatMode = node.Item(6).InnerText;
-            //entity.Mode = int.Parse(node.Item(0).InnerText);
-            //entity.Monitor = int.Parse(node.Item(4).InnerText);
-            //entity.Proportion = int.Parse(node.Item(1).InnerText);
-            //entity.WithOrder = int.Parse(node.Item(5).InnerText);
-
-            //entity.EatQDiscount = int.Parse(node.Item(7).InnerText);
-            //entity.EatQLimitStart = int.Parse(node.Item(8).InnerText);
-            //entity.EatWPDiscount = int.Parse(node.Item(9).InnerText);
-            //entity.EatWPLimitStart = int.Parse(node.Item(10).InnerText);
-            //entity.EatWPLimitEnd = int.Parse(node.Item(11).InnerText);
-            //entity.EatQPDiscount = int.Parse(node.Item(12).InnerText);
-            //entity.EatQPLimitStart = int.Parse(node.Item(13).InnerText);
-
-            //entity.BetQDiscount = int.Parse(node.Item(14).InnerText);
-            //entity.BetQLimitStart = int.Parse(node.Item(15).InnerText);
-            //entity.BetWPDiscount = int.Parse(node.Item(16).InnerText);
-            //entity.BetWPLimitStart = int.Parse(node.Item(17).InnerText);
-            //entity.BetWPLimitEnd = int.Parse(node.Item(18).InnerText);
-            //entity.BetQPDiscount = int.Parse(node.Item(19).InnerText);
-            //entity.BetQPLimitStart = int.Parse(node.Item(20).InnerText);
-
             return entity;
         }
         catch (Exception)
@@ -146,6 +122,7 @@ public class XMLData
             hstable.Add("BetWPDiscount", entity.BetWPDiscount);
             hstable.Add("BetWPLimitEnd", entity.BetWPLimitEnd);
             hstable.Add("BetWPLimitStart", entity.BetWPLimitStart);
+            hstable.Add("MaxCount", entity.MaxCount);
 
             bool node = xml.UpdateNode(CONFIGPATH, "Config",null, hstable);
             return node;
