@@ -30,171 +30,376 @@
         }
     </style>
     <script src="Scripts/jquery-1.4.1.js" type="text/javascript"></script>
-    <script type="text/javascript">  
-		// 模块拖拽  
-		$(function(){  
-		var _move=false;//移动标记  
-		var _x,_y;//鼠标离控件左上角的相对位置  
-		    $("#drag").click(function(){  
-		        //alert("click");//点击（松开后触发）  
-		        }).mousedown(function(e){  
-		        _move=true;  
-		        _x=e.pageX-parseInt($("#drag").css("left"));  
-		        _y=e.pageY-parseInt($("#drag").css("top"));  
-		    });  
-		    $(document).mousemove(function(e){  
-		        if(_move){  
-		            var x=e.pageX-_x;//移动时根据鼠标位置计算控件左上角的绝对位置  
-		            var y=e.pageY-_y;  
-		            $("#drag").css({top:y,left:x});//控件新位置  
-		        }  
-		    }).mouseup(function(){  
-		    _move=false;  
-		  });  
-		});  
-</script>  
+    <script type="text/javascript">
+        // 模块拖拽  
+        $(function () {
+            var _move = false; //移动标记  
+            var _x, _y; //鼠标离控件左上角的相对位置  
+            $("#drag").click(function () {
+                //alert("click");//点击（松开后触发）  
+            }).mousedown(function (e) {
+                _move = true;
+                _x = e.pageX - parseInt($("#drag").css("left"));
+                _y = e.pageY - parseInt($("#drag").css("top"));
+            });
+            $(document).mousemove(function (e) {
+                if (_move) {
+                    var x = e.pageX - _x; //移动时根据鼠标位置计算控件左上角的绝对位置  
+                    var y = e.pageY - _y;
+                    $("#drag").css({ top: y, left: x }); //控件新位置  
+                }
+            }).mouseup(function () {
+                _move = false;
+            });
+        });  
+    </script>
 </head>
 <body>
     <div id="drag">
-        <h3>长城帮助程序</h3>
+        <h3>
+            长城帮助程序</h3>
         <div style="font-size: 12px;">
-        	<table style="width:100%;">
-        		<tr>
-        			<td>模式</td>
-        			<td>
-        				<select id="Mode">
-                			<option value="0">按比例</option>
-            			</select>
-        			</td>
-        			<td>比例</td>
-        			<td>
-        				<input id="Proportion" type="number" step="0.1" style="width: 40px;" size="4" value="1.0"/>
+            <table style="width: 100%;">
+                <tr>
+                    <td>
+                        模式
                     </td>
-        		</tr>
-        		<tr>
-        			<td>折头</td>
-        			<td>
-        				<select id="Discount">
-                			<option value="0">固定折头</option>
-            			</select>
-        			</td>
-        			<td>方向</td>
-        			<td>
-        				<select id="Direction">
-                			<option value="0">正向跟单</option>
-                			<option value="1">反向跟单</option>
-            			</select>
+                    <td>
+                        <select id="Mode">
+                            <option value="0">按比例</option>
+                        </select>
                     </td>
-        		</tr>
-        		<tr>
-        			<td>监控</td>
-        			<td>
-        				<select id="Monitor">
-			                <option value="0">com香港彩池</option>
-			                <option value="1">net香港彩池</option>
-			                <option value="2">com新加坡彩池</option>
-			                <option value="3">net新加坡彩池</option>
-			            </select>
-        			</td>
-        			<td>跟单</td>
-        			<td>
-        				<select id="WithOrder">
-			                <option value="0">com香港彩池</option>
-			                <option value="1">net香港彩池</option>
-			                <option value="2">com新加坡彩池</option>
-			                <option value="3">net新加坡彩池</option>
-			            </select>
+                    <td>
+                        比例
                     </td>
-        		</tr>
-        		<tr>
-        			<td colspan="2">
-        				<table>
-        					<tr>
-        						<td>吃</td>
-        						<td>折头</td>
-        						<td>极限</td>
-        					</tr>
-        					<tr>
-        						<td>WP</td>
-        						<td>
-        							<input id="EatWPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76"/>
-        						</td>
-        						<td>
-        							<input id="EatWPLimitStart" type="number" step="10" style="width: 40px;" size="4" value="300"/>
-        							/<input id="EatWPLimitEnd" type="number" step="10" style="width: 40px;" size="4" value="100"/>
-        						</td>
-        					</tr>
-        					<tr>
-        						<td>Q</td>
-        						<td>
-        							<input id="EatQDiscount" type="number" step="10" style="width: 40px;" size="4" value="76"/>
-        						</td>
-        						<td>
-        							<input id="EatQLimitStart" type="number" step="10" style="width: 40px;" size="4" value="300"/>
-        						</td>
-        					</tr>
-        					<tr>
-        						<td>QP</td>
-        						<td>
-        							<input id="EatQPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76"/>
-        						</td>
-        						<td>
-        							<input id="EatQPLimitStart" type="number" step="10" style="width: 40px;" size="4" value="300"/>
-        						</td>
-        					</tr>
-        				</table>
-        			</td>
-        			<td colspan="2">
-        				<table>
-        					<tr>
-        						<td>赌</td>
-        						<td>折头</td>
-        						<td>极限</td>
-        					</tr>
-        					<tr>
-        						<td>WP</td>
-        						<td>
-        							<input id="BWPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76"/>
-        						</td>
-        						<td>
-        							<input id="BetWPLimitStart" type="number" step="10" style="width: 40px;" size="4" value="300"/>
-        							/<input id="BetWPLimitEnd" type="number" step="10" style="width: 40px;" size="4" value="100"/>
-        						</td>
-        					</tr>
-        					<tr>
-        						<td>Q</td>
-        						<td>
-        							<input id="BetQDiscount" type="number" step="10" style="width: 40px;" size="4" value="76"/>
-        						</td>
-        						<td>
-        							<input id="BetQLimitStart" type="number" step="10" style="width: 40px;" size="4" value="300"/>
-        						</td>
-        					</tr>
-        					<tr>
-        						<td>QP</td>
-        						<td>
-        							<input id="BetQPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76"/>
-        						</td>
-        						<td>
-        							<input id="BetQPLimitStart" type="number" step="10" style="width: 40px;" size="4" value="300"/>
-        						</td>
-        					</tr>
-        				</table>
-        			</td>
-        		</tr>
-        		<tr>
-        			<td colspan="4">
-        				<textarea style="width: 90%; height: 120px;" id="txtLogs"></textarea>
-        			</td>
-        		</tr>
-        		<tr>
-        			<td><input type="button" id="btnStart" value="开始运行" /></td>
-        			<td><input type="button" id="btnSaveConfig" value="保存设置" /></td>
-        			<td><input type="button" id="btnClear" value="清除历史" /></td>
-        			<td><input type="button" id="btnOver" value="结束跟单" /></td>
-        		</tr>
-        	</table>
+                    <td>
+                        <input id="Proportion" type="number" step="0.1" style="width: 40px;" size="4" value="1.0" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        折头
+                    </td>
+                    <td>
+                        <select id="Discount">
+                            <option value="0">固定折头</option>
+                        </select>
+                    </td>
+                    <td>
+                        方向
+                    </td>
+                    <td>
+                        <select id="Direction">
+                            <option value="0">正向跟单</option>
+                            <option value="1">反向跟单</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        监控
+                    </td>
+                    <td>
+                        <select id="Monitor">
+                            <option value="0">com香港彩池</option>
+                            <option value="1">net香港彩池</option>
+                            <option value="2">com新加坡彩池</option>
+                            <option value="3">net新加坡彩池</option>
+                        </select>
+                    </td>
+                    <td>
+                        跟单
+                    </td>
+                    <td>
+                        <select id="WithOrder">
+                            <option value="0">com香港彩池</option>
+                            <option value="1">net香港彩池</option>
+                            <option value="2">com新加坡彩池</option>
+                            <option value="3">net新加坡彩池</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        限注
+                    </td>
+                    <td colspan="3">
+                        <input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <table>
+                            <tr>
+                                <td>
+                                    吃
+                                </td>
+                                <td>
+                                    折头
+                                </td>
+                                <td>
+                                    极限
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    WP
+                                </td>
+                                <td>
+                                    <input id="EatWPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76" />
+                                </td>
+                                <td>
+                                    <input id="EatWPLimitStart" type="number" step="10" style="width: 40px;" size="4"
+                                        value="300" />
+                                    /<input id="EatWPLimitEnd" type="number" step="10" style="width: 40px;" size="4"
+                                        value="100" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Q
+                                </td>
+                                <td>
+                                    <input id="EatQDiscount" type="number" step="10" style="width: 40px;" size="4" value="76" />
+                                </td>
+                                <td>
+                                    <input id="EatQLimitStart" type="number" step="10" style="width: 40px;" size="4"
+                                        value="300" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    QP
+                                </td>
+                                <td>
+                                    <input id="EatQPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76" />
+                                </td>
+                                <td>
+                                    <input id="EatQPLimitStart" type="number" step="10" style="width: 40px;" size="4"
+                                        value="300" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td colspan="2">
+                        <table>
+                            <tr>
+                                <td>
+                                    赌
+                                </td>
+                                <td>
+                                    折头
+                                </td>
+                                <td>
+                                    极限
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    WP
+                                </td>
+                                <td>
+                                    <input id="BWPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76" />
+                                </td>
+                                <td>
+                                    <input id="BetWPLimitStart" type="number" step="10" style="width: 40px;" size="4"
+                                        value="300" />
+                                    /<input id="BetWPLimitEnd" type="number" step="10" style="width: 40px;" size="4"
+                                        value="100" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Q
+                                </td>
+                                <td>
+                                    <input id="BetQDiscount" type="number" step="10" style="width: 40px;" size="4" value="76" />
+                                </td>
+                                <td>
+                                    <input id="BetQLimitStart" type="number" step="10" style="width: 40px;" size="4"
+                                        value="300" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    QP
+                                </td>
+                                <td>
+                                    <input id="BetQPDiscount" type="number" step="10" style="width: 40px;" size="4" value="76" />
+                                </td>
+                                <td>
+                                    <input id="BetQPLimitStart" type="number" step="10" style="width: 40px;" size="4"
+                                        value="300" />
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4">
+                        <textarea style="width: 90%; height: 120px; font-size: 10px;" id="txtLogs"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <input type="button" id="btnStart" value="开始运行" />
+                    </td>
+                    <td>
+                        <input type="button" id="btnSaveConfig" value="保存设置" />
+                    </td>
+                    <td>
+                        <input type="button" id="btnClear" value="清除历史" />
+                    </td>
+                    <td>
+                        <input type="button" id="btnOver" value="结束跟单" />
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
+    <script language="javascript" type="text/javascript">
+        ConfigScript = {
+            config: {},
+            status:"0",
+            onInit: function () {
+                $.ajax({
+                    type: "get",
+                    url: "GetStatus.ashx",
+                    data: "type=get",
+                    success: function (msg) {
+                    	 ConfigScript.status = msg;
+                    }
+                });
+                $.ajax({
+                    type: "get",
+                    url: "Config.ashx",
+                    data: "type=get",
+                    success: function (msg) {
+                        ConfigScript.config = $.parseJSON(msg);
+                        var setValue = ConfigScript.config;
+                        $("#Mode").val(setValue.Mode);
+                        $("#Proportion").val(setValue.Proportion)
+                        $("#Discount").val(setValue.Discount)
+                        $("#Direction").val(setValue.Direction)
+                        $("#Monitor").val(setValue.Monitor)
+                        $("#WithOrder").val(setValue.WithOrder)
+                        $("#EatMode").val(setValue.EatMode)
+                        $("#MaxCount").val(setValue.MaxCount)
+                        $("#EatQDiscount").val(setValue.EatQDiscount)
+                        $("#EatQLimitStart").val(setValue.EatQLimitStart)
+                        $("#EatWPDiscount").val(setValue.EatWPDiscount)
+                        $("#EatWPLimitStart").val(setValue.EatWPLimitStart)
+                        $("#EatWPLimitEnd").val(setValue.EatWPLimitEnd)
+                        $("#EatQPDiscount").val(setValue.EatQPDiscount)
+                        $("#EatQPLimitStart").val(setValue.EatQPLimitStart)
+                        $("#BetQDiscount").val(setValue.BetQDiscount)
+                        $("#BetQLimitStart").val(setValue.BetQLimitStart)
+                        $("#BetWPDiscount").val(setValue.BetWPDiscount)
+                        $("#BetWPLimitStart").val(setValue.BetWPLimitStart)
+                        $("#BetWPLimitEnd").val(setValue.BetWPLimitEnd)
+                        $("#BetQPDiscount").val(setValue.BetQPDiscount)
+                        $("#BetQPLimitStart").val(setValue.BetQPLimitStart);
+                        if(ConfigScript.status=="1"){
+                        	ConfigScript.addOver();
+                        	$("#btnStart").unbind("click");
+                    		$("#btnStart").val("跟单中");
+                        }else{
+                        	ConfigScript.addStart();
+                        	$("#btnOver").unbind("click");
+                    		$("#btnStart").val("开始跟单");
+                        }
+                    },
+                    error: function (msg) {
+                        alert("插件出现异常，请联系开发者");
+                    }
+                });
+            	
+            	ConfigScript.addButtonEvent();
+            },
+            addButtonEvent:function(){
+            	ConfigScript.saveConfig();
+            	ConfigScript.addClear();
+            },
+            addStart:function(){
+            	$("#btnStart").bind("click",function(){
+            		 $.ajax({
+	                    type: "get",
+	                    url: "GetStatus.ashx",
+	                    data: "type=update&status=1",
+	                    success: function (msg) {
+	                    	alert("开始跟单");
+                    		$("#txtLogs").val($("#txtLogs").val()+"\r\n 开始跟单" + Date());
+                    		$("#btnStart").unbind("click");
+                    		$("#btnStart").val("跟单中");
+                    		ConfigScript.addOver();
+	                    }
+	                 });
+            	})
+            },
+            addOver:function(){
+            	$("#btnOver").bind("click",function(){
+            		 $.ajax({
+	                    type: "get",
+	                    url: "GetStatus.ashx",
+	                    data: "type=update&status=0",
+	                    success: function (msg) {
+	                    	alert("结束跟单");
+                    		$("#txtLogs").val($("#txtLogs").val()+"\r\n 结束跟单" + Date());
+                    		$("#btnOver").unbind("click");
+                    		$("#btnStart").val("开始跟单");
+                    		ConfigScript.addStart();
+	                    }
+	                 });
+            	})
+            },
+            saveConfig:function(){
+            	$("#btnSaveConfig").bind("click",function(){
+            		var postData = {
+						                "Mode": $("#Mode").val(),
+						                "Proportion": $("#Proportion").val(),
+						                "Discount": $("#Discount").val(),
+						                "Direction": $("#Direction").val(),
+						                "Monitor": $("#Monitor").val(),
+						                "WithOrder": $("#WithOrder").val(),
+						                "EatMode": $("#EatMode").val(),
+						                "MaxCount": $("#MaxCount").val(),
+						                "EatQDiscount": $("#EatQDiscount").val(),
+						                "EatQLimitStart": $("#EatQLimitStart").val(),
+						                "EatWPDiscount": $("#EatWPDiscount").val(),
+						                "EatWPLimitStart": $("#EatWPLimitStart").val(),
+						                "EatWPLimitEnd": $("#EatWPLimitEnd").val(),
+						                "EatQPDiscount": $("#EatQPDiscount").val(),
+						                "EatQPLimitStart": $("#EatQPLimitStart").val(),
+						                "BetQDiscount": $("#BetQDiscount").val(),
+						                "BetQLimitStart": $("#BetQLimitStart").val(),
+						                "BetWPDiscount": $("#BetWPDiscount").val(),
+						                "BetWPLimitStart": $("#BetWPLimitStart").val(),
+						                "BetWPLimitEnd": $("#BetWPLimitEnd").val(),
+						                "BetQPDiscount": $("#BetQPDiscount").val(),
+						                "BetQPLimitStart": $("#BetQPLimitStart").val()
+						            }
+            		postData.type="update";
+            		$.ajax({
+                    	type: "get",
+                    	url: "Config.ashx",
+                    	data: postData,
+                    	success: function (msg) {
+                    		alert("设置保存成功");
+                    		$("#txtLogs").val($("#txtLogs").val()+"\r\n 设置保存成功" + Date());
+                    	},
+                    	error: function (msg) {
+                        	alert("设置保存失败,请联系开发者");
+                        	$("#txtLogs").val($("#txtLogs").val()+"\r\n 设置保存失败,请联系开发者" + Date());
+                        }
+                  });
+                 });
+          },
+          addClear:function(){
+          	  $("#txtLogs").val("");
+          }
+        }
+        
+        ConfigScript.onInit();
+    </script>
 </body>
 </html>

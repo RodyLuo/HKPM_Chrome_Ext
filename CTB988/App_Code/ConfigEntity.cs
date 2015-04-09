@@ -182,4 +182,10 @@ public class ConfigEntity
         set { betQPLimitStart = value; }
     }
 
+    private string maxCount;
+    public string MaxCount
+    {
+        get { return maxCount; }
+        set { maxCount = value; }
+    }
 }
