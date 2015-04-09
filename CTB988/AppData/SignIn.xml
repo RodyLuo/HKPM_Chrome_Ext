@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SignInDataList>
+  <SignIn>
+    <Id>121212121</Id>
+    <ModeType>Q</ModeType>
+    <BuyMode>E</BuyMode>
+    <Hourse1>1</Hourse1>
+    <Hourse2>2</Hourse2>
+    <Ticket>2</Ticket>
+    <Discount>80</Discount>
+    <LimitStart>300</LimitStart>
+    <LimitEnd>
+    </LimitEnd>
+    <W>
+    </W>
+    <P>
+    </P>
+    <Status>1</Status>
+  </SignIn>
+</SignInDataList>
