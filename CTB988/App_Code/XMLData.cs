@@ -15,6 +15,7 @@ public class XMLData
     public static string STATUSPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Status.xml";
     public static string DATAPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Data.xml";
     public static string CONFIGPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Config.xml";
+    public static string SIGNINPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\SignIn.xml";
     public static XmlHelper xml = new XmlHelper();
     public XMLData()
     {
@@ -236,6 +237,62 @@ public class XMLData
         }
     }
 
+    /// <summary>
+    /// 新增数据
+    /// </summary>
+    /// <param name="Status"></param>
+    /// <returns></returns>
+    public static string AddSignInData(SignInEntity entity)
+    {
+        try
+        {
+            Hashtable hashTable = new Hashtable();
+            PropertyInfo[] pInfos = entity.GetType().GetProperties();
+            string pValue = string.Empty;
+            foreach (PropertyInfo item in pInfos)
+            {
+                if (!(item.GetValue(entity, null) == null))
+                {
+                    pValue = item.GetValue(entity, null).ToString();
+                }
+                else
+                {
+                    pValue = string.Empty;
+                }
+                hashTable.Add(item.Name, string.IsNullOrEmpty(pValue) ? string.Empty : pValue);
+            }
+            bool node = xml.InsertNode(SIGNINPATH, "SignIn", false, "SignInDataList", null, hashTable);
+            if (node)
+            {
+                return "1";
+            }
+            else
+            {
+                return "0";
+            }
+        }
+        catch (Exception)
+        {
+            return "-1";
+        }
+    }
+
+    public static string DeleteSignInById(string Id)
+    {
+        try
+        {
+            Hashtable where = new Hashtable();
+            where.Add("Id", Id);
+            bool result = xml.DeleteXmlByWhere(SIGNINPATH, "SignInDataList", where);
+            return result ? "1" : "0";
+        }
+        catch (Exception)
+        {
+            return "-1";
+        }
+
+    }
+
     public static string UpdatePushDataStatusById(string status,string Id) {
         try
         {
@@ -328,6 +385,40 @@ public class XMLData
                     {
                         continue;
                     }
+                }
+
+                result.Add(entity);
+            }
+
+            return result;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+
+    public static List<SignInEntity> GetAllSignIn()
+    {
+        try
+        {
+            List<SignInEntity> result = new List<SignInEntity>();
+
+            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(DATAPATH, "SignInDataList/SignIn");
+
+            foreach (XmlNode node in nodeList)
+            {
+                SignInEntity entity = new SignInEntity();
+                XmlElement nodeElement = (XmlElement)node;
+                XmlNodeList itemList = nodeElement.ChildNodes;
+
+                PropertyInfo[] pInfos = entity.GetType().GetProperties();
+                string pValue = string.Empty;
+                foreach (PropertyInfo item in pInfos)
+                {
+                    pValue = GetNodeListByName(itemList, item.Name);
+                    item.SetValue(entity, pValue, null);
                 }
 
                 result.Add(entity);

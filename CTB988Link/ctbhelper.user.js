@@ -8,22 +8,68 @@
 // ==/UserScript==
 
 ContentScript={
-	hostName:'http://localhost:59590/CTB988/',
+	hostName:'http://localhost:55664/CTB988/',
+	signInId:"";
+	pageConfig:{},
 	onInit:function(){
-		ContentScript.CreateHtmlElement();
-		ContentScript.HtmlAddDragEvent();
-		
-		ContentScript.bindOnLoadEvent();
-		ContentScript.bindUnLoadEvent();
+		var host =window.location.href;
+		if(host.indexOf("playerhk.jsp")>=0 || host.indexOf("Q.jsp")>=0){
+			//创建用户界面
+			ContentScript.CreateHtmlElement();
+			ContentScript.HtmlAddDragEvent();
+			
+			//页面签到功能
+			ContentScript.bindOnLoadEvent();
+			ContentScript.bindUnLoadEvent();
+			
+			//创建定时监控吃票事件
+			//创建定时定时跟单事件
+		}
 	},
 	bindOnLoadEvent:function(){
 		//调用签到接口签到
-		
+		var url= window.location.href;
+		var loginuser = $.trim($("#username").text());
+		$.ajax({
+	              type: "get",
+	              url: "SignIn.ashx",
+	              data: "type=add&url="+url+"&loginuser="+loginuser,
+	              success: function (msg) {
+	                    if(msg!="0"){
+	                    	 	ContentScript.signInId = msg;
+	                    }
+	               }
+	             });
+		//页面离开事件 刷新也会加载这个事件
+		$("boay").bind("onload",function(){
+			//调用签到接口签到
+			var url= window.location.href;
+			var loginuser = $.trim($("#username").text());
+			$.ajax({
+	                    type: "get",
+	                    url: "SignIn.ashx",
+	                    data: "type=add&url="+url+"&loginuser="+loginuser,
+	                    success: function (msg) {
+	                    	 if(msg!="0"){
+	                    	 	ContentScript.signInId = msg;
+	                    	 }
+	                    }
+	                });
+		});
 	},
 	bindUnLoadEvent:function(){
 		//页面离开事件 刷新也会加载这个事件
 		$("boay").bind("onunload",function(){
-			
+			if(ContentScript.signInId.length>0){
+				$.ajax({
+                    type: "get",
+                    url: "SignIn.ashx",
+                    data: "type=delete&Id="+ContentScript.signInId,
+                    success: function (msg) {
+                    	 
+                    }
+                });
+			}
 		});
 	},
 	OpenConfigPage:function(){
