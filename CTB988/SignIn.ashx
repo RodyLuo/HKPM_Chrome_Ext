@@ -5,7 +5,7 @@ using System.Web;
 using System.Collections.Generic;
 
 public class Handler : IHttpHandler {
-
+    // setWithOrder setMonitor
     public void ProcessRequest(HttpContext context)
     {
         string type = string.IsNullOrEmpty(context.Request["type"]) ? "" : context.Request["type"];
@@ -56,6 +56,23 @@ public class Handler : IHttpHandler {
                     context.Response.Write(result);
                     break;
                 }
+
+            case "setWithOrder":
+                {
+                    string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
+                    string result = XMLData.DeleteSignInById(Id);
+                    context.Response.ContentType = "text/plain";
+                    context.Response.Write(result);
+                    break;
+                }
+            case "setMonitor":
+                {
+                    string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
+                    string result = XMLData.DeleteSignInById(Id);
+                    context.Response.ContentType = "text/plain";
+                    context.Response.Write(result);
+                    break;
+                }  
             default:
                 context.Response.Write("");
                 break;
