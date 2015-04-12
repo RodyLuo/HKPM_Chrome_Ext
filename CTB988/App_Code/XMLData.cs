@@ -16,6 +16,12 @@ public class XMLData
     public static string DATAPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Data.xml";
     public static string CONFIGPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Config.xml";
     public static string SIGNINPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\SignIn.xml";
+
+    public static object statusObj = new object();
+    public static object dataObj = new object();
+    public static object configObj = new object();
+    public static object signObj = new object();
+
     public static XmlHelper xml = new XmlHelper();
     public XMLData()
     {
@@ -124,8 +130,11 @@ public class XMLData
             hstable.Add("BetWPLimitEnd", entity.BetWPLimitEnd);
             hstable.Add("BetWPLimitStart", entity.BetWPLimitStart);
             hstable.Add("MaxCount", entity.MaxCount);
-
-            bool node = xml.UpdateNode(CONFIGPATH, "Config",null, hstable);
+            bool node = false;
+            lock (configObj)
+            {
+                node = xml.UpdateNode(CONFIGPATH, "Config", null, hstable);
+            }
             return node;
         }
         catch (Exception)
@@ -179,7 +188,11 @@ public class XMLData
             Hashtable hstable = new Hashtable();
             hstable.Add("Statue", Status);
             hstable.Add("StatueTime", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-            bool node = xml.UpdateNode(STATUSPATH, "Status",null, hstable);
+            bool node = false;
+            lock (statusObj)
+            {
+                xml.UpdateNode(STATUSPATH, "Status", null, hstable);
+            }
             if (node)
             {
                 return "1";
@@ -221,7 +234,11 @@ public class XMLData
                 }
                 hashTable.Add(item.Name, string.IsNullOrEmpty(pValue) ? string.Empty : pValue);
             }
-            bool node = xml.InsertNode(DATAPATH, "PushData", false, "PushDataList", null, hashTable);
+            bool node = false;
+            lock (dataObj)
+            {
+                node = xml.InsertNode(DATAPATH, "PushData", false, "PushDataList", null, hashTable);
+            }
             if (node)
             {
                 return "1";
@@ -261,7 +278,11 @@ public class XMLData
                 }
                 hashTable.Add(item.Name, string.IsNullOrEmpty(pValue) ? string.Empty : pValue);
             }
-            bool node = xml.InsertNode(SIGNINPATH, "SignIn", false, "SignInDataList", null, hashTable);
+            bool node = false;
+            lock (signObj)
+            {
+                node = xml.InsertNode(SIGNINPATH, "SignIn", false, "SignInDataList", null, hashTable);
+            }
             if (node)
             {
                 return "1";
@@ -283,7 +304,11 @@ public class XMLData
         {
             Hashtable where = new Hashtable();
             where.Add("Id", Id);
-            bool result = xml.DeleteXmlByWhere(SIGNINPATH, "SignInDataList", where);
+            bool result = false;
+            lock (signObj)
+            {
+                result = xml.DeleteXmlByWhere(SIGNINPATH, "SignInDataList", where);
+            }
             return result ? "1" : "0";
         }
         catch (Exception)
@@ -293,7 +318,8 @@ public class XMLData
 
     }
 
-    public static string UpdatePushDataStatusById(string status,string Id) {
+    public static string UpdatePushDataStatusById(string status, string Id)
+    {
         try
         {
             Hashtable update = new Hashtable();
@@ -301,7 +327,39 @@ public class XMLData
 
             Hashtable where = new Hashtable();
             where.Add("Id", Id);
-            bool result = xml.UpdateNodeByWhere(DATAPATH, "PushDataList", null, update, where);
+            bool result = false;
+            lock (dataObj)
+            {
+                result = xml.UpdateNodeByWhere(DATAPATH, "PushDataList", null, update, where);
+            }
+            return result ? "1" : "0";
+        }
+        catch (Exception)
+        {
+            return "-1";
+        }
+
+    }
+
+    public static string UpdateSignInSetMonitorById(string Id, string IsMonitor)
+    {
+        try
+        {
+            Hashtable update = new Hashtable();
+            update.Add("IsMonitor", IsMonitor);
+            if (IsMonitor == "1") {
+                Hashtable updateA = new Hashtable();
+                updateA.Add("IsMonitor", "0");
+                updateA.Add("IsWithOrder", "0");
+                xml.UpdateNodeByWhere(SIGNINPATH, "SignInDataList", null, updateA, null);
+            }
+            Hashtable where = new Hashtable();
+            where.Add("Id", Id);
+            bool result = false;
+            lock (signObj)
+            {
+                result = xml.UpdateNodeByWhere(SIGNINPATH, "SignInDataList", null, update, where);
+            }
 
             return result ? "1" : "0";
         }
@@ -309,7 +367,30 @@ public class XMLData
         {
             return "-1";
         }
-        
+
+    }
+
+    public static string UpdateSignInSetWithOrderById(string Id, string isWithOrder)
+    {
+        try
+        {
+            Hashtable update = new Hashtable();
+            update.Add("IsWithOrder", isWithOrder);
+
+            Hashtable where = new Hashtable();
+            where.Add("Id", Id);
+            bool result = false;
+            lock (signObj)
+            {
+                result = xml.UpdateNodeByWhere(SIGNINPATH, "SignInDataList", null, update, where);
+            }
+            return result ? "1" : "0";
+        }
+        catch (Exception)
+        {
+            return "-1";
+        }
+
     }
 
     public static string DeletePushDataById(string Id)
@@ -318,21 +399,27 @@ public class XMLData
         {
             Hashtable where = new Hashtable();
             where.Add("Id", Id);
-            bool result = xml.DeleteXmlByWhere(DATAPATH, "PushDataList", where);
-            return result?"1":"0";
+            bool result = false;
+            lock (dataObj)
+            {
+                result = xml.DeleteXmlByWhere(DATAPATH, "PushDataList", where);
+            }
+
+            return result ? "1" : "0";
         }
         catch (Exception)
         {
             return "-1";
         }
-        
+
     }
 
     public static string GetNodeListByName(XmlNodeList nodeList, string Name)
     {
         foreach (XmlNode item in nodeList)
         {
-            if (item.Name == Name) {
+            if (item.Name == Name)
+            {
                 return item.InnerText;
             }
         }
@@ -347,7 +434,8 @@ public class XMLData
 
             XmlNodeList nodeList = xml.GetXmlNodeListByXpath(DATAPATH, "PushDataList/PushData");
 
-            foreach (XmlNode node in nodeList) {
+            foreach (XmlNode node in nodeList)
+            {
                 PustDataEntity entity = new PustDataEntity();
                 XmlElement nodeElement = (XmlElement)node;
                 XmlNodeList itemList = nodeElement.ChildNodes;
@@ -356,12 +444,14 @@ public class XMLData
                 string pValue = string.Empty;
                 foreach (PropertyInfo item in pInfos)
                 {
-                    pValue = GetNodeListByName(itemList,item.Name);
-                    item.SetValue(entity, pValue,null);
+                    pValue = GetNodeListByName(itemList, item.Name);
+                    item.SetValue(entity, pValue, null);
                 }
 
-                if (!string.IsNullOrEmpty(query.BuyMode)) {
-                    if (query.BuyMode != entity.BuyMode) {
+                if (!string.IsNullOrEmpty(query.BuyMode))
+                {
+                    if (query.BuyMode != entity.BuyMode)
+                    {
                         continue;
                     }
                 }
@@ -405,7 +495,7 @@ public class XMLData
         {
             List<SignInEntity> result = new List<SignInEntity>();
 
-            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(DATAPATH, "SignInDataList/SignIn");
+            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(SIGNINPATH, "SignInDataList/SignIn");
 
             foreach (XmlNode node in nodeList)
             {

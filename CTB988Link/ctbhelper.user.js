@@ -11,12 +11,63 @@ ContentScript={
 	hostName:'http://localhost:55664/CTB988/',
 	signInId:"";
 	pageStatus:"",
+	txn_mode_check_item:new Array('WPB','WPE','WB','WE','PB','PE','FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE','DEmr','DBmr'),  
 	timerEatClock:null,
 	timerBetClock:null,
 	timerGetConfig:null,
 	timerGetStatus:null,
+	timerGetSignInList:null,
 	currentUrl:window.location.href,
+	GetSignInInfo:function(){
+		//调用签到接口签到
+			var url= window.location.href;
+			var siteType = ""
+			if(url.indexOf("ctb988.com")>=0){
+				siteType = "com";
+			}else{
+				siteType = "net"
+			}
+			var urlValue = window.location.pathname;
+			var paramList = window.location.search.split("?")[1];
+			var paramArray = paramList.split("&");
+			var RaceType = $("input[name='race_type']").val();
+			var RaceDate = $("input[name='race_date']").val();
+			var Sml = "s";
+			var loginuser = $.trim($("#username").text());
+			var result = {"url":urlValue,"loginuser":loginuser,"RaceType":RaceType,"RaceDate":RaceDate,"Sml":Sml,"SiteType":SiteType};
+			return result;
+	},
+	signInList: [],
+	isMonitor:false,
+	isWithOrder:false,
+	oldSignInList:[],
 	pageConfig:{},
+	getSignInList: function () {
+                $.ajax({
+                    type: "get",
+                    url: ContentScript.hostName + "SignIn.ashx",
+                    data: "type=get",
+                    success: function (msg) {
+                        ContentScript.oldSignInList = ContentScript.signInList;
+                        ContentScript.signInList = $.parseJSON(msg);
+                    }
+                });
+    },
+	checkPageSignInInfo:function(){
+		$(ContentScript.signInList).each(function(i){
+					var result = ContentScript.GetSignInInfo();
+			  		if($(this)[0].SiteType == result.SiteType 
+			  	       && $(this)[0].RaceDate == result.RaceDate
+			  	       && $(this)[0].RaceType == result.RaceType
+			  	       && $(this)[0].LoginUser == result.loginuser
+			  		){
+			  			var monitor = ($(this)[0].isMonitor =="1");
+			  			var withorder = ($(this)[0].isWithOrder =="1");
+			  			ContentScript.isMonitor = monitor;
+			  			ContentScript.isWithOrder = withorder;
+			  		}
+			  })
+	},
 	onInit:function(){
 		var host =window.location.href;
 		if(host.indexOf("playerhk.jsp")>=0 || host.indexOf("Q.jsp")>=0){
@@ -30,20 +81,24 @@ ContentScript={
 			
 			//页面是否跟单状态
 			ContentScript.timerGetStatus = self.setInterval(function(){
-			  ContentScript.getPageStatus();
+			  ContentScript.getSignInList();
+			  ContentScript.checkPageSignInInfo();
 			},1000);
-			
+			//获取签到页面的配置信息
+			ContentScript.timerGetSignInList = self.setInterval(function(){
+			  ContentScript.getPageConfig();
+			},1000);
 			//获取页面配置
 			ContentScript.timerGetConfig = self.setInterval(function(){
 			  ContentScript.getPageConfig();
 			},1000);
 			//创建定时监控吃票事件
 			ContentScript.timerEatClock = self.setInterval(function(){
-			  ContentScript.onEatInit();
+			  ContentScript.onMonitorInit();
 			},1000);
 			//创建定时定时跟单事件
 			ContentScript.timerEatClock = self.setInterval(function(){
-			  ContentScript.onBetInit();
+			  ContentScript.onWithOrderInit();
 			},1000);
 		}
 	},
@@ -67,229 +122,76 @@ ContentScript={
                     }
              });
 	},
-	onEatInit:function(){
+	onMonitorInit:function(){
+		ContentScript.pageConfig
+		if(ContentScript.pageStatus == "1" && ContentScript.isMonitor){
+			
+		}
+	},
+	pushDataToServer:function(item){
 		
 	},
-	onBetInit:function(){
-		
+	onWithOrderInit:function(){
+		if(ContentScript.pageStatus == "1" ContentScript.isWithOrder){
+			
+		}
 	},
-	GetQData:function(){
-		var QdataResult = [];
-		var item = {};
-		var type = 0;
-		$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="删"){
+	GetAllTransactionData:function(){
+		var result = [];
+		//<td>6</td>
+		//<td class="RD F_B">FC</td>
+		//<td class="F_B ">4-5</td>
+		//<td id="FCE_6_4-5_100_700x">2</td>
+		//<td id="FCE_6_4-5_100_700y">100</td>
+		//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
+		//<td class="">吃</td>
+		$(ContentScript.txn_mode_check_item).each(function(i){
+			var type = $(this)
+			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
+				var temp = "";
+				$(this).find("td").each(function(item){
 					temp += $(this).text()+"$";
+				})
+				if(temp.length>0){
+					var tempArray = temp.split("$");
+					item={"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
+					result.push(item);
 				}
-			})
-			if(temp.length>0){
-				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr .del_ch").length
-				var tempArray = temp.split("$");
-				if(tempArray[2].indexOf("(")>=0){
-					type=2
-				}else{
-					type=1;
-				}
-				item={"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
+			});
 		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="删"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				if(tempArray[2].indexOf("(")>=0){
-					type=4
-				}else{
-					type=3;
-				}
-				item={"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-	    return QdataResult;
-	},
-	GetQCJData:function(){
-		var QdataResult = [];
-		var item = {};
-		var type = 0;
-		$(window.frames["frmTRANS"].document).find("tbody[id^='FCB'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="赌"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				type=1;
-				var tempArray = temp.split("$");
-				var x = tempArray[2].split('-')[0];
-				var y = tempArray[2].split('-')[1];
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='PFTB'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="赌"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				type = 2;
-				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
-				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='FCE'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="吃"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				type = 3;
-				var x = tempArray[2].split('-')[0];
-				var y = tempArray[2].split('-')[1];
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='PFTE'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="吃"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				type = 4;
-				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
-				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		
-		$(window.frames["frmTRANS"].document).find("tbody[id^='QB'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="赌"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				type=1;
-				var tempArray = temp.split("$");
-				var x = tempArray[2].split('-')[0];
-				var y = tempArray[2].split('-')[1];
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='QPB'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="赌"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				type = 2;
-				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
-				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='QE'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="吃"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				type = 3;
-				var x = tempArray[2].split('-')[0];
-				var y = tempArray[2].split('-')[1];
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		$(window.frames["frmTRANS"].document).find("tbody[id^='QPE'] tr").each(function(index){
-			var temp = "";
-			$(this).find("td").each(function(item){
-				if($(this).text()!="吃"){
-					temp += $(this).text()+"$";
-				}
-			})
-			if(temp.length>0){
-				var tempArray = temp.split("$");
-				type = 4;
-				var x = tempArray[2].split('-')[0].replace(/\(/g,"");
-				var y = tempArray[2].split('-')[1].replace(/\)/g,"");
-				item={"PL":ContentScript.getBSData(x,y), "type":type,"matches":tempArray[0],"rdfb":tempArray[1],"complex":tempArray[2],"tickets":tempArray[3],"precent":tempArray[4],"limit":tempArray[5]}
-				QdataResult.push(item);
-			}
-		});
-		
-	    return QdataResult;
-	},
-	GetWPData:function(){
-		var result = {},
-		return result;
-	},
-	GetWPCJData:function(){
-		var result = {},
-		return result;
 	},
 	bindOnLoadEvent:function(){
-		//调用签到接口签到
-		var url= window.location.href;
-		var loginuser = $.trim($("#username").text());
-		$.ajax({
-	              type: "get",
-	              url: "SignIn.ashx",
-	              data: "type=add&url="+url+"&loginuser="+loginuser,
-	              success: function (msg) {
-	                    if(msg!="0"){
-	                    	 	ContentScript.signInId = msg;
-	                    }
-	               }
-	             });
-		//页面离开事件 刷新也会加载这个事件
-		$("boay").bind("onload",function(){
-			//调用签到接口签到
-			var url= window.location.href;
-			var loginuser = $.trim($("#username").text());
+		if(window.location.href.indexOf("?")>=0
+		   && window.location.href.indexOf("&")>=0  
+		){
+			var result = ConfigScript.GetSignInInfo();
+			result.type="add";
 			$.ajax({
-	                    type: "get",
-	                    url: "SignIn.ashx",
-	                    data: "type=add&url="+url+"&loginuser="+loginuser,
-	                    success: function (msg) {
-	                    	 if(msg!="0"){
-	                    	 	ContentScript.signInId = msg;
-	                    	 }
-	                    }
-	                });
-		});
+		              type: "get",
+		              url: "SignIn.ashx",
+		              data: result,
+		              success: function (msg) {
+		                    if(msg!="0"){
+		                    	 	ContentScript.signInId = msg;
+		                    }
+		               }
+		             });
+			//页面离开事件 刷新也会加载这个事件
+			$("boay").bind("onload",function(){
+				var result = ConfigScript.GetSignInInfo();
+				result.type="add";
+				$.ajax({
+		                    type: "get",
+		                    url: "SignIn.ashx",
+		                    data: result,
+		                    success: function (msg) {
+		                    	 if(msg!="0"){
+		                    	 	ContentScript.signInId = msg;
+		                    	 }
+		                    }
+		                });
+			});
+		}
 	},
 	bindUnLoadEvent:function(){
 		//页面离开事件 刷新也会加载这个事件

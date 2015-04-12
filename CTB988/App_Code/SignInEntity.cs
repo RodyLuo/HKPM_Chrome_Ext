@@ -37,4 +37,50 @@ public class SignInEntity
         get { return loginUser; }
         set { loginUser = value; }
     }
+
+    private string isMonitor;
+    public string IsMonitor
+    {
+        get { return isMonitor; }
+        set { isMonitor = value; }
+    }
+
+    private string isWithOrder;
+    public string IsWithOrder
+    {
+        get { return isWithOrder; }
+        set { isWithOrder = value; }
+    }
+
+    private string raceType;
+
+    public string RaceType
+    {
+        get { return raceType; }
+        set { raceType = value; }
+    }
+
+    private string raceDate;
+
+    public string RaceDate
+    {
+        get { return raceDate; }
+        set { raceDate = value; }
+    }
+
+    private string sml;
+
+    public string Sml
+    {
+        get { return sml; }
+        set { sml = value; }
+    }
+
+    private string siteType;
+
+    public string SiteType
+    {
+        get { return siteType; }
+        set { siteType = value; }
+    }
 }

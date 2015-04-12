@@ -33,12 +33,23 @@ public class Handler : IHttpHandler {
                 {
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
                     string Url = string.IsNullOrEmpty(context.Request["Url"]) ? "" : context.Request["Url"];
+                    string RaceDate = string.IsNullOrEmpty(context.Request["RaceDate"]) ? "" : context.Request["RaceDate"];
+                    string RaceType = string.IsNullOrEmpty(context.Request["RaceType"]) ? "" : context.Request["RaceType"];
+                    string Sml = string.IsNullOrEmpty(context.Request["Sml"]) ? "" : context.Request["Sml"];
+                    string SiteType = string.IsNullOrEmpty(context.Request["SiteType"]) ? "" : context.Request["SiteType"];
                     string LoginUser = string.IsNullOrEmpty(context.Request["LoginUser"]) ? "" : context.Request["LoginUser"];
                     SignInEntity entity = new SignInEntity();
 
                     entity.Id = Guid.NewGuid().ToString();
                     entity.Url = Url;
                     entity.LoginUser = LoginUser;
+                    entity.IsMonitor = string.Empty;
+                    entity.IsWithOrder = string.Empty;
+                    entity.RaceDate = RaceDate;
+                    entity.RaceType = RaceType;
+                    entity.Sml = Sml;
+                    entity.SiteType = SiteType;
+                    
                     string result = XMLData.AddSignInData(entity);
                     
                     context.Response.ContentType = "text/plain";
@@ -57,18 +68,20 @@ public class Handler : IHttpHandler {
                     break;
                 }
 
-            case "setWithOrder":
+            case "setwithorder":
                 {
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
-                    string result = XMLData.DeleteSignInById(Id);
+                    string IsWithOrder = string.IsNullOrEmpty(context.Request["IsWithOrder"]) ? "" : context.Request["IsWithOrder"];
+                    string result = XMLData.UpdateSignInSetWithOrderById(Id, IsWithOrder);
                     context.Response.ContentType = "text/plain";
                     context.Response.Write(result);
                     break;
                 }
-            case "setMonitor":
+            case "setmonitor": 
                 {
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
-                    string result = XMLData.DeleteSignInById(Id);
+                    string IsMonitor = string.IsNullOrEmpty(context.Request["IsMonitor"]) ? "" : context.Request["IsMonitor"];
+                    string result = XMLData.UpdateSignInSetMonitorById(Id, IsMonitor);
                     context.Response.ContentType = "text/plain";
                     context.Response.Write(result);
                     break;

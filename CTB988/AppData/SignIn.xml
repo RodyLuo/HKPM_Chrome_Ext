@@ -1,3 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <SignInDataList>
+  <SignIn>
+    <Id>1</Id>
+    <Url>/Q.jsp</Url>
+    <RaceType>275E</RaceType>
+    <RaceDate>10-04-2015</RaceDate>
+    <Sml>s</Sml>
+    <LoginUser>sr002a</LoginUser>
+    <IsMonitor>0</IsMonitor>
+    <IsWithOrder>0</IsWithOrder>
+    <SiteType>com</SiteType>
+  </SignIn>
+  <SignIn>
+    <Id>2</Id>
+    <Url>/Q.jsp</Url>
+    <RaceType>275U</RaceType>
+    <RaceDate>10-04-2015</RaceDate>
+    <Sml>s</Sml>
+    <LoginUser>sr002b</LoginUser>
+    <IsMonitor>1</IsMonitor>
+    <IsWithOrder>1</IsWithOrder>
+    <SiteType>net</SiteType>
+  </SignIn>
 </SignInDataList>

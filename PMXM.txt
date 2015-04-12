@@ -2,6 +2,34 @@ http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=1&m=HK&c=3
 http://ksifvch.ctb988.com/Q.jsp?race_type=3H&race_date=01-03-2015&sml=s
 
 
+var txn_mode_check_item=new Array('WPB','WPE','WB','WE','PB','PE','FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE');  
+
+æ–°å¢èµŒäº¤æ˜“
+http://cqfexhv.ctb988.com/forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=5&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=BET&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.5189470457844436
+èµŒäº¤æ˜“åé¦ˆ
+<script>document.domain = 'ctb988.com';</script><script>top.reply('bets','ä½ çš„ä¸‹æ³¨äº¤æ˜“å·²æ‰€æœ‰è¢«è¯å®');</script>
+
+æ–°å¢åƒäº¤æ˜“
+http://cqfexhv.ctb988.com/forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
+<script>document.domain = 'ctb988.com';</script><script>top.reply('bookings','@ç›®å‰æ— æ³•ä¸‹æ³¨ï¼Œæ­£åœ¨ç­‰å¾…èµ›æœä¸­');</script>
+<script>document.domain = 'ctb988.com';</script><script>top.reply('bookings','#è¦æ±‚åƒæ³¨æˆåŠŸ');</script> æœªè¢«è¯å®çš„äº¤æ˜“
+
+åˆ é™¤äº¤æ˜“
+http://cqfexhv.ctb988.com/transactions?type=del&bid=1045022801&x=3&betType=1&race_date=12-04-2015&race_type=330E&q=q&race=8&show=8&rd=0.37321557523682714
+<script>document.domain = 'ctb988.com';</script><script>top.reply('transactions','#å–æ¶ˆé¢„æµ‹å½©åƒæ³¨æˆåŠŸ');</script>
+
+WP playerhk
+http://cqfexhv.ctb988.com/bets?t=frm&race=6&horse=2&win=5&place=5&amount=76&l_win=110&l_place=30&race_type=224T&race_date=12-04-2015&wptck=1&show=6&post=1&rd=0.9082353711128235
+<script>document.domain = 'ctb988.com';</script><script>top.reply('bets','#è¦æ±‚ä¸‹æ³¨æˆåŠŸ');</script>
+
+http://cqfexhv.ctb988.com/bets?t=frm&race=6&horse=2&win=5&place=5&amount=82&l_win=240&l_place=60&race_type=224T&race_date=12-04-2015&wptck=1&show=6&post=2&rd=0.4262801210861653
+<script>document.domain = 'ctb988.com';</script><script>top.reply('bets','ä½ çš„ä¸‹æ³¨äº¤æ˜“å·²æ‰€æœ‰è¢«è¯å®<br><br>åœº: &nbsp;&nbsp;<span style="color:#FF0000"><strong>6</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;é©¬:&nbsp;&nbsp;<span style="color:#FF0000"><strong>2</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;å¤´:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>&nbsp;&nbsp;&nbsp;è„š:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>');</script>
+
+http://cqfexhv.ctb988.com/bookings?t=frm&race=6&horse=2&win=5&place=5&amount=76&l_win=240&l_place=60&race_type=224T&race_date=12-04-2015&wptck=1&show=6&post=1&rd=0.48656415077857673
+<script>document.domain = 'ctb988.com';</script><script>top.reply('bookings','ä½ çš„åƒç¥¨äº¤æ˜“å·²æ‰€æœ‰è¢«è¯å®<br><br>åœº: &nbsp;&nbsp;<span style="color:#FF0000"><strong>6</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;é©¬:&nbsp;&nbsp;<span style="color:#FF0000"><strong>2</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;å¤´:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>&nbsp;&nbsp;&nbsp;è„š:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>');</script>
+
+
+è¯·æ±‚Qä½æ•°æ®
 http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=1&m=HK&c=3
 http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=0&m=HK&c=3
 
@@ -81,24 +109,24 @@ function Init() {
 	hide();
 	
 	I18N.setResource({
-		"Q.LockLimit.error1":"´íÎó£¡\nÏŞ¶îÎŞĞ§¡£Çë¼ì²éÄúµÄÏŞ¶î\n»ò²Î¿¼Í¶×¢¹æÔòÖ¸ÄÏ.",
-		"currently_viewing_Race" : "ÄãÕıÔÚ¹Û¿´µÚ{0} ³¡£¬ÎªÁË±ÜÃâ·¢Éú³¡´Î´íÎóµÄ½»Ò×£»ËùÒÔÄãÖ»ÄÜ½øĞĞµÚ {0} ³¡µÄ½»Ò×¡£ÈçÒª½øĞĞµÚ {1} ³¡µÄÏÂ×¢»ò³ÔÆ±µÈ´ı£¬ÇëÑ¡Ôñ¹Û¿´µÚ {1} ³¡»òÃ¿³¡¡£",
-		"MIN_TIX_INFO" : "'×îµÍ½»Ò×Êı¶îÊÇ $2'",
-		"MAX_TIX_INFO" : "'Ã¿½»Ò××î¶àÊı¶îÊÇ $50000'",
-		"no_race" : "ÎŞÈüÊÂ : ",
-		"Bets.horse_not_found" : "¸îÂí»òÎŞ´ËºÅÂí",
-		"hint_info_race" : "ÇëÊäÈë³¡´Î",
-		"hint_info_input_horse" : "ÇëÊäÈëÂíºÅ ",
-		"hint_info_check_horse" : "Çë¼ì²éÂíºÅ",
-		"betq" : '<span style=\"background:url(/main_images/mb/title02_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;¶Ä Á¬Ó®&nbsp;</span><br/>³Ê½»¶¯×÷ĞèÒªÏÂÊö×ÊÁÏ»òÑéÖ¤ÊäÈë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>Çë¼ì²é !',
-		"betqp" : '<span style=\"background:url(/main_images/mb/title01_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;¶Ä Î»ÖÃQ&nbsp;</span><br/>³Ê½»¶¯×÷ĞèÒªÏÂÊö×ÊÁÏ»òÑéÖ¤ÊäÈë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>Çë¼ì²é !',
-		"eatq" : '<span style=\"background:url(/main_images/mb/title03_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;³Ô Á¬Ó®&nbsp;</span><br/>³Ê½»¶¯×÷ĞèÒªÏÂÊö×ÊÁÏ»òÑéÖ¤ÊäÈë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>Çë¼ì²é !',
-		"eatqp" : '<span style=\"background:url(/main_images/mb/title04_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;³Ô Î»ÖÃQ&nbsp;</span><br/>³Ê½»¶¯×÷ĞèÒªÏÂÊö×ÊÁÏ»òÑéÖ¤ÊäÈë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>Çë¼ì²é !',
-		"hint_info_1" : "ÇëÊäÈëµÚÒ»Æ¥ÂíºÅ",
-		"hint_info_2" : "ÇëÊäÈëµÚ¶şÆ¥ÂíºÅ",
-		"hint_info_3" : "ÇëÊäÈëÆ±Êı",
-		"hint_info_4" : "ÇëÊäÈë%",
-		"hint_info_5" : "ÇëÊäÈëÏŞ¶î"
+		"Q.LockLimit.error1":"ï¿½ï¿½ï¿½ï¿½\nï¿½Ş¶ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş¶ï¿½\nï¿½ï¿½Î¿ï¿½Í¶×¢ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½.",
+		"currently_viewing_Race" : "ï¿½ï¿½ï¿½ï¿½ï¿½Ú¹Û¿ï¿½ï¿½ï¿½{0} ï¿½ï¿½ï¿½ï¿½Îªï¿½Ë±ï¿½ï¿½â·¢ï¿½ï¿½Î´ï¿½ï¿½ï¿½Ä½ï¿½ï¿½×£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½Ü½ï¿½ï¿½Ğµï¿½ {0} ï¿½ï¿½ï¿½Ä½ï¿½ï¿½×¡ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ğµï¿½ {1} ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½Æ±ï¿½È´ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Û¿ï¿½ï¿½ï¿½ {1} ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½",
+		"MIN_TIX_INFO" : "'ï¿½ï¿½Í½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ $2'",
+		"MAX_TIX_INFO" : "'Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ $50000'",
+		"no_race" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ : ",
+		"Bets.horse_not_found" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş´Ëºï¿½ï¿½ï¿½",
+		"hint_info_race" : "ï¿½ï¿½ï¿½ï¿½ï¿½ë³¡ï¿½ï¿½",
+		"hint_info_input_horse" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ",
+		"hint_info_check_horse" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½",
+		"betq" : '<span style=\"background:url(/main_images/mb/title02_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;ï¿½ï¿½ ï¿½ï¿½Ó®&nbsp;</span><br/>ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï»ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>ï¿½ï¿½ï¿½ï¿½ !',
+		"betqp" : '<span style=\"background:url(/main_images/mb/title01_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;ï¿½ï¿½ Î»ï¿½ï¿½Q&nbsp;</span><br/>ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï»ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>ï¿½ï¿½ï¿½ï¿½ !',
+		"eatq" : '<span style=\"background:url(/main_images/mb/title03_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;ï¿½ï¿½ ï¿½ï¿½Ó®&nbsp;</span><br/>ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï»ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>ï¿½ï¿½ï¿½ï¿½ !',
+		"eatqp" : '<span style=\"background:url(/main_images/mb/title04_bg.jpg) no-repeat 0 0;color:white;font:17px trebuchet ms, arial;\">&nbsp;ï¿½ï¿½ Î»ï¿½ï¿½Q&nbsp;</span><br/>ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï»ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ë¡£ <ul style=\"margin-top:3px;margin-left:30px;margin-bottom:3px;\">uuuu</ul>ï¿½ï¿½ï¿½ï¿½ !',
+		"hint_info_1" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Æ¥ï¿½ï¿½ï¿½",
+		"hint_info_2" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¶ï¿½Æ¥ï¿½ï¿½ï¿½",
+		"hint_info_3" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ±ï¿½ï¿½",
+		"hint_info_4" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½%",
+		"hint_info_5" : "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ş¶ï¿½"
 	});
 	
 	
@@ -273,22 +301,22 @@ flag='+f.flag.value+'
 &race_type=' + f.race_type.value + '
 &race_date=' + f.race_date.value );
 
-Ìá½»½»Ò×µÄURL²ÎÊıÁĞ±í
+ï¿½á½»ï¿½ï¿½ï¿½×µï¿½URLï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
 
 flag 
 Tix
 Race
-Hs1 µÚÒ»¸öÂíµÄ±àºÅ Èç1
-Hs2 µÚ¶ş¸öÂíµÄ±àºÅ Èç2
+Hs1 ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ ï¿½ï¿½1
+Hs2 ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½ï¿½ ï¿½ï¿½2
 fctype
 Q
 type
 overflow
 amount
 fclmt
-race_type Ïã¸Û3H
-race_date ÅÜÂíÈÕÆÚ
-y ³¡Êı
+race_type ï¿½ï¿½ï¿½3H
+race_date ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+y ï¿½ï¿½ï¿½ï¿½
 rd Math.random()
 
 
@@ -308,4 +336,7 @@ rd Math.random()
 		parent.document.getElementById('eatPrice1').innerText    = b.amount.value = newy[3];
 		parent.document.getElementById('eatLimit1').innerText    = b.fclmt.value = newy[4];
 }
+
+<tr class="xes"><td>6</td><td class="RD F_B">FC</td><td class="F_B ">4-5</td><td id="FCE_6_4-5_100_700x">2</td><td id="FCE_6_4-5_100_700y">100</td><td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td><td class="">åƒ</td></tr>
+
 

@@ -13,8 +13,7 @@
             border: solid 1px #ccc;
             float: right;
             z-index: 100;
-            right: 0;
-            top: 0;
+            vertical-align: middle;
             min-height: 250px;
             overflow-y: auto;
             max-height: 600px;
@@ -40,7 +39,7 @@
         }
     </style>
     <script src="Scripts/jquery-1.4.1.js" type="text/javascript"></script>
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
         // 模块拖拽  
         $(function () {
             var _move = false; //移动标记  
@@ -62,7 +61,7 @@
                 _move = false;
             });
         });  
-    </script>
+    </script>-->
 </head>
 <body>
     <div id="drag">
@@ -107,10 +106,10 @@
                 </tr>
                 <tr>
                     <td class="tdLeft">
-                        监控
+                        可监控列表
                     </td>
                     <td class="tdRight">
-                        <select id="Monitor">
+                        <select id="Monitor" style="display: none">
                             <option value="0">com香港彩池</option>
                             <option value="1">net香港彩池</option>
                             <option value="2">com新加坡彩池</option>
@@ -118,10 +117,10 @@
                         </select>
                     </td>
                     <td class="tdLeft">
-                        跟单
+                        可跟单列表
                     </td>
                     <td class="tdRight">
-                        <select id="WithOrder">
+                        <select id="WithOrder" style="display: none">
                             <option value="0">com香港彩池</option>
                             <option value="1">net香港彩池</option>
                             <option value="2">com新加坡彩池</option>
@@ -131,10 +130,8 @@
                 </tr>
                 <tr>
                     <td colspan="2" id="tdMonitor">
-                        
                     </td>
                     <td colspan="2" id="tdWithOrder">
-                       
                     </td>
                 </tr>
                 <tr>
@@ -276,18 +273,109 @@
         </div>
     </div>
     <script language="javascript" type="text/javascript">
+        var CtbCityList = [ { "Code": "3H", "Name": "港-沙田" },
+                            { "Code": "14H", "Name": "港-海外蘭域" },
+                            { "Code": "1S", "Name": "新-克兰芝" },
+                            { "Code": "5S", "Name": "新-怡保" },
+                            { "Code": "8S", "Name": "新-珀斯" },
+                            { "Code": "3S", "Name": "新-沙田" },
+                            { "Code": "10S", "Name": "新-澳洲(混合赛)" },
+                            { "Code": "19S", "Name": "新-新加坡海外赛事" },
+                            { "Code": "325K", "Name": "韩-首尔" },
+                            { "Code": "164D", "Name": "瑞-丹尔鲁" },
+                            { "Code": "165D", "Name": "瑞-马尔默" },
+                            { "Code": "166D", "Name": "瑞-米约尔比市" },
+                            { "Code": "36J", "Name": "日-福岛" },
+                            { "Code": "35J", "Name": "日-阪神" },
+                            { "Code": "34J", "Name": "日-中山" },
+                            { "Code": "234Z", "Name": "南-战神广场" },
+                            { "Code": "17Z", "Name": "南-特夫方丹" },
+                            { "Code": "185E", "Name": "法-马赛维鸥" },
+                            { "Code": "186E", "Name": "法-万塞讷(PM)" },
+                            { "Code": "187E", "Name": "法-亚眠" },
+                            { "Code": "275E", "Name": "法-海外(安特里)" },
+                            { "Code": "274E", "Name": "法-波尔多乐波卡" },
+                            { "Code": "13U", "Name": "澳-怡保" },
+                            { "Code": "9U", "Name": "澳-逸园狗场" },
+                            { "Code": "215T", "Name": "意-米兰" },
+                            { "Code": "225T", "Name": "意-罗马" },
+                            { "Code": "3M", "Name": "马-沙田" },
+                            { "Code": "1M", "Name": "马-克兰芝" },
+                            { "Code": "5M", "Name": "马-怡保" },
+                            { "Code": "192Y", "Name": "美-莫霍克-加" },
+                            { "Code": "191Y", "Name": "美-西博会-加" },
+                            { "Code": "193Y", "Name": "美-弗雷泽-加" },
+                            { "Code": "122Y", "Name": "美-萨拉托加" },
+                            { "Code": "123Y", "Name": "美-扬克斯" },
+                            { "Code": "125Y", "Name": "美-梅坞公园" },
+                            { "Code": "124Y", "Name": "美-梅多兰兹" },
+                            { "Code": "121Y", "Name": "美-布法罗" },
+                            { "Code": "135Y", "Name": "美-胡热尔公园" },
+                            { "Code": "112Y", "Name": "美-查尔斯镇" },
+                            { "Code": "113Y", "Name": "美-洛杉矶托斯" },
+                            { "Code": "100Y", "Name": "美-杰克维/奥兰治E" },
+                            { "Code": "90Y", "Name": "美-伊万杰琳斯" },
+                            { "Code": "89Y", "Name": "美-宾夕法尼亚" },
+                            { "Code": "91Y", "Name": "美-雷明顿公园" },
+                            { "Code": "93Y", "Name": "美-棕榈滩Eve" },
+                            { "Code": "96Y", "Name": "美-代托纳比奇Eve" },
+                            { "Code": "99Y", "Name": "美-桑福Eve" },
+                            { "Code": "92Y", "Name": "美-惠灵Eve" },
+                            { "Code": "97Y", "Name": "美-德比巷Eve" },
+                            { "Code": "98Y", "Name": "美-沙拉索塔Eve" },
+                            { "Code": "95Y", "Name": "美-那不勒斯Eve" },
+                            { "Code": "94Y", "Name": "美-特赖Eve" },
+                            { "Code": "102Y", "Name": "美-伯明翰Eve" },
+                            { "Code": "103Y", "Name": "美-绍斯兰Eve" },
+                            { "Code": "104Y", "Name": "美-图森" },
+                            { "Code": "205Y", "Name": "美-马迪格Late"}];
+                   var CodeMapping = [
+                            {
+                                CodeList: [{ "Code": "3H", "Name": "港-沙田" }, { "Code": "3S", "Name": "新-沙田" }, { "Code": "3M", "Name": "马-沙田" }]
+                                ,
+                                CityName:"香港-沙田" 
+                            },
+                            {
+                                CodeList: [{ "Code": "5S", "Name": "新-怡保" }, { "Code": "13U", "Name": "澳-怡保" }, { "Code": "5M", "Name": "马-怡保"}]
+                                , 
+                                CityName: "马来西亚-怡保" 
+                            }
+                            ,
+                            {
+                                CodeList: [{ "Code": "1S", "Name": "新-克兰芝" }, { "Code": "1M", "Name": "马-克兰芝" }]
+                                ,
+                                CityName: "新加坡-克兰芝"
+                            }
+                            ];
+
+    </script>
+    <script language="javascript" type="text/javascript">
         ConfigScript = {
             config: {},
+            hostName: 'http://localhost:55664/CTB988/',
             status: "0",
             signInList: [],
             oldSignInList: [],
             withOrderList: [],
             monitorOrder: "",
             timerSignInListClock: null,
+            GetCityNameByCode: function (code) {
+                var result = code;
+                $(CtbCityList).each(function (i) {
+                    if ($(this)[0].Code == code) {
+                        result = $(this)[0].Name;
+                    }
+                })
+                return result;
+            },
             onInit: function () {
+            	$("#btnClear").bind("click",function(){
+            		$("#txtLogs").val("");
+            	});
+            	
                 $.ajax({
                     type: "get",
-                    url: "GetStatus.ashx",
+                    url: ConfigScript.hostName + "GetStatus.ashx",
                     data: "type=get",
                     success: function (msg) {
                         ConfigScript.status = msg;
@@ -295,7 +383,7 @@
                 });
                 $.ajax({
                     type: "get",
-                    url: "Config.ashx",
+                    url: ConfigScript.hostName + "Config.ashx",
                     data: "type=get",
                     success: function (msg) {
                         ConfigScript.config = $.parseJSON(msg);
@@ -338,15 +426,18 @@
                 });
 
                 ConfigScript.addButtonEvent();
+                ConfigScript.matchSignIn();
                 //创建定时定时跟单事件
                 ConfigScript.timerSignInListClock = setInterval(function () {
-                    ContentScript.getSignInList();
+                    ConfigScript.getSignInList();
                     if (JSON.stringify(ConfigScript.signInList) == JSON.stringify(ConfigScript.oldSignInList)) {
                         return;
                     } else {
                         if (ConfigScript.signInList != null && ConfigScript.signInList != undefined
                         && ConfigScript.signInList.length > 0) {
-
+                            //
+                            ConfigScript.matchSignIn();
+                            ConfigScript.transLateSignData()
                         } else {
                             //tdMonitor tdWithOrder
                             $("#tdMonitor").empty();
@@ -355,80 +446,125 @@
                     }
                 }, 1000);
             },
+            matchSignIn: function () {
+                if (ConfigScript.signInList != null && ConfigScript.signInList != undefined
+                        && ConfigScript.signInList.length > 0) {
+                    $(ConfigScript.signInList).each(function (i) {
+                        if ($(this)[0].IsWithOrder == "1") {
+                            ConfigScript.withOrderList.push($(this).Id);
+                        }
+                        if ($(this)[0].IsMonitor == "1") {
+                            ConfigScript.monitorOrder = $(this).Id;
+                        }
+                    });
+                }
+            },
             transLateSignData: function () {
                 //监控页面绑定 tdMonitor dtWithOrder
                 var signInList = ConfigScript.signInList;
                 var htmlMonitor = "";
                 var htmlWithOrder = "";
-                signInList.each(function (i) {
-                    var result = ConfigScript.transLateUrl($(this).Url);
+                $(signInList).each(function (i) {
                     var checkedMonitor = "";
                     var checkedWithOrder = "";
-                    if (ConfigScript.monitorOrder == $(this).Id) {
-                        checkedMonitor = " checked";
+                    if ($(this)[0].IsMonitor == "1") {
+                        checkedMonitor = "checked = 'checked'";
+                        ConfigScript.monitorOrder = $(this)[0].Id;
                     }
-                    var thisId = $(this).Id;
-                    withOrderList.each(function (j) {
-                        if ($(this) == thisId) {
-                            checkedWithOrder = " checked";
-                        }
-                    });
-                    htmlMonitor += "<input onclick='ConfigScript.setMonitor(this)' type='radio' " + checkedMonitor + " value='" + $(this).Id + "' text='" + $(this).LoginUser + "(" + result.race_date + "$" + result.race_type + ")" + "' />";
-                    htmlWithOrder += "<input onclick='ConfigScript.setWithOrder(this)' type='checkbox' " + checkedWithOrder + " value='" + $(this).Id + "' text='" + $(this).LoginUser + "(" + result.race_date + "$" + result.race_type + ")" + "' />";
+                    var thisId = $(this)[0].Id;
+                    if ($(this)[0].IsWithOrder == "1") {
+                        checkedWithOrder = "checked = 'checked'";
+                        //ConfigScript.withOrderList.push($(this)[0].Id);
+                    }
+                    var cityName = ConfigScript.GetCityNameByCode($(this)[0].RaceType);
+                    htmlMonitor += " <input onclick='ConfigScript.setMonitor(this)' type='radio' raceDate='" + $(this)[0].RaceDate + "' raceType='" + $(this)[0].RaceType + "' name='monitor' " + checkedMonitor + " value='" + $(this)[0].Id + "' /> <font>" + $(this)[0].SiteType + "/" + $(this)[0].LoginUser + "/" + $(this)[0].RaceDate + "$" + cityName + "</font> <br>";
+                    htmlWithOrder += " <input onclick='ConfigScript.setWithOrder(this)' type='checkbox' raceDate='" + $(this)[0].RaceDate + "' raceType='" + $(this)[0].RaceType + "' name='withorder' " + checkedWithOrder + " value='" + $(this)[0].Id + "'/><font>" + $(this)[0].SiteType + "/" + $(this)[0].LoginUser + "/" + $(this)[0].RaceDate + "$" + cityName + "</font><br>";
                 });
-                $("#tdMonitor").append(htmlMonitor);
-
+                $("#tdMonitor").empty();
+                $("#tdWithOrder").empty();
                 //跟单页面绑定
+                $("#tdMonitor").append(htmlMonitor);
                 $("#tdWithOrder").append(htmlWithOrder);
+                var raceType = "";
+                var raceDate = "";
+                if (ConfigScript.monitorOrder.length > 0) {
+                    raceType = $("input[value='" + ConfigScript.monitorOrder + "']").attr("raceType");
+                    raceDate = $("input[value='" + ConfigScript.monitorOrder + "']").attr("raceDate");
+                }
+                ConfigScript.showWithOrderList(raceType, raceDate);
             },
-            setMonitor: function () {
-                var id = $(this).val();
+            setMonitor: function (obj) {
+                var id = $(obj).val();
+                var IsMonitor = "0";
+                if ($(obj).attr("checked")) {
+                    IsMonitor = "1";
+                }
                 $.ajax({
                     type: "get",
-                    url: hostName + "SignIn.ashx",
-                    data: "type=setMonitor&Id" + id,
+                    url: ConfigScript.hostName + "SignIn.ashx",
+                    data: "type=setMonitor&Id=" + id + "&IsMonitor=" + IsMonitor,
                     success: function (msg) {
                         ConfigScript.monitorOrder = id;
+                        ConfigScript.withOrderList = [];
+                    }
+                });
+
+                var raceType = $(obj).attr("raceType");
+                var raceDate = $(obj).attr("raceDate");
+                ConfigScript.showWithOrderList(raceType, raceDate);
+            },
+            showWithOrderList: function (raceType, raceDate) {
+                $("input[name='withorder']").each(function (i) {
+                    var raceType2 = $(this).attr("raceType");
+                    var raceDate2 = $(this).attr("raceDate");
+                    if (raceDate2 == raceDate
+                    && (
+                        raceType == raceType2
+                        || (
+                              ",3H,3S,3M,".indexOf("," + raceType2 + ",") >= 0
+                              && ",3H,3S,3M,".indexOf("," + raceType1 + ",") >= 0
+                           )
+                        || (
+                              ",5S,13U,5M,".indexOf("," + raceType2 + ",") >= 0
+                              && ",5S,13U,5M,".indexOf("," + raceType1 + ",") >= 0
+                           )
+                        || (
+                              ",1S,1M,".indexOf("," + raceType2 + ",") >= 0
+                              && ",1S,1M,".indexOf("," + raceType1 + ",") >= 0
+                           )
+                    )) {
+                        $(this).show();
+                        $(this).next().show();
+                    }
+                    else {
+                        $(this).hide();
+                        $(this).next().hide();
                     }
                 });
             },
-            setWithOrder: function () {
-                var id = $(this).val();
+            setWithOrder: function (obj) {
+                var id = $(obj).val();
+                var IsWithOrder = "0";
+                if ($(obj).attr("checked")) {
+                    IsWithOrder = "1";
+                }
                 $.ajax({
                     type: "get",
-                    url: hostName + "SignIn.ashx",
-                    data: "type=setWithOrder&Id" + id,
+                    url: ConfigScript.hostName + "SignIn.ashx",
+                    data: "type=setWithOrder&Id=" + id + "&IsWithOrder=" + IsWithOrder,
                     success: function (msg) {
                         ConfigScript.withOrderList.push(id);
                     }
                 });
             },
-            transLateUrl: function (url) {
-                //race_type=1S&race_date=10-04-2015&sml=s
-                if (url.indexOf("?") >= 0) {
-                    var urlList = url.split('?');
-                    var paramList = urlList[1].split('&');
-                    var race_date = "";
-                    var race_type = "";
-                    paramList.each(function (i) {
-                        if ($(this).split("=")[0].indexOf("race_date") >= 0) {
-                            race_date = $(this).split("=")[1];
-                        }
-                        if ($(this).split("=")[0].indexOf("race_type") >= 0) {
-                            race_type = $(this).split("=")[1];
-                        }
-                    });
-                    return { "race_type": race_type, "race_date": race_date };
-                }
-            },
             getSignInList: function () {
                 $.ajax({
                     type: "get",
-                    url: hostName + "Config.ashx",
+                    url: ConfigScript.hostName + "SignIn.ashx",
                     data: "type=get",
                     success: function (msg) {
                         ConfigScript.oldSignInList = ConfigScript.signInList;
-                        ContentScript.signInList = $.parseJSON(msg);
+                        ConfigScript.signInList = $.parseJSON(msg);
                     }
                 });
             },
@@ -438,25 +574,35 @@
             },
             addStart: function () {
                 $("#btnStart").bind("click", function () {
-                    $.ajax({
-                        type: "get",
-                        url: "GetStatus.ashx",
-                        data: "type=update&status=1",
-                        success: function (msg) {
-                            alert("开始跟单");
-                            $("#txtLogs").val($("#txtLogs").val() + "\r\n 开始跟单" + Date());
-                            $("#btnStart").unbind("click");
-                            $("#btnStart").val("跟单中");
-                            ConfigScript.addOver();
-                        }
-                    });
+                    if (ConfigScript.withOrderList != null
+                        && ConfigScript.withOrderList != undefined
+                        && ConfigScript.withOrderList.length > 0
+                        && ConfigScript.monitorOrder != null
+                        && ConfigScript.monitorOrder != undefined
+                        && ConfigScript.monitorOrder.length > 0
+                    ) {
+                        $.ajax({
+                            type: "get",
+                            url: ConfigScript.hostName + "GetStatus.ashx",
+                            data: "type=update&status=1",
+                            success: function (msg) {
+                                alert("开始跟单");
+                                $("#txtLogs").val($("#txtLogs").val() + "\r\n 开始跟单" + Date());
+                                $("#btnStart").unbind("click");
+                                $("#btnStart").val("跟单中");
+                                ConfigScript.addOver();
+                            }
+                        });
+                    } else {
+                        alert("没有选择任何要监控或者跟单的页面")
+                    }
                 })
             },
             addOver: function () {
                 $("#btnOver").bind("click", function () {
                     $.ajax({
                         type: "get",
-                        url: "GetStatus.ashx",
+                        url: ConfigScript.hostName + "GetStatus.ashx",
                         data: "type=update&status=0",
                         success: function (msg) {
                             alert("结束跟单");
@@ -497,7 +643,7 @@
                     postData.type = "update";
                     $.ajax({
                         type: "get",
-                        url: "Config.ashx",
+                        url: ConfigScript.hostName + "Config.ashx",
                         data: postData,
                         success: function (msg) {
                             alert("设置保存成功");
