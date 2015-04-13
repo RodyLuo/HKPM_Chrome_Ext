@@ -18,8 +18,21 @@ ContentScript={
 	timerGetStatus:null,
 	timerGetSignInList:null,
 	currentUrl:window.location.href,
+	Request:function(paras){ 
+        var url = location.href; 
+        var paraString = url.substring(url.indexOf("?")+1,url.length).split("&"); 
+        var paraObj = {} 
+        for (i=0; j=paraString[i]; i++){ 
+        paraObj[j.substring(0,j.indexOf("=")).toLowerCase()] = j.substring(j.indexOf("=")+1,j.length); 
+        } 
+        var returnValue = paraObj[paras.toLowerCase()]; 
+        if(typeof(returnValue)=="undefined"){ 
+        return ""; 
+        }else{ 
+        return returnValue; 
+        } 
+    },
 	GetSignInInfo:function(){
-		//调用签到接口签到
 			var url= window.location.href;
 			var siteType = ""
 			if(url.indexOf("ctb988.com")>=0){
@@ -129,7 +142,16 @@ ContentScript={
 		}
 	},
 	pushDataToServer:function(item){
-		
+		$.ajax({
+		              type: "get",
+		              url: "SignIn.ashx",
+		              data: result,
+		              success: function (msg) {
+		                    if(msg!="0"){
+		                    	 	ContentScript.signInId = msg;
+		                    }
+		               }
+		});
 	},
 	onWithOrderInit:function(){
 		if(ContentScript.pageStatus == "1" ContentScript.isWithOrder){
@@ -154,7 +176,8 @@ ContentScript={
 				})
 				if(temp.length>0){
 					var tempArray = temp.split("$");
-					item={"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
+					var id = temp;
+					item={"id":temp,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
 					result.push(item);
 				}
 			});
