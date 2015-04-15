@@ -31,93 +31,60 @@ public class PustDataEntity
         get { return id; }
         set { id = value; }
     }
+    private string _type;
 
-    private string modeType;
-
-    public string ModeType
+    public string type
     {
-        get { return modeType; }
-        set { modeType = value; }
+        get { return _type; }
+        set { _type = value; }
     }
 
-    private string buyMode;
+    private string _matches;
 
-    public string BuyMode
+    public string matches
     {
-        get { return buyMode; }
-        set { buyMode = value; }
+        get { return _matches; }
+        set { _matches = value; }
     }
 
-    private string hourse1;
+    private string _rdfb;
 
-    public string Hourse1
+    public string rdfb
     {
-        get { return hourse1; }
-        set { hourse1 = value; }
+        get { return _rdfb; }
+        set { _rdfb = value; }
     }
 
-    private string hourse2;
+    private string _fb;
 
-    public string Hourse2
+    public string fb
     {
-        get { return hourse2; }
-        set { hourse2 = value; }
+        get { return _fb; }
+        set { _fb = value; }
     }
 
-    private string ticket;
+    private string _x;
 
-    public string Ticket
+    public string x
     {
-        get { return ticket; }
-        set { ticket = value; }
+        get { return _x; }
+        set { _x = value; }
     }
 
-    private string discount;
+    private string _y;
 
-    public string Discount
+    public string y
     {
-        get { return discount; }
-        set { discount = value; }
+        get { return _y; }
+        set { _y = value; }
     }
 
-    private string limitStart;
+    private string _t;
 
-    public string LimitStart
+    public string t
     {
-        get { return limitStart; }
-        set { limitStart = value; }
-    }
-
-    private string limitEnd;
-
-    public string LimitEnd
-    {
-        get { return limitEnd; }
-        set { limitEnd = value; }
-    }
-
-    private string w;
-
-    public string W
-    {
-        get { return w; }
-        set { w = value; }
-    }
-
-    private string p;
-
-    public string P
-    {
-        get { return p; }
-        set { p = value; }
-    }
-
-    private string status;
-
-    public string Status
-    {
-        get { return status; }
-        set { status = value; }
+        get { return _t; }
+        set { _t = value; }
     }
 }
 
@@ -136,26 +103,11 @@ public class PushDataQueryEntity     {
         set { id = value; }
     }
 
-    private string modeType;
+    private string _type;
 
-    public string ModeType
+    public string type
     {
-        get { return modeType; }
-        set { modeType = value; }
-    }
-
-    private string buyMode;
-
-    public string BuyMode
-    {
-        get { return buyMode; }
-        set { buyMode = value; }
-    }
-
-    private string status;
-    public string Status
-    {
-        get { return status; }
-        set { status = value; }
+        get { return _type; }
+        set { _type = value; }
     }
 }

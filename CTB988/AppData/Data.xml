@@ -1,44 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PushDataList>
   <PushData>
-    <Id>121212121</Id>
-    <ModeType>Q</ModeType>
-    <BuyMode>E</BuyMode>
-    <Hourse1>1</Hourse1>
-    <Hourse2>2</Hourse2>
-    <Ticket>2</Ticket>
-    <Discount>80</Discount>
-    <LimitStart>300</LimitStart>
-    <LimitEnd>
-    </LimitEnd>
-    <W>
-    </W>
-    <P>
-    </P>
-    <Status>1</Status>
-  </PushData>
-  <PushData>
-    <Status>0</Status>
-    <LimitEnd>
-    </LimitEnd>
-    <BuyMode>
-    </BuyMode>
-    <Hourse2>
-    </Hourse2>
-    <LimitStart>
-    </LimitStart>
-    <Hourse1>
-    </Hourse1>
-    <P>
-    </P>
-    <Id>4a19c346-ee6a-464b-a186-4329e7e3dd05</Id>
-    <Ticket>
-    </Ticket>
-    <Discount>
-    </Discount>
-    <ModeType>
-    </ModeType>
-    <W>
-    </W>
+    <Id>121212121$</Id>
+    <type>Q</type>
+    <matches>E</matches>
+    <rdfb>1</rdfb>
+    <fb>2</fb>
+    <x>2</x>
+    <y>80</y>
+    <t>300/2()</t>
   </PushData>
 </PushDataList>

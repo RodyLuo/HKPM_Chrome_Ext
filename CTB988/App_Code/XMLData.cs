@@ -218,7 +218,6 @@ public class XMLData
         try
         {
             entity.Id = Guid.NewGuid().ToString();
-            entity.Status = "0";
             Hashtable hashTable = new Hashtable();
             PropertyInfo[] pInfos = entity.GetType().GetProperties();
             string pValue = string.Empty;
@@ -448,13 +447,6 @@ public class XMLData
                     item.SetValue(entity, pValue, null);
                 }
 
-                if (!string.IsNullOrEmpty(query.BuyMode))
-                {
-                    if (query.BuyMode != entity.BuyMode)
-                    {
-                        continue;
-                    }
-                }
                 if (!string.IsNullOrEmpty(query.Id))
                 {
                     if (query.Id != entity.Id)
@@ -462,21 +454,13 @@ public class XMLData
                         continue;
                     }
                 }
-                if (!string.IsNullOrEmpty(query.ModeType))
+                if (!string.IsNullOrEmpty(query.type))
                 {
-                    if (query.ModeType != entity.ModeType)
+                    if (query.type != entity.type)
                     {
                         continue;
                     }
                 }
-                if (!string.IsNullOrEmpty(query.Status))
-                {
-                    if (query.Status != entity.Status)
-                    {
-                        continue;
-                    }
-                }
-
                 result.Add(entity);
             }
 

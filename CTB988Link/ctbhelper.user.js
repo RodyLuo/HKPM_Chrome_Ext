@@ -7,6 +7,10 @@
 // @grant      none
 // ==/UserScript==
 
+Array.prototype.contains = function(item){
+    return RegExp(item).test(this);
+};
+
 ContentScript={
 	hostName:'http://localhost:55664/CTB988/',
 	signInId:"";
@@ -17,19 +21,43 @@ ContentScript={
 	timerGetConfig:null,
 	timerGetStatus:null,
 	timerGetSignInList:null,
+	successPushData:[],
+	allPushData:[],
 	currentUrl:window.location.href,
+	hadSendAjaxToCTB:[],
+	allTransactionData:ContentScript.GetAllTransactionData(),
+	allEatDataList:ContentScript.GetAllEatTransactionData(),
+	allBetDataList:ContentScript.GetAllBetTransactionData(),
+	GetAllEatTransactionData:function(){
+		var result = [] ;
+		$(allTransactionData).each(function(i){
+			if($(this)[0].type.indexOf("E")>=0){
+				result.push($(this));
+			}
+		});
+		return result;
+	},
+	GetAllBetTransactionData:function(){
+		var result = [] ;
+		$(allTransactionData).each(function(i){
+			if($(this)[0].type.indexOf("E")>=0){
+				result.push($(this));
+			}
+		});
+		return result;
+	},
 	Request:function(paras){ 
         var url = location.href; 
         var paraString = url.substring(url.indexOf("?")+1,url.length).split("&"); 
         var paraObj = {} 
         for (i=0; j=paraString[i]; i++){ 
-        paraObj[j.substring(0,j.indexOf("=")).toLowerCase()] = j.substring(j.indexOf("=")+1,j.length); 
+        	paraObj[j.substring(0,j.indexOf("=")).toLowerCase()] = j.substring(j.indexOf("=")+1,j.length); 
         } 
         var returnValue = paraObj[paras.toLowerCase()]; 
         if(typeof(returnValue)=="undefined"){ 
-        return ""; 
+        	return ""; 
         }else{ 
-        return returnValue; 
+        	return returnValue; 
         } 
     },
 	GetSignInInfo:function(){
@@ -135,28 +163,53 @@ ContentScript={
                     }
              });
 	},
-	onMonitorInit:function(){
-		ContentScript.pageConfig
-		if(ContentScript.pageStatus == "1" && ContentScript.isMonitor){
-			
-		}
-	},
 	pushDataToServer:function(item){
+	    item.Otype="add";
 		$.ajax({
 		              type: "get",
-		              url: "SignIn.ashx",
-		              data: result,
+		              url: "GetData.ashx",
+		              data: item,
 		              success: function (msg) {
 		                    if(msg!="0"){
-		                    	 	ContentScript.signInId = msg;
+		                    		if(!ContentScript.successPushData.contains(msg)){
+		                    			ContentScript.successPushData.push(msg);
+		                    		}
 		                    }
 		               }
 		});
 	},
 	onWithOrderInit:function(){
-		if(ContentScript.pageStatus == "1" ContentScript.isWithOrder){
-			
+		if( ContentScript.pageStatus!=null && ContentScript.pageStatus!=undefined
+			&& ContentScript.pageStatus == "1" && ContentScript.isWithOrder){
+			if(ContentScript.allPushData!=null && ContentScript.allPushData !=undefined
+			   && ContentScript.allPushData.length>0
+			){
+				//真实的跟单操作
+				$(ContentScript.allPushData).each(function(i){
+					var signInfo = ContentScript.GetSignInInfo();
+					if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
+						
+					}
+					if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
+						
+					}
+				});
+			}
 		}
+	},
+	onMonitorInit:function(){
+		if( ContentScript.pageStatus!=null && ContentScript.pageStatus!=undefined
+			&& ContentScript.pageStatus == "1" && ContentScript.isMonitor){
+			$(ContentScript.allEatDataList).each(function(i){
+				if(!ContentScript.successPushData.contains($(this)[0].id)){
+					ContentScript.pushDataToServer($(this)[0]);
+				}
+			});
+		}
+	},
+	GetWithOrderList:function(thisPageList,AllPushData){
+		var result = [];
+		return result;
 	},
 	GetAllTransactionData:function(){
 		var result = [];
@@ -168,7 +221,7 @@ ContentScript={
 		//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
 		//<td class="">吃</td>
 		$(ContentScript.txn_mode_check_item).each(function(i){
-			var type = $(this)
+			var type = $(this);
 			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
 				var temp = "";
 				$(this).find("td").each(function(item){
@@ -176,11 +229,37 @@ ContentScript={
 				})
 				if(temp.length>0){
 					var tempArray = temp.split("$");
-					var id = temp;
-					item={"id":temp,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
+					var id = ContentScript.GetPushDataId(tempArray,type,result);
+					item={"id":id,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
 					result.push(item);
 				}
 			});
+		});
+		
+		return result;
+	},
+	GetPushDataId:function(item,type,result){
+		var signInfo = ContentScript.GetSignInInfo();
+		var id = type+item[0]+item[1]+item[2]+item[3]+item[4]+item[5];
+		var count = 0;
+		$(result).each(function(i){
+			if($(this)[0].id.indexOf(id)>=0){
+				count=count+1;
+			}
+		});
+		if(count>0){
+			id=id+ (count+1);
+		}
+		return id;
+	},
+	GetAllPushData:function(){
+		$.ajax({
+		              type: "get",
+		              url: "GetData.ashx",
+		              data: "Otype=get",
+		              success: function (msg) {
+		                  ContentScript.allPushData = $.parseJSON(msg);;
+		              }
 		});
 	},
 	bindOnLoadEvent:function(){

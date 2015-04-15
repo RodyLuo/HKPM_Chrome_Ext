@@ -8,20 +8,16 @@ public class Handler : IHttpHandler {
 
     public void ProcessRequest(HttpContext context)
     {
-        string type = string.IsNullOrEmpty(context.Request["type"]) ? "" : context.Request["type"];
-        switch (type.ToLower())
+        string Otype = string.IsNullOrEmpty(context.Request["Otype"]) ? "" : context.Request["Otype"];
+        switch (Otype.ToLower())
         {
             case "get":
                 {
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
-                    string BuyMode = string.IsNullOrEmpty(context.Request["BuyMode"]) ? "" : context.Request["BuyMode"];
-                    string ModeType = string.IsNullOrEmpty(context.Request["ModeType"]) ? "" : context.Request["ModeType"];
-                    string Status = string.IsNullOrEmpty(context.Request["Status"]) ? "" : context.Request["Status"];
+                    string type = string.IsNullOrEmpty(context.Request["type"]) ? "" : context.Request["type"];
                     PushDataQueryEntity query = new PushDataQueryEntity();
                     query.Id=Id;
-                    query.BuyMode = BuyMode;
-                    query.ModeType = ModeType;
-                    query.Status = Status;
+                    query.type = type;
                     
                     List<PustDataEntity> entity  = XMLData.GetPushDataByWhere(query);
                     string result = "[";
@@ -41,33 +37,46 @@ public class Handler : IHttpHandler {
             case "add":
                 {
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
-                    string BuyMode = string.IsNullOrEmpty(context.Request["BuyMode"]) ? "" : context.Request["BuyMode"];
-                    string ModeType = string.IsNullOrEmpty(context.Request["ModeType"]) ? "" : context.Request["ModeType"];
-                    string Status = string.IsNullOrEmpty(context.Request["Status"]) ? "" : context.Request["Status"];
-                    string Discount = string.IsNullOrEmpty(context.Request["Discount"]) ? "" : context.Request["Discount"];
-                    string Hourse1 = string.IsNullOrEmpty(context.Request["Hourse1"]) ? "" : context.Request["Hourse1"];
-                    string Hourse2 = string.IsNullOrEmpty(context.Request["Hourse2"]) ? "" : context.Request["Hourse2"];
-                    string LimitEnd = string.IsNullOrEmpty(context.Request["LimitEnd"]) ? "" : context.Request["LimitEnd"];
-                    string LimitStart = string.IsNullOrEmpty(context.Request["LimitStart"]) ? "" : context.Request["LimitStart"];
-                    string P = string.IsNullOrEmpty(context.Request["P"]) ? "" : context.Request["P"];
-                    string W = string.IsNullOrEmpty(context.Request["W"]) ? "" : context.Request["W"];
-                    string Ticket = string.IsNullOrEmpty(context.Request["Ticket"]) ? "" : context.Request["Ticket"];
-                    PustDataEntity entity = new PustDataEntity();
-                    entity.BuyMode = BuyMode;
-                    entity.Discount = Discount;
-                    entity.Hourse1 = Hourse1;
-                    entity.Hourse2 = Hourse2;
-                    entity.LimitEnd = LimitEnd;
-                    entity.LimitStart = LimitStart;
-                    entity.ModeType = ModeType;
-                    entity.P = P;
-                    entity.Ticket = Ticket;
-                    entity.W = W;
-                    entity.Id = Id;
-                    entity.Status = Status;
-                    string result = XMLData.AddPushData(entity);
-                    context.Response.ContentType = "text/plain";
-                    context.Response.Write(result);
+                    string type = string.IsNullOrEmpty(context.Request["type"]) ? "" : context.Request["type"];
+                    string matches = string.IsNullOrEmpty(context.Request["matches"]) ? "" : context.Request["matches"];
+                    string rdfb = string.IsNullOrEmpty(context.Request["rdfb"]) ? "" : context.Request["rdfb"];
+                    string fb = string.IsNullOrEmpty(context.Request["fb"]) ? "" : context.Request["fb"];
+                    string x = string.IsNullOrEmpty(context.Request["x"]) ? "" : context.Request["x"];
+                    string y = string.IsNullOrEmpty(context.Request["y"]) ? "" : context.Request["y"];
+                    string t = string.IsNullOrEmpty(context.Request["t"]) ? "" : context.Request["t"];
+                    
+                    PushDataQueryEntity query = new PushDataQueryEntity();
+                    query.Id= Id;
+                    List<PustDataEntity> existsEntity = XMLData.GetPushDataByWhere(query);
+
+                    if (existsEntity != null && existsEntity.Count > 0)
+                    {
+                        context.Response.ContentType = "text/plain";
+                        context.Response.Write("0");
+                    }
+                    else
+                    {
+
+                        PustDataEntity entity = new PustDataEntity();
+                        entity.Id = Id;
+                        entity.type = type;
+                        entity.matches = matches;
+                        entity.rdfb = rdfb;
+                        entity.fb = fb;
+                        entity.x = x;
+                        entity.y = y;
+                        entity.t = t;
+                        string result = XMLData.AddPushData(entity);
+                        context.Response.ContentType = "text/plain";
+                        if (result == "1")
+                        {
+                            context.Response.Write(entity.Id);
+                        }
+                        else
+                        {
+                            context.Response.Write("0");
+                        }
+                    }
                     break;
                 }
             case "delete":
