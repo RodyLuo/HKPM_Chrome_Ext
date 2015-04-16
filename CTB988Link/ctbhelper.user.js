@@ -26,6 +26,8 @@ ContentScript={
 	urlX: "http://"+window.location.host,
 	currentUrl:window.location.href,
 	hadSendAjaxToCTB:[],
+	successSendAjaxToCTB:[],
+	needPingCangData:[],
 	allTransactionData:ContentScript.GetAllTransactionData(),
 	allEatDataList:ContentScript.GetAllEatTransactionData(),
 	allBetDataList:ContentScript.GetAllBetTransactionData(),
@@ -179,6 +181,19 @@ ContentScript={
 		               }
 		});
 	},
+	ticketByFloat:function(item,type){
+		var result = 0;
+		if(type="Q"){
+			if(item%2 !=0){
+				result = item+1;
+			}
+		}else{
+			if(item%5 !=0){
+				result = item + (5 - item%5);
+			}
+		}
+		return result
+	}
 	onWithOrderInit:function(){
 		if( ContentScript.pageStatus!=null && ContentScript.pageStatus!=undefined
 			&& ContentScript.pageStatus == "1" && ContentScript.isWithOrder){
@@ -187,23 +202,153 @@ ContentScript={
 			){
 				//真实的跟单操作
 				$(ContentScript.allPushData).each(function(i){
-					var signInfo = ContentScript.GetSignInInfo();
-					if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
-						var postData = {};
-						ContentScript.hadSendAjaxToCTB.push($(this)[0].Id)
-						postData.task = "betBox";
-						/forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
-						$.ajax({
-						              type: "get",
-						              url: ContentScript.urlX +"/transactions",
-						              data: postData,
-						              success: function (msg) {
-						                  ContentScript.allPushData = $.parseJSON(msg);;
-						              }
-						});
+					if(ContentScript.pageConfig.MaxCount>ContentScript.hadSendAjaxToCTB.length){
+						var item = $(this)[0];
+						if(!ContentScript.hadSendAjaxToCTB.contains(item.id)){
+						var signInfo = ContentScript.GetSignInInfo();
+						if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
+							var postData = {};
+							ContentScript.hadSendAjaxToCTB.push(item.Id)
+							postData.task = "betBox";
+							postData.combo =0;
+							//<td>6</td>
+							//<td class="RD F_B">FC</td>
+							//<td class="F_B ">4-5</td>
+							//<td id="FCE_6_4-5_100_700x">2</td>
+							//<td id="FCE_6_4-5_100_700y">100</td>
+							//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
+							//<td class="">吃</td>
+							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.x)*Proportion,"Q");
+							postData.Race = parseInt(item.matches);
+							var hourse1,hourse2;
+							//如果含有括号特殊处理一下
+							if(item.fb.indexOf("(")<0){
+								hourse1 = item.fb.split("-")[0];
+								hourse2 = item.fb.split("-")[1];
+							}else{
+								hourse1 = item.fb.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
+								hourse2 = item.fb.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
+							}			
+							postData.Hs1 = hourse1;
+							postData.Hs2 = hourse2;
+							postData.Hs3 = "";
+							postData.Hs4 = "";
+							postData.Hs5 = "";
+							postData.Hs6 = "";
+							postData.Hs7 = "";
+							postData.Hs8 = "";
+							postData.fctype = 0;
+							postData.Q = "Q";
+							//反向跟单
+							if(ContentScript.pageConfig.Direction =="1"){
+								postData.type = "BET";
+								//QP模式
+								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P")>=0){
+									postData.amount = ContentScript.pageConfig.BetQPDiscount;
+									postData.fclmt = ContentScript.pageConfig.BetQPLimitStart;
+								}
+								//Q模式
+								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P") < 0){
+									postData.amount = ContentScript.pageConfig.BetQDiscount;
+									postData.fclmt = ContentScript.pageConfig.BetQLimitStart;
+								}
+							}
+							if(ContentScript.pageConfig.Direction =="0"){
+								postData.type = "EAT";
+								//QP模式
+								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P")>=0){
+									postData.amount = ContentScript.pageConfig.BetQPDiscount;
+									postData.fclmt = ContentScript.pageConfig.EatQPLimitStart;
+								}
+								//Q模式
+								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P") < 0){
+									postData.amount = ContentScript.pageConfig.EatQDiscount;
+									postData.fclmt = ContentScript.pageConfig.EatQLimitStart;
+								}
+							}
+							
+							postData.overflow = "1";
+							postData.amount = "90";
+							postData.race_type = signInfo.RaceType;
+							postData.race_date = signInfo.RaceDate;
+							postData.show = parseInt(item.matches);
+							///forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
+							$.ajax({
+							              type: "get",
+							              url: ContentScript.urlX +"/transactions",
+							              data: postData,
+							              success: function (msg) {
+							              	  if(msg.indexOf("交易已所有被证实")>=0){
+							              	  		ContentScript.successSendAjaxToCTB(item.id);
+							              	  }
+							              	  if(msg.indexOf("#要求")>=0){
+							              	  		ContentScript.needPingCangData(item.id);
+							              	  }
+							              }
+							});
+						}
+						if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
+							//吃http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
+							//赌http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
+							//<td>8</td
+							//<td class="F_B">2</td>
+							//<td id="WE_8_2_76_110/0_0x">5</td>
+							//<td id="WE_8_2_76_110/0_0y">0</td>
+							//<td id="WE_8_2_76_110/0_0z">76</td>
+							//<td id="WE_8_2_76_110/0_0t" colspan="1" class="">110/0</td>
+							//<td class="">吃</td>
+							
+							//<td>6</td>
+							//<td class="RD F_B">FC</td>
+							//<td class="F_B ">4-5</td>
+							//<td id="FCE_6_4-5_100_700x">2</td>
+							//<td id="FCE_6_4-5_100_700y">100</td>
+							//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
+							//<td class="">吃</td>
+							
+							var postURL = "";
+							
+							var postData = {};
+							ContentScript.hadSendAjaxToCTB.push(item.Id)
+							postData.t = "frm";
+							postData.race = item.matches;
+							postData.horse = item.rdfb;
+							postData.win = ContentScript.ticketByFloat(parseInt(item.fb)*Proportion,"WP");
+							postData.place = item.x;
+							//反向跟单
+							if(ContentScript.pageConfig.Direction =="1"){
+								postURL ="/bookings";
+								postData.type = "book";   
+								postData.amount = ContentScript.pageConfig.BetWPDiscount;
+								postData.limit = BetWPLimitStart+"/"+ BetWPLimitEnd;
+							}
+							if(ContentScript.pageConfig.Direction =="0"){
+								postData.type = "bet";
+								postURL ="/bets";
+								postData.amount = ContentScript.pageConfig.EatWPDiscount;
+								postData.limit = EatWPLimitStart+"/"+ EatWPLimitEnd;
+							}
+							postData.race_type = signInfo.RaceType;
+							postData.race_date = signInfo.RaceDate;
+							postData.show = parseInt(item.matches);
+							postData.post = "1";
+							$.ajax({
+							              type: "get",
+							              url: ContentScript.urlX + postURL,
+							              data: postData,
+							              success: function (msg) {
+							              	  if(msg.indexOf("交易已所有被证实")>=0){
+							              	  		ContentScript.successSendAjaxToCTB(item.id);
+							              	  }
+							              	  if(msg.indexOf("#要求")>=0){
+							              	  		ContentScript.needPingCangData(item.id);
+							              	  }
+							              }
+							});
+						}
 					}
-					if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
-						
+					}else{
+						alert("已经超过限制注的数量了，不再跟单！")
 					}
 				});
 			}
