@@ -23,6 +23,7 @@ ContentScript={
 	timerGetSignInList:null,
 	successPushData:[],
 	allPushData:[],
+	urlX: "http://"+window.location.host,
 	currentUrl:window.location.href,
 	hadSendAjaxToCTB:[],
 	allTransactionData:ContentScript.GetAllTransactionData(),
@@ -188,7 +189,18 @@ ContentScript={
 				$(ContentScript.allPushData).each(function(i){
 					var signInfo = ContentScript.GetSignInInfo();
 					if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
-						
+						var postData = {};
+						ContentScript.hadSendAjaxToCTB.push($(this)[0].Id)
+						postData.task = "betBox";
+						/forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
+						$.ajax({
+						              type: "get",
+						              url: ContentScript.urlX +"/transactions",
+						              data: postData,
+						              success: function (msg) {
+						                  ContentScript.allPushData = $.parseJSON(msg);;
+						              }
+						});
 					}
 					if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
 						
