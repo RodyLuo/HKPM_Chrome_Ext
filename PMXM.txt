@@ -28,6 +28,11 @@ http://cqfexhv.ctb988.com/bets?t=frm&race=6&horse=2&win=5&place=5&amount=82&l_wi
 http://cqfexhv.ctb988.com/bookings?t=frm&race=6&horse=2&win=5&place=5&amount=76&l_win=240&l_place=60&race_type=224T&race_date=12-04-2015&wptck=1&show=6&post=1&rd=0.48656415077857673
 <script>document.domain = 'ctb988.com';</script><script>top.reply('bookings','你的吃票交易已所有被证实<br><br>场: &nbsp;&nbsp;<span style="color:#FF0000"><strong>6</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;马:&nbsp;&nbsp;<span style="color:#FF0000"><strong>2</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;头:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>&nbsp;&nbsp;&nbsp;脚:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>');</script>
 
+http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&l_win=110&l_place=0&race_type=34J&race_date=16-04-2015&wptck=1&show=8&post=1&rd=0.9396663182415068
+吃
+http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
+赌
+http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
 
 请求Q位数据
 http://info.ctb988.com/qdata?q=1&race_date=01-03-2015&race_type=3H&rc=1&m=HK&c=3
