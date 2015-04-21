@@ -31,7 +31,17 @@ public class Handler : IHttpHandler {
                 }
             case "add":
                 {
+                    List<SignInEntity> entityList = XMLData.GetAllSignIn();
+                    
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
+                    foreach (SignInEntity item in entityList)
+                    {
+                        if (item.Id == Id) {
+                            context.Response.ContentType = "text/plain";
+                            context.Response.Write("1");
+                            break;
+                        }
+                    }
                     string Url = string.IsNullOrEmpty(context.Request["Url"]) ? "" : context.Request["Url"];
                     string RaceDate = string.IsNullOrEmpty(context.Request["RaceDate"]) ? "" : context.Request["RaceDate"];
                     string RaceType = string.IsNullOrEmpty(context.Request["RaceType"]) ? "" : context.Request["RaceType"];
@@ -40,7 +50,7 @@ public class Handler : IHttpHandler {
                     string LoginUser = string.IsNullOrEmpty(context.Request["LoginUser"]) ? "" : context.Request["LoginUser"];
                     SignInEntity entity = new SignInEntity();
 
-                    entity.Id = Guid.NewGuid().ToString();
+                    entity.Id = Id;
                     entity.Url = Url;
                     entity.LoginUser = LoginUser;
                     entity.IsMonitor = string.Empty;
@@ -49,6 +59,7 @@ public class Handler : IHttpHandler {
                     entity.RaceType = RaceType;
                     entity.Sml = Sml;
                     entity.SiteType = SiteType;
+                    entity.date = DateTime.Today.ToString("yyyy-MM-dd");
                     
                     string result = XMLData.AddSignInData(entity);
                     
@@ -85,7 +96,23 @@ public class Handler : IHttpHandler {
                     context.Response.ContentType = "text/plain";
                     context.Response.Write(result);
                     break;
-                }  
+                }
+            case "clean": {
+                List<SignInEntity> entity = XMLData.GetAllSignIn();
+                int count = 0;
+                foreach (SignInEntity item in entity)
+                {
+                    if (item.date != DateTime.Today.ToString("yyyy-MM-dd")) {
+                        string temp = XMLData.DeleteSignInById(item.Id);
+                        if (temp == "1") {
+                            count++;
+                        }
+                    }
+                }
+                context.Response.ContentType = "text/plain";
+                context.Response.Write(count==entity.Count?"1":"0");
+                break;
+            }
             default:
                 context.Response.Write("");
                 break;

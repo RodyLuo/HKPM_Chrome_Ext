@@ -7,7 +7,7 @@
         #drag
         {
             width: 400px;
-            height: 400px;
+            height: 600px;
             cursor: move;
             position: absolute;
             border: solid 1px #ccc;
@@ -370,7 +370,23 @@
             },
             onInit: function () {
             	$("#btnClear").bind("click",function(){
-            		$("#txtLogs").val("");
+            	    $("#txtLogs").val("");
+            	    $.ajax({
+            	        type: "get",
+            	        url: ConfigScript.hostName + "GetData.ashx",
+            	        data: "Otype=clean",
+            	        success: function (msg) {
+                            
+            	        }
+            	    });
+            	    $.ajax({
+            	        type: "get",
+            	        url: ConfigScript.hostName + "SignIn.ashx",
+            	        data: "type=clean",
+            	        success: function (msg) {
+
+            	        }
+            	    });
             	});
             	
                 $.ajax({

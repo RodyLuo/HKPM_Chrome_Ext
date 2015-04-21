@@ -83,4 +83,12 @@ public class SignInEntity
         get { return siteType; }
         set { siteType = value; }
     }
+
+    private string _date;
+
+    public string date
+    {
+        get { return _date; }
+        set { _date = value; }
+    }
 }

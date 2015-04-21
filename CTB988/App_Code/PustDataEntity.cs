@@ -86,6 +86,14 @@ public class PustDataEntity
         get { return _t; }
         set { _t = value; }
     }
+
+    private string _date;
+
+    public string date
+    {
+        get { return _date; }
+        set { _date = value; }
+    }
 }
 
 

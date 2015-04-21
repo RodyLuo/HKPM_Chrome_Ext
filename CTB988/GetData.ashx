@@ -23,7 +23,10 @@ public class Handler : IHttpHandler {
                     string result = "[";
                     if (entity != null && entity.Count > 0) {
                         foreach (PustDataEntity item in entity) {
-                           result += XMLData.EntityToJson(item)+",";
+                            if (item.date == DateTime.Today.ToString("yyyy-MM-dd"))
+                            {
+                                result += XMLData.EntityToJson(item) + ",";
+                            }
                         }
                     }
                     if (result.EndsWith(",")) {
@@ -66,6 +69,7 @@ public class Handler : IHttpHandler {
                         entity.x = x;
                         entity.y = y;
                         entity.t = t;
+                        entity.date = DateTime.Today.ToString("yyyy-MM-dd");
                         string result = XMLData.AddPushData(entity);
                         context.Response.ContentType = "text/plain";
                         if (result == "1")
@@ -96,6 +100,26 @@ public class Handler : IHttpHandler {
                     string result = XMLData.UpdatePushDataStatusById(Status,Id);
                     context.Response.ContentType = "text/plain";
                     context.Response.Write(result);
+                    break;
+                }
+            case "clean":
+                {
+                    PushDataQueryEntity query = new PushDataQueryEntity();
+                    List<PustDataEntity> entity = XMLData.GetPushDataByWhere(query);
+                    int count = 0;
+                    foreach (PustDataEntity item in entity)
+                    {
+                        if (item.date != DateTime.Today.ToString("yyyy-MM-dd"))
+                        {
+                            string temp = XMLData.DeletePushDataById(item.Id);
+                            if (temp == "1")
+                            {
+                                count++;
+                            }
+                        }
+                    }
+                    context.Response.ContentType = "text/plain";
+                    context.Response.Write(count == entity.Count ? "1" : "0");
                     break;
                 }
             default:
