@@ -1,0 +1,229 @@
+﻿<!DOCTYPE html>   
+<html>   
+   <head>   
+	 <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+     <title>HTML5 Indexed Database</title>   
+    <style type="text/css">
+		
+		table{
+			padding: 0; 
+			margin: 0; 
+			border-collapse: collapse;
+			width:500px;
+		}
+		th { 
+			font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif; 
+			color: #4f6b72; 
+			border: 1px solid #C1DAD7; 
+			letter-spacing: 2px; 
+			text-transform: uppercase; 
+			text-align: center; 
+			padding: 6px 6px 6px 12px; 
+			background: #CAE8EA  no-repeat; 
+		}
+		td { 
+			border: 1px solid #C1DAD7; 
+			background: #fff; 
+			font-size:11px; 
+			padding: 6px 6px 6px 12px; 
+			color: #4f6b72; 
+		} 
+		
+		.item{
+			margin-bottom:10px;
+		}
+		
+		.item label{
+			font-weight:bold;
+			margin-right:10px;
+		}
+
+	</style>
+
+	
+
+	<!-- required: dojo.js -->
+	<script src="http//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
+	<script type="text/javascript">
+		dojo.require("dijit.dijit"); // optimize: load dijit layer
+		dojo.require("dijit.Dialog");
+		dojo.require("dijit.form.Button");
+		dojo.require("dijit.form.TextBox");
+		dojo.require("dijit.form.NumberTextBox");
+		
+		var dbInfo={
+			dbName:"ShoppingCartDB",  ///名称
+            dbVersion:"0.1"///版本
+		};
+		
+		var db;
+		var indexedDB = window.indexedDB || window.webkitIndexedDB;
+
+		if ('webkitIndexedDB' in window) {
+			window.IDBTransaction = window.webkitIDBTransaction;
+			window.IDBKeyRange = window.webkitIDBKeyRange;
+		}
+		
+		function createDBAndShoppingCartTable(){
+			var request = indexedDB.open(dbInfo.dbName);
+			request.onsuccess = function(evt) {
+				db = evt.target.result;
+				// Can only create Object stores in a setVersion transaction;
+				if (dbInfo.dbVersion!= db.version) {
+					var setVReq = db.setVersion(dbInfo.dbVersion);
+					// onsuccess is the only place we can create Object Stores
+					setVReq.onerror = dbError;
+					setVReq.onsuccess = function() {
+						if(db.objectStoreNames.contains("ShoppingCart")) {
+							db.deleteObjectStore("ShoppingCart");
+						}
+						db.createObjectStore("ShoppingCart",{keyPath: "id"});
+						refreshShoppingCart();
+					};
+				}
+				else{
+					refreshShoppingCart();
+				}
+			};
+			 request.onerror = dbError;
+		}
+		
+		function dbError(error){
+			console.error(error);
+		}
+		
+		function insertOrUpdateDataToShoppingCart(data){
+			console.log("insertOrUpdateDataToShoppingCart",data);
+			var trans = db.transaction(["ShoppingCart"], IDBTransaction.READ_WRITE);
+			var store = trans.objectStore("ShoppingCart");
+			var request = store.put(data);
+			request.onsuccess = function(e) {
+				refreshShoppingCart();
+			};
+			request.onerror = dbError;
+		}
+		
+		function deleteDataFromShoppingCart(id){
+			console.log("deleteDataFromShoppingCart",id);
+			var trans = db.transaction(["ShoppingCart"], IDBTransaction.READ_WRITE);
+			var store = trans.objectStore("ShoppingCart");
+			var request = store.delete(id);
+			request.onsuccess = function(e) {
+				refreshShoppingCart();
+			};
+			request.onerror = dbError;
+		}
+		
+		function refreshShoppingCart(){
+			dojo.byId("shoppingCartTableData").innerHTML="";
+			
+			var trans = db.transaction(["ShoppingCart"], IDBTransaction.READ_ONLY);
+			var store = trans.objectStore("ShoppingCart");
+			var keyRange = IDBKeyRange.lowerBound(0);
+			var cursorReq = store.openCursor(keyRange);
+			cursorReq.onsuccess = function(evt) {
+				var result = evt.target.result;
+				if(!result)return;
+				var item = result.value.item
+
+				var shoppingCart = dojo.byId("shoppingCartTableData");
+				var tableRow = dojo.create("tr",{},shoppingCart);
+				dojo.create("td",{"innerHTML":item.name},tableRow);
+				dojo.create("td",{"innerHTML":item.price},tableRow);
+				dojo.create("td",{"innerHTML":item.count},tableRow);
+				dojo.create("td",{"innerHTML":item.desc},tableRow);
+				dojo.create("td",{"innerHTML":item.price*item.count},tableRow);
+				var actions = dojo.create("td",{},tableRow);
+				var btnDelete = new dijit.form.Button({
+					"label":"删除",
+					"onClick":(function(id){return function(){deleteDataFromShoppingCart(id)}})(result.value.id)
+				});
+				var btnUpdate = new dijit.form.Button({
+					"label":"更新",
+					"onClick":(function(item){return function(){
+						showUpdateDataDialog({id:result.value.id,name:item.name,price:item.price,count:item.count,desc:item.desc});
+					}})(item)
+				});
+				actions.appendChild(btnDelete.domNode);
+				actions.appendChild(btnUpdate.domNode);
+				 
+				result.continue();
+			};
+			
+			cursorReq.onerror = dbError;
+
+		}
+		
+		function showUpdateDataDialog(data){
+			dijit.byId("updateName").set("value",data.name);
+			dijit.byId("updateName").set("value",data.name);
+			dijit.byId("updatePrice").set("value",data.price);
+			dijit.byId("updateCount").set("value",data.count);
+			dijit.byId("updateDesc").set("value",data.desc);
+			dojo.byId("updateId").value = data.id;
+			dijit.byId("updateDataDialog").show();
+		}
+		
+		function btnAddDataDialog(){
+			var data={
+				name:dijit.byId("addName").get("value"),
+				price:parseFloat(dijit.byId("addPrice").get("value")),
+				count:dijit.byId("addCount").get("value"),
+				desc:dijit.byId("addDesc").get("value")
+			}
+			
+			insertOrUpdateDataToShoppingCart({id:String(new Date().getTime()),item:data});
+			dijit.byId('addDataDialog').hide();
+		}
+		
+		function btnUpdateDataDialog(){
+			var data={
+				name:dijit.byId("updateName").get("value"),
+				price:parseFloat(dijit.byId("updatePrice").get("value")),
+				count:dijit.byId("updateCount").get("value"),
+				desc:dijit.byId("updateDesc").get("value")
+			}
+			insertOrUpdateDataToShoppingCart({id:dojo.byId("updateId").value,item:data});
+			dijit.byId('updateDataDialog').hide();
+		}
+		
+
+		dojo.ready(function(){
+			createDBAndShoppingCartTable();
+		})
+		
+	</script>
+   </head>   
+   <body class="claro">   
+   <div style="margin:20px;">
+		<button data-dojo-type="dijit.form.Button" data-dojo-props="onClick:function(){dijit.byId('addDataDialog').show()}">添加</button>
+		 <table id="shoppingCartTable">
+				<thead>
+					<tr><th>名称</th><th>单价</th><th>数量</th><th>描述</th><th>小计</th><th>操作</th></tr>
+				</thead>
+				<tbody id="shoppingCartTableData">
+				<tbody>
+		</table>
+	</div>
+	<div id="addDataDialog" data-dojo-type="dijit.Dialog" data-dojo-props='title:"添加到购物车"'>
+		<div>
+			<div class="item"><label>名称：</label><span><input id="addName" data-dojo-type="dijit.form.TextBox"></span></div>
+			<div class="item"><label>单价：</label><span><input id="addPrice" data-dojo-type="dijit.form.TextBox"></span></div>
+			<div class="item"><label>数量：</label><span><input id="addCount" data-dojo-type="dijit.form.NumberTextBox"></span></div>
+			<div class="item"><label>描述：</label><span><input id="addDesc" data-dojo-type="dijit.form.TextBox"></span></div>
+			<div class="item"><button  data-dojo-type="dijit.form.Button" data-dojo-props="onClick:btnAddDataDialog">添加</button></div>
+		</div>
+	</div>
+	<div id="updateDataDialog" data-dojo-type="dijit.Dialog" data-dojo-props='title:"更新购物车"'>
+		<div>
+			<div class="item"><label>名称：</label><span><input id="updateName" data-dojo-type="dijit.form.TextBox"></span></div>
+			<div class="item"><label>单价：</label><span><input id="updatePrice" data-dojo-type="dijit.form.TextBox"></span></div>
+			<div class="item"><label>数量：</label><span><input id="updateCount" data-dojo-type="dijit.form.NumberTextBox"></span></div>
+			<div class="item"><label>描述：</label><span><input id="updateDesc" data-dojo-type="dijit.form.TextBox"></span></div>
+			<div class="item"><button  data-dojo-type="dijit.form.Button" data-dojo-props="onClick:btnUpdateDataDialog">更新</button></div>
+			<input type="hidden" id="updateId"/>
+		</div>
+	</div>
+   </body>   
+  
+</html>   

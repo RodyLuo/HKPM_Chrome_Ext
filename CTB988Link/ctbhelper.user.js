@@ -478,7 +478,7 @@ ContentScript={
         htmlList += '</div></div>';
         
         $("body").append(htmlList);
-        AddLogs()
+        AddLogs("初始化成功")
 	},
 	AddLogs:function(log){
 		$("#txtLogs").val($("#txtLogs").val()+"\r\n"+log+ (new Date()).toLocaleTimeString());
@@ -508,84 +508,55 @@ ContentScript={
 	}
 }
 
-PostHelp={
-	urlX: "http://"+window.location.host,
-	fcfrm1 :  $("#fcfrm1"),
-	fcfrm2 :  $("#fcfrm2"),
-	postData:function(url){
-		var view1 = $("#view1");
-		if(view1) {
-				var y = $("#view1").val();
-				var postion = url  + "&show="+y+ "&rd=" + Math.random();
-				var postionArray = postion.split("?");
-				var postUrl = postionArray[0];
-				var dataUrl = postionArray[1];
-				var dataArray = dataUrl.split('&');
-				var postString ='{';
-				for(var i=0;i< dataArray.length;i++){
-					var itemArray = dataArray[i].split('=');
-					postString +='"'+itemArray[0]+'": "'+itemArray[1]+'",';
-				}
-				postString = postString.substr(0,postString.length-1);
-				postString+='}';
-				var dataJson = $.parseJSON(postString);
-				$.ajax(
-				{
-		             type: "GET",
-		             url: postUrl,		             
-		             data: dataJson,
-		             dataType: "text",
-		             success: function(da)
-		             {
-		             },
-		             error:function (da, status, e){   
-	   				 }
-	     		});
-		}
+IndexedDB={
+	dbInfo:{
+			dbName:"CtbHelperDB",  ///名称
+            dbVersion:"0.1"///版本
 	},
-	PostDeleteData:function(info){
-		var id,x,type,date,race_type,race
-		var li=info.split(",");
-		id=li[0];x=li[1];type=li[2];date=li[3];race_type=li[4];race=li[5];
-		document.getElementById('boxFcBET').style.display = "none";
-		document.getElementById('boxFcEAT').style.display = "none";
-		document.getElementById('boxPfcBET').style.display = "none";
-		document.getElementById('boxPfcEAT').style.display = "none";
-		PostHelp.postData(PostHelp.urlX + '/transactions?type=del&bid='+id+'&x='+x+'&betType='+type+'&race_date='+date+'&race_type='+race_type+'&q=q&race='+race);
+	db:null,
+	indexedDB : window.indexedDB || window.webkitIndexedDB,
+	createDBAndCtbHelperTable: function (tableName){
+		var request = indexedDB.open(IndexedDB.dbInfo.dbName);
+		request.onsuccess = function(evt) {
+			IndexedDB.db = evt.target.result;
+			// Can only create Object stores in a setVersion transaction;
+			if (dbInfo.dbVersion!= IndexedDB.db.version) {
+				var setVReq = IndexedDB.db.setVersion(dbInfo.dbVersion);
+				// onsuccess is the only place we can create Object Stores
+				setVReq.onerror = dbError;
+				setVReq.onsuccess = function() {
+					if(IndexedDB.db.objectStoreNames.contains(tableName)) {
+						IndexedDB.db.deleteObjectStore(tableName);
+					}else{
+						IndexedDB.db.createObjectStore(tableName,{keyPath: "id"});
+					}
+			    };
+			}
+		};
+		request.onerror = dbError;
 	},
-	AjaxDeleteData:function(info){
-		var id,x,type,date,race_type,race
-		var li=info.split(",");
-		var y = view1.options[view1.selectedIndex].value;
-		id=li[0];x=li[1];type=li[2];date=li[3];race_type=li[4];race=li[5];
-		document.getElementById('boxFcBET').style.display = "none";
-		document.getElementById('boxFcEAT').style.display = "none";
-		document.getElementById('boxPfcBET').style.display = "none";
-		document.getElementById('boxPfcEAT').style.display = "none";		
-		$.ajax(
-				{
-		             type: "GET",
-		             url: PostHelp.urlX +"/transactions",		             
-		             data: {
-		             	"type":"del",
-		             	"bid":id,
-		             	"x":x,
-		             	"betType":type,
-		             	"race_date":date,
-		             	"race_type":race_type,
-		             	"q":"q",
-						"race":race,
-						"show":y,
-						"rd":Math.random()
-		             },
-		             dataType: "text",
-		             success: function(da)
-		             {
-		             },
-		             error:function (da, status, e){   
-	   				 }   
-	   				 
-	     });
+	dbError:function (error){
+		console.error(error);
+	},
+	insertOrUpdateDataToCtbHelper: function (tableName,data){
+			console.log("insertOrUpdateDataToCtbHelper",data);
+			var trans = IndexedDB.db.transaction([tableName], IDBTransaction.READ_WRITE);
+			var store = trans.objectStore(tableName);
+			var request = store.put(data);
+			request.onsuccess = function(e) {
+				//refreshShoppingCart();
+			};
+			request.onerror = dbError;
+	},
+	deleteDataFromCtbHelper:function (tableName,id){
+			console.log("deleteDataFromCtbHelper",id);
+			var trans = IndexedDB.db.transaction([tableName], IDBTransaction.READ_WRITE);
+			var store = trans.objectStore(tableName);
+			var request = store.delete(id);
+			request.onsuccess = function(e) {
+				//refreshShoppingCart();
+			};
+			request.onerror = dbError;
 	}
 }
 
