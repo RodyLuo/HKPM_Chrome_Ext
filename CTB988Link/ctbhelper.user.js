@@ -21,6 +21,7 @@ ContentScript={
 	timerGetConfig:null,
 	timerGetStatus:null,
 	timerGetSignInList:null,
+	timerShowPageHtml:null,
 	successPushData:[],
 	allPushData:[],
 	urlX: "http://"+window.location.host,
@@ -144,6 +145,20 @@ ContentScript={
 			ContentScript.timerEatClock = self.setInterval(function(){
 			  ContentScript.onWithOrderInit();
 			},1000);
+			
+			ContentScript.timerShowPageHtml = self.setInterval(function(){
+			  ContentScript.ShowPageHtml();
+			},2000);
+		}
+	},
+	ShowPageHtml:function(){
+		if(ContentScript.isMonitor == true){
+			$("#withOrderImage").hide();
+			$("#monitorImage").show();
+		}
+		if(ContentScript.isWithOrder == true){
+			$("#withOrderImage").show();
+			$("#monitorImage").hide();
 		}
 	},
 	getPageConfig:function(){
@@ -420,9 +435,11 @@ ContentScript={
 		});
 	},
 	bindOnLoadEvent:function(){
-		if(window.location.href.indexOf("?")>=0
-		   && window.location.href.indexOf("&")>=0  
-		){
+			if(window.localStorage[window.location.href+"successPushData"] != undefined 
+			   && window.localStorage[window.location.href+"successPushData"] !=null){
+			   		ContentScript.successPushData = JSON.parse(window.localStorage[window.location.href+"successPushData"]);
+			}
+			
 			var result = ConfigScript.GetSignInInfo();
 			result.type="add";
 			$.ajax({
@@ -438,6 +455,10 @@ ContentScript={
 			//页面离开事件 刷新也会加载这个事件
 			$("boay").bind("onload",function(){
 				var result = ConfigScript.GetSignInInfo();
+				if(window.localStorage[window.location.href+"successPushData"] != undefined 
+			   		&& window.localStorage[window.location.href+"successPushData"] !=null){
+			   		ContentScript.successPushData = JSON.parse(window.localStorage[window.location.href+"successPushData"]);
+				}
 				result.type="add";
 				$.ajax({
 		                    type: "get",
@@ -450,9 +471,9 @@ ContentScript={
 		                    }
 		                });
 			});
-		}
 	},
 	bindUnLoadEvent:function(){
+		window.localStorage[window.location.href+"successPushData"] = JSON.stringify(ContentScript.successPushData);
 		//页面离开事件 刷新也会加载这个事件
 		$("boay").bind("onunload",function(){
 			if(ContentScript.signInId.length>0){
@@ -471,18 +492,24 @@ ContentScript={
 		window.open(ContentScript.hostName+'Drag.htm','newwindow','height=400,width=400,top=0,left=0,toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no');
 	},
 	CreateHtmlElement:function(){
-		var htmlList = '<div id="drag" style="width: 200px; height: 100px; cursor: move; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 250px;overflow-y: auto;max-height: 600px;">';
+		var htmlList = '<div id="drag" style="width: 120px; height: 120px; cursor: move; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 250px;overflow-y: auto;max-height: 600px;">';
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">长城帮助程序客户端</h3>';
-        htmlList += '<div style="font-size: 12px;">';	
-        htmlList += '<textarea style="width: 90%; height: 80px; font-size: 10px;" id="txtLogs"></textarea>';
-        htmlList += '</div></div>';
+        htmlList += '<div id="withOrderImage" style="font-size: 12px;display:none">';	
+        htmlList += '<img src="'+ContentScript.hostName+'/image/loading.gif" />';
+        htmlList += '<font color="green">跟单中</font>';
+        htmlList += '</div>'; 
+        htmlList += '<div id="monitorImage" style="font-size: 12px;display:none">';	
+        htmlList += '<img src="'+ContentScript.hostName+'/image/loading.gif" />';
+        htmlList += '<font color="red">监控中</font>';
+        htmlList += '</div>';
+        htmlList += '</div>';
         
         $("body").append(htmlList);
-        AddLogs("初始化成功")
+        //AddLogs("初始化成功")
 	},
-	AddLogs:function(log){
-		$("#txtLogs").val($("#txtLogs").val()+"\r\n"+log+ (new Date()).toLocaleTimeString());
-	},
+	//AddLogs:function(log){
+		//$("#txtLogs").val($("#txtLogs").val()+"\r\n"+log+ (new Date()).toLocaleTimeString());
+	//},
 	HtmlAddDragEvent:function(){
 		// 模块拖拽  
         $(function () {
@@ -508,56 +535,10 @@ ContentScript={
 	}
 }
 
-IndexedDB={
-	dbInfo:{
-			dbName:"CtbHelperDB",  ///名称
-            dbVersion:"0.1"///版本
-	},
-	db:null,
-	indexedDB : window.indexedDB || window.webkitIndexedDB,
-	createDBAndCtbHelperTable: function (tableName){
-		var request = indexedDB.open(IndexedDB.dbInfo.dbName);
-		request.onsuccess = function(evt) {
-			IndexedDB.db = evt.target.result;
-			// Can only create Object stores in a setVersion transaction;
-			if (dbInfo.dbVersion!= IndexedDB.db.version) {
-				var setVReq = IndexedDB.db.setVersion(dbInfo.dbVersion);
-				// onsuccess is the only place we can create Object Stores
-				setVReq.onerror = dbError;
-				setVReq.onsuccess = function() {
-					if(IndexedDB.db.objectStoreNames.contains(tableName)) {
-						IndexedDB.db.deleteObjectStore(tableName);
-					}else{
-						IndexedDB.db.createObjectStore(tableName,{keyPath: "id"});
-					}
-			    };
-			}
-		};
-		request.onerror = dbError;
-	},
-	dbError:function (error){
-		console.error(error);
-	},
-	insertOrUpdateDataToCtbHelper: function (tableName,data){
-			console.log("insertOrUpdateDataToCtbHelper",data);
-			var trans = IndexedDB.db.transaction([tableName], IDBTransaction.READ_WRITE);
-			var store = trans.objectStore(tableName);
-			var request = store.put(data);
-			request.onsuccess = function(e) {
-				//refreshShoppingCart();
-			};
-			request.onerror = dbError;
-	},
-	deleteDataFromCtbHelper:function (tableName,id){
-			console.log("deleteDataFromCtbHelper",id);
-			var trans = IndexedDB.db.transaction([tableName], IDBTransaction.READ_WRITE);
-			var store = trans.objectStore(tableName);
-			var request = store.delete(id);
-			request.onsuccess = function(e) {
-				//refreshShoppingCart();
-			};
-			request.onerror = dbError;
+$(function(){
+	var host =window.location.href;
+	if(host.indexOf("playerhk.jsp")>=0 || host.indexOf("Q.jsp")>=0){
+		ContentScript.onInit();
 	}
-}
-
+});
 
