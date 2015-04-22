@@ -5,67 +5,25 @@
 		<title></title>
 		http://www.cnblogs.com/dolphinX/p/3415761.html
 		<script type="text/javascript">
-			IndexedDB={
-				dbInfo:{
-						dbName:"CtbHelperDB",  ///名称
-			            dbVersion:"2",///版本
-			            dbTableName:"ctbhelper"
-				},
-				db:null,
-				indexedDB : window.indexedDB || window.webkitIndexedDB,
-				createDBAndCtbHelperTable: function (tableName,version){
-					var version=version || 1;
-		            var request=window.indexedDB.open(IndexedDB.dbInfo.dbName,version);
-		            request.onerror=function(e){
-		                console.log(e.currentTarget.error.message);
-		            };
-		            request.onsuccess=function(e){
-		                IndexedDB.db=e.target.result;
-		            };
-		            request.onupgradeneeded=function(e){
-		            	var db=e.target.result;
-		                if(!db.objectStoreNames.contains(tableName)){
-		                    db.createObjectStore(tableName,{keyPath:"id"});
-		                }
-		                console.log('create table '+tableName);
-		            };
-					request.onerror = IndexedDB.dbError;
-				},
-				dbError:function (error){
-					console.error(error);
-				},
-				insertOrUpdateDataToCtbHelper: function (tableName,data){
-						console.log("insertOrUpdateDataToCtbHelper",data);
-						if(IndexedDB.db == null){
-							IndexedDB.createDBAndCtbHelperTable(IndexedDB.dbInfo.dbTableName,IndexedDB.dbInfo.dbVersion);
-						}else{
-							var trans = IndexedDB.db.transaction([tableName], IDBTransaction.READ_WRITE);
-							var store = trans.objectStore(tableName);
-							var request = store.put(data);
-							request.onsuccess = function(e) {
-								//refreshShoppingCart();
-							};
-							request.onerror = IndexedDB.dbError;
-						}
-						
-				},
-				deleteDataFromCtbHelper:function (tableName,id){
-						console.log("deleteDataFromCtbHelper",id);
-						if(IndexedDB.db == null){
-							IndexedDB.createDBAndCtbHelperTable(IndexedDB.dbInfo.dbTableName,IndexedDB.dbInfo.dbVersion);
-						}else{
-							var trans = IndexedDB.db.transaction([tableName], IDBTransaction.READ_WRITE);
-							var store = trans.objectStore(tableName);
-							var request = store.delete(id);
-							request.onsuccess = function(e) {
-								//refreshShoppingCart();
-							};
-							request.onerror = IndexedDB.dbError;
-						}
-				}
-		}
-
-			
+			var unloadPageTip = function(){
+				return function(){
+					if(window.confirm("您确定刷新吗？")){
+						alert("我刷新了！");
+					}
+				} 
+				//return "";
+				//$.ajax({
+	            //    type: "get",
+	            //    url: "http://localhost:59590/CTB988/SignIn.ashx",
+	            //    data: "type=delete&Id="+ContentScript.signInId,
+	            //    success: function (msg) {
+	                    	 
+	            //    }
+	            //});
+			};
+			window.onbeforeunload = unloadPageTip;
+			window.onload = function(){alert("我加载了")};
+			window.close(function(){alert("我关闭了")});
 		</script>
 	</head>
 	<body>
