@@ -32,42 +32,47 @@ public class Handler : IHttpHandler {
             case "add":
                 {
                     List<SignInEntity> entityList = XMLData.GetAllSignIn();
-                    
+                    bool isBack = false;
                     string Id = string.IsNullOrEmpty(context.Request["Id"]) ? "" : context.Request["Id"];
                     foreach (SignInEntity item in entityList)
                     {
                         if (item.Id == Id) {
                             context.Response.ContentType = "text/plain";
                             context.Response.Write("1");
+                            isBack = true;
                             break;
                         }
                     }
-                    string Url = string.IsNullOrEmpty(context.Request["Url"]) ? "" : context.Request["Url"];
-                    string RaceDate = string.IsNullOrEmpty(context.Request["RaceDate"]) ? "" : context.Request["RaceDate"];
-                    string RaceType = string.IsNullOrEmpty(context.Request["RaceType"]) ? "" : context.Request["RaceType"];
-                    string Sml = string.IsNullOrEmpty(context.Request["Sml"]) ? "" : context.Request["Sml"];
-                    string SiteType = string.IsNullOrEmpty(context.Request["SiteType"]) ? "" : context.Request["SiteType"];
-                    string LoginUser = string.IsNullOrEmpty(context.Request["LoginUser"]) ? "" : context.Request["LoginUser"];
-                    SignInEntity entity = new SignInEntity();
+                    if (!isBack)
+                    {
+                        string Url = string.IsNullOrEmpty(context.Request["Url"]) ? "" : context.Request["Url"];
+                        string RaceDate = string.IsNullOrEmpty(context.Request["RaceDate"]) ? "" : context.Request["RaceDate"];
+                        string RaceType = string.IsNullOrEmpty(context.Request["RaceType"]) ? "" : context.Request["RaceType"];
+                        string Sml = string.IsNullOrEmpty(context.Request["Sml"]) ? "" : context.Request["Sml"];
+                        string SiteType = string.IsNullOrEmpty(context.Request["SiteType"]) ? "" : context.Request["SiteType"];
+                        string LoginUser = string.IsNullOrEmpty(context.Request["LoginUser"]) ? "" : context.Request["LoginUser"];
+                        SignInEntity entity = new SignInEntity();
 
-                    entity.Id = Id;
-                    entity.Url = Url;
-                    entity.LoginUser = LoginUser;
-                    entity.IsMonitor = string.Empty;
-                    entity.IsWithOrder = string.Empty;
-                    entity.RaceDate = RaceDate;
-                    entity.RaceType = RaceType;
-                    entity.Sml = Sml;
-                    entity.SiteType = SiteType;
-                    entity.date = DateTime.Today.ToString("yyyy-MM-dd");
-                    
-                    string result = XMLData.AddSignInData(entity);
-                    
-                    context.Response.ContentType = "text/plain";
-                    if (result == "1") {
-                        result = entity.Id;
+                        entity.Id = Id;
+                        entity.Url = Url;
+                        entity.LoginUser = LoginUser;
+                        entity.IsMonitor = string.Empty;
+                        entity.IsWithOrder = string.Empty;
+                        entity.RaceDate = RaceDate;
+                        entity.RaceType = RaceType;
+                        entity.Sml = Sml;
+                        entity.SiteType = SiteType;
+                        entity.date = DateTime.Today.ToString("yyyy-MM-dd");
+
+                        string result = XMLData.AddSignInData(entity);
+
+                        context.Response.ContentType = "text/plain";
+                        if (result == "1")
+                        {
+                            result = entity.Id;
+                        }
+                        context.Response.Write(result);
                     }
-                    context.Response.Write(result);
                     break;
                 }
             case "delete":
