@@ -1,3 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <SignInDataList>
+  <SignIn>
+    <IsMonitor>1</IsMonitor>
+    <Sml>s</Sml>
+    <LoginUser>sr002a</LoginUser>
+    <RaceDate>23-04-2015</RaceDate>
+    <SiteType>com</SiteType>
+    <IsWithOrder>1</IsWithOrder>
+    <Id>com/playerhk.jsp60A23-04-2015sr002a</Id>
+    <date>2015-04-23</date>
+    <RaceType>60A</RaceType>
+    <Url>/playerhk.jsp</Url>
+  </SignIn>
 </SignInDataList>
