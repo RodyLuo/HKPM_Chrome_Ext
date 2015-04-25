@@ -217,7 +217,6 @@ public class XMLData
     {
         try
         {
-            entity.Id = Guid.NewGuid().ToString();
             Hashtable hashTable = new Hashtable();
             PropertyInfo[] pInfos = entity.GetType().GetProperties();
             string pValue = string.Empty;
