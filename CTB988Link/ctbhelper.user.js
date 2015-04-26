@@ -152,7 +152,7 @@ ContentScript={
 		if(host.indexOf("playerhk.jsp")>=0 || host.indexOf("Q.jsp")>=0){
 			//创建用户界面
 			ContentScript.CreateHtmlElement();
-			ContentScript.HtmlAddDragEvent();
+			//ContentScript.HtmlAddDragEvent();
 			
 			//页面签到功能
 			ContentScript.bindOnLoadEvent();
@@ -276,7 +276,7 @@ ContentScript={
 						var item = $(this)[0];
 						if(!ContentScript.hadSendAjaxToCTB.contains(item.Id)){
 						var signInfo = ContentScript.GetSignInInfo();
-						if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE','DEmr','DBmr'].contains($(this)[0].type)){
+						if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
 							var postData = {};
 							ContentScript.hadSendAjaxToCTB.push(item.Id)
 							postData.task = "betBox";
@@ -354,10 +354,11 @@ ContentScript={
 							              	  if(msg.indexOf("#要求")>=0){
 							              	  		ContentScript.needPingCangData(item.id);
 							              	  }
+							              	  ContentScript.AddLogs(msg);
 							              }
 							});
 						}
-						if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE','DEmr','DBmr'].contains($(this)[0].type)){
+						if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
 							//吃http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
 							//赌http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
 							//<td>8</td
@@ -409,13 +410,12 @@ ContentScript={
 							              data: postData,
 							              success: function (msg) {
 							              	  if(msg.indexOf("交易已所有被证实")>=0){
-							              	  		ContentScript.successSendAjaxToCTB(item.id);
-							              	  }else{
-							              	  	 ContentScript.AddLogs("跟单失败，调整跟单参数重试!");
+							              	  		ContentScript.successSendAjaxToCTB(item.Id);
 							              	  }
-							              	  if(msg.indexOf("#要求")>=0){
-							              	  		ContentScript.needPingCangData(item.id);
+							              	  else if(msg.indexOf("#要求")>=0){
+							              	  		ContentScript.needPingCangData(item.Id);
 							              	  }
+							              	  ContentScript.AddLogs(msg);
 							              }
 							});
 						}
@@ -524,7 +524,7 @@ ContentScript={
 		return "外挂工作中，关掉页面将导致本页面无法跟单!";
 	},
 	OpenConfigPage:function(){
-		window.open(ContentScript.hostName+'Drag.htm','newwindow','height=600,width=430,top=0,left=0,toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no');
+		window.open(ContentScript.hostName+'Drag.htm','newwindow','height=620,width=430,top=0,left=0,toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no');
 	},
 	CreateHtmlElement:function(){
 		var htmlList = '<div id="drag" style="background:white;width: 150px; height: 120px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 250px;overflow-y: auto;max-height: 600px;">';
