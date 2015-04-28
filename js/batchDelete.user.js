@@ -243,18 +243,25 @@ ContentScript ={
 		ContentScript.EventOnInit();
 	},	
 	EventOnInit:function(){
-		$("#DeleteAllEatButton").bind("click",function(){
-			$("#DeleteAllEatButton").hide();
-			setTimeout(function(){
-				ContentScript.EatButtonEvent();
-			},0);
-		});
+//		$("#DeleteAllEatButton").bind("click",function(){
+//			$("#DeleteAllEatButton").hide();
+//			setTimeout(function(){
+//				ContentScript.EatButtonEvent();
+//			},0);
+//		});
+//		
+//		$("#DeleteAllBetButton").bind("click",function(){
+//			$("#DeleteAllBetButton").hide();
+//			setTimeout(function(){
+//				ContentScript.BetButtonEvent();
+//			},0);
+//		});
 		
-		$("#DeleteAllBetButton").bind("click",function(){
-			$("#DeleteAllBetButton").hide();
-			setTimeout(function(){
-				ContentScript.BetButtonEvent();
-			},0);
+		$("#DeleteAllEatButton").bind("click",function(){
+			var isExists = $(window.frames["frmTRANS"].document).find(".del2_ch");
+			if(isExists!=null && isExists!=undefined){
+				$(window.frames["frmTRANS"].document).find(".del2_ch").last().click();
+			}
 		});
 	},
 	EatButtonEvent:function(){
@@ -282,12 +289,12 @@ ContentScript ={
 		$("#DeleteAllBetButton").show();
 	},
 	buildHtml:function(result){
-		var htmlList = '<div id="drag" style="background:white;width: 150px; height: 80px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 60px;overflow-y: auto;max-height: 600px;">';
+		var htmlList = '<div id="drag" style="background:white;width: 100px; height: 50px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 60px;overflow-y: auto;max-height: 600px;">';
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">批量取消未确认交易</h3>';
-        htmlList += '<br/>';
+        //htmlList += '<br/>';
        	htmlList += '&nbsp;&nbsp;&nbsp;<input type="button" id="DeleteAllEatButton" value="取消吃"/>'
-        htmlList += "&nbsp;"
-        htmlList += '&nbsp;&nbsp;<input type="button" name="DeleteAllBetButton" value="取消赌"/>'
+        //htmlList += "&nbsp;"
+        //htmlList += '&nbsp;&nbsp;<input type="button" name="DeleteAllBetButton" value="取消赌"/>'
         htmlList += '</div>';  
         
         $("body").append(htmlList);
