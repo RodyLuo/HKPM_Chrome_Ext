@@ -147,6 +147,24 @@ ContentScript={
 			  
 		}
 	},
+	getNeedWithOrderList:function(){
+		var withType = $("input[name='orderType']:checked").val();
+		var returnList = [];
+		if(withType.length<1){
+			if("WP" == withType){
+				['WPB','WPE','WB','WE','PB','PE']
+			}
+			if("QP" == withType){
+				['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
+			}
+			if("Q" == withType){
+				['FCB','FCE','QB','QE']
+			}
+		}else{
+			alert("类型没有选择");
+		}
+		
+	},
 	ticketByFloat:function(item,type){
 		var result = 0;
 		if(type=="Q"){
@@ -229,7 +247,7 @@ ContentScript={
 							              success: function (msg) {
 							              }
 							});
-						}
+						} 
 						if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
 							//吃http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
 							//赌http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
@@ -254,15 +272,14 @@ ContentScript={
 							postData.t = "frm";
 							postData.race = item.matches;
 							postData.horse = item.rdfb;
-							var Proportion = parseInt(ContentScript.pageConfig.Proportion);
+							var Proportion = parseInt(ContentScript.PageConfig.Percent);
 							postData.win = ContentScript.ticketByFloat(parseInt(item.fb)*Proportion,"WP");
 							postData.place = item.x;
 							
-							
-								postData.type = "bet";
-								postURL ="/bets";
-								postData.amount = ContentScript.pageConfig.EatWPDiscount;
-								postData.limit = ContentScript.pageConfig.EatWPLimitStart+"/"+ ContentScript.pageConfig.EatWPLimitEnd;
+							postData.type = "bet";
+							postURL ="/bets";
+							postData.amount = ContentScript.PageConfig.Discount;
+							postData.limit = ContentScript.PageConfig.LimitStart+"/"+ ContentScript.PageConfig.LimitEnd;
 							
 							postData.race_type = signInfo.RaceType;
 							postData.race_date = signInfo.RaceDate;
@@ -313,9 +330,9 @@ ContentScript={
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">当前账户:'+$.trim($("#username").text())+'</h3>';
         htmlList +='<table>';
         htmlList +='<tr><td>';
-        htmlList +='<input type= "radio" name="orderType" value="WP" id="wpType"/>WP';
-        htmlList +='<input type= "radio" name="orderType" value="Q" id="wpType"/>Q';
-        htmlList +='<input type= "radio" name="orderType" value="QP" id="wpType"/>QP';
+        htmlList +='<input type= "radio" name="orderType" value="Q" checked="checked" id="QType"/>Q';
+        htmlList +='<input type= "radio" name="orderType" value="WP" id="WPType"/>WP';
+        htmlList +='<input type= "radio" name="orderType" value="QP" id="QPType"/>QP';
         htmlList +='</td>' 
         htmlList +='<td>折头:<input id="Discount" type="number" step="10" style="width: 40px;" size="4" value="76" />'
 		htmlList +='极限:<input id="LimitStart" type="number" step="10" style="width: 40px;" size="4" value="300" />'
