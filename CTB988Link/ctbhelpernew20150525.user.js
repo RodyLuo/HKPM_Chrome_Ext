@@ -23,16 +23,15 @@ ContentScript={
 		MaxCount:90,
 		Discount:76,
 		LimitStart:300,
-		LimitEnd:700,
-		Percent:1
+		LimitEnd:700
 	},
 	GetAllEatTransactionData:function(){
 		var result = [] ;
 		var allData = ContentScript.GetAllTransactionData();
 		$(allData).each(function(i){
-			if($(this)[0].type.indexOf("E")>=0){
+			if($(this)[0].type.indexOf("E")>=0 && $(this)[0].type != 'DEmr'){
 				result.push($(this));
-			}
+			} 
 		});
 		return result;
 	},
@@ -40,7 +39,27 @@ ContentScript={
 		var result = [] ;
 		var allData = ContentScript.GetAllTransactionData();
 		$(allData).each(function(i){
-			if($(this)[0].type.indexOf("B")>=0){
+			if($(this)[0].type.indexOf("B")>=0 && $(this)[0].type != 'DBmr'){
+				result.push($(this));
+			}
+		});
+		return result;
+	},
+	GetAllDBmrTransactionData:function(){
+		var result = [] ;
+		var allData = ContentScript.GetAllTransactionData();
+		$(allData).each(function(i){
+			if($(this)[0].type.indexOf("DBmr")>=0){
+				result.push($(this));
+			}
+		});
+		return result;
+	},
+	GetAllDEmrTransactionData:function(){
+		var result = [] ;
+		var allData = ContentScript.GetAllTransactionData();
+		$(allData).each(function(i){
+			if($(this)[0].type.indexOf("DEmr")>=0){
 				result.push($(this));
 			}
 		});
@@ -106,12 +125,12 @@ ContentScript={
 			$("#MaxCount").val(700);
 		}
 		
-		try{
-			ContentScript.PageConfig.Percent = $("#Percent").val();
-		}catch(e){
-			ContentScript.PageConfig.Percent = 1;
-			$("#MaxCount").val(1);
-		}
+//		try{
+//			ContentScript.PageConfig.Percent = $("#Percent").val();
+//		}catch(e){
+//			ContentScript.PageConfig.Percent = 1;
+//			$("#MaxCount").val(1);
+//		}
 	},
 	onInit:function(){
 		var host =window.location.href;
@@ -123,16 +142,27 @@ ContentScript={
 			//限制投注数
 			ContentScript.MaxCountEvent();
 			
+			//删单
 			$("#btnDelete").bind("click",function(){
 				var isExists = $(window.frames["frmTRANS"].document).find(".del2_ch");
 				if(isExists!=null && isExists!=undefined){
 					$(window.frames["frmTRANS"].document).find(".del2_ch").last().click();
 				}
+				
+				setTimeout(function(){
+					var isExistsDel = $(window.frames["frmTRANS"].document).find(".del_ch");
+					if(isExistsDel!=null && isExistsDel!=undefined){
+						$(window.frames["frmTRANS"].document).find(".del_ch").last().click();
+					}
+				},0);
 			});
 			
 			//开始
 			$("#btnStart").bind("click",function(){
-				ContentScript.MaxCountEvent();
+				$(this).hide();
+				ContentScript.MaxCountEvent();				
+				setTimeout(ContentScript.withOrderOnInit(ContentScript.getNeedWithOrderList()),0);
+				$(this).show();
 			});
 			
 			//结束
@@ -142,28 +172,83 @@ ContentScript={
 			
 			//平仓
 			$("#btnBanlance").bind("click",function(){
+				$(this).hide();
+				var AllDBmr = ContentScript.GetAllDBmrTransactionData();
+				var AllDEmr = ContentScript.GetAllDEmrTransactionData();
 				
+				//先删除所有没有成交的数据
+				setTimeout(function(){
+					ContentScript.EatButtonEvent();
+				},0);
+				setTimeout(function(){
+					ContentScript.BetButtonEvent();
+				},0);
+				$(this).show();
+				//然后100%的平仓数据交易
 			});
-			  
 		}
 	},
 	getNeedWithOrderList:function(){
 		var withType = $("input[name='orderType']:checked").val();
+		var returnBetList = [];
+		var returnEatList = [];
 		var returnList = [];
-		if(withType.length<1){
+		var CheckType = [];
+		if(withType.length>0){
 			if("WP" == withType){
-				['WPB','WPE','WB','WE','PB','PE']
+				CheckType = ['WPB','WPE','WB','WE','PB','PE']
 			}
 			if("QP" == withType){
-				['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
+				CheckType = ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
 			}
 			if("Q" == withType){
-				['FCB','FCE','QB','QE']
+				CheckType = ['FCB','FCE','QB','QE']
 			}
+			
+			var allList = ContentScript.GetAllTransactionData();
+			var keyEatList=[];
+			var keyBetList=[];
+			$(allList).each(function(index){
+				if(CheckType.contains($(this)[0].type)){
+					if($(this)[0].type.indexOf("E")>=0){
+						if(keyEatList.indexOf(id)>=0){
+							returnEatList[keyEatList.indexOf(allList[index].id)].x += allList[index].x;
+						}else{
+							keyEatList.push($(this).id);
+							returnEatList.push($(this));
+						}
+						
+					}
+					if($(this)[0].type.indexOf("B")>=0){
+						if(keyBetList.indexOf(id)>=0){
+							returnBetList[keyBetList.indexOf(allList[index].id)].x +=allList[index].x;
+						}else{
+							keyBetList.push($(this).id);
+							returnBetList.push($(this));
+						}
+					}	
+				}
+			});
+			
+			$(returnBetList).each(function(index){
+				var item =	$(this);
+				$(keyEatList).each(function(i){
+					if(item.id == $(this).id && item.x > $(this).x){
+						var nowIndex = $(this);
+						nowIndex.x = item.x-nowIndex.x;
+						returnList.push(nowIndex);
+					}
+				});
+			});
+			
+			return returnList;
 		}else{
 			alert("类型没有选择");
+			return [];
 		}
-		
+	},
+	getNeedPingCangData:function(){
+		var temp = ['DEmr','DBmr']
 	},
 	ticketByFloat:function(item,type){
 		var result = 0;
@@ -183,13 +268,11 @@ ContentScript={
 		return result
 	},
 	withOrderOnInit:function(pushData){
-			   var betList = ContentScript.GetAllEatTransactionData();
 				//真实的跟单操作
 				$(pushData).each(function(i){
-					if(ContentScript.MaxCount>betList.length){
 						var item = $(this)[0];
 						var signInfo = ContentScript.GetSignInInfo();
-						if(signInfo.url.indexOf("Q.jsp")>=0 && ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
+						if(['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
 							var postData = {};
 							postData.task = "betBox";
 							postData.combo =0;
@@ -200,7 +283,7 @@ ContentScript={
 							//<td id="FCE_6_4-5_100_700y">100</td>
 							//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
 							//<td class="">吃</td>
-							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.x)*ContentScript.PageConfig.Percent,"Q");
+							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.x),"Q");
 							postData.Race = parseInt(item.matches);
 							var hourse1,hourse2;
 							//如果含有括号特殊处理一下
@@ -248,7 +331,7 @@ ContentScript={
 							              }
 							});
 						} 
-						if(signInfo.url.indexOf("playerhk.jsp")>=0 && ['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
+						if(['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
 							//吃http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
 							//赌http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
 							//<td>8</td
@@ -272,8 +355,8 @@ ContentScript={
 							postData.t = "frm";
 							postData.race = item.matches;
 							postData.horse = item.rdfb;
-							var Proportion = parseInt(ContentScript.PageConfig.Percent);
-							postData.win = ContentScript.ticketByFloat(parseInt(item.fb)*Proportion,"WP");
+							//var Proportion = parseInt(ContentScript.PageConfig.Percent);
+							postData.win = ContentScript.ticketByFloat(parseInt(item.fb),"WP");
 							postData.place = item.x;
 							
 							postData.type = "bet";
@@ -293,11 +376,8 @@ ContentScript={
 							              }
 							});
 					}
-					}else{
-						alert("已经超过限制注的数量了，请调节限注数！")
-					}
 				});
-	}
+	},
 	GetAllTransactionData:function(){
 		var result = [];
 		//<td>6</td>
@@ -316,7 +396,7 @@ ContentScript={
 				})
 				if(temp.length>0){
 					var tempArray = temp.split("$");
-					var id = ContentScript.GetPushDataId(tempArray,type,result);
+					var id = type+tempArray[0]+tempArray[1]+tempArray[2];
 					item={"id":id,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
 					result.push(item);
 				}
@@ -326,24 +406,24 @@ ContentScript={
 		return result;
 	},
 	CreateHtmlElement:function(){
-		var htmlList = '<div id="drag" style="background:white;width: 630px; height: 150px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 250px;overflow-y: auto;max-height: 600px;">';
+		var htmlList = '<div id="drag" style="background:white;width: 330px; height: 80px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 150px;overflow-y: auto;max-height: 600px;">';
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">当前账户:'+$.trim($("#username").text())+'</h3>';
-        htmlList +='<table>';
-        htmlList +='<tr><td>';
+        htmlList +='<table style="width:100%">';
+        htmlList +='<tr style="line-height: 30px;"><td>';
         htmlList +='<input type= "radio" name="orderType" value="Q" checked="checked" id="QType"/>Q';
         htmlList +='<input type= "radio" name="orderType" value="WP" id="WPType"/>WP';
         htmlList +='<input type= "radio" name="orderType" value="QP" id="QPType"/>QP';
-        htmlList +='</td>' 
-        htmlList +='<td>折头:<input id="Discount" type="number" step="10" style="width: 40px;" size="4" value="76" />'
+        htmlList +='</td></tr>' 
+        htmlList +='<tr style="line-height: 30px;"><td>折头:<input id="Discount" type="number" step="10" style="width: 40px;" size="4" value="76" />'
 		htmlList +='极限:<input id="LimitStart" type="number" step="10" style="width: 40px;" size="4" value="300" />'
 		htmlList +='/<input id="LimitEnd" type="number" step="10" style="width: 40px;" size="4" value="700" />'
         htmlList +='限注:<input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />'
-        htmlList +='比例:<input id="Percent" type="number" step="0.1" style="width: 40px;" size="4" value="1" />'
+        //htmlList +='比例:<input id="Percent" type="number" step="0.1" style="width: 40px;" size="4" value="1" />'
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
-        htmlList +='<tr><td colspan="2" style="text-align:right">';
+        htmlList +='<tr style="line-height: 40px;"><td style="text-align:right">';
         htmlList +='<input type="button" id="btnStart" value="开始" />';
-        htmlList +='<input type="button" id="btnEnd" value="停止" />';
+        //htmlList +='<input type="button" id="btnEnd" value="停止" />';
         htmlList +='<input type="button" id="btnBanlance" value="平仓" />';
         htmlList +='<input type="button" id="btnDelete" value="删单" />';
         htmlList +='</td></tr>';
@@ -351,6 +431,28 @@ ContentScript={
         htmlList += '</div>';
         
         $("body").append(htmlList);
+	},
+	EatButtonEvent:function(){
+		var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
+		if(yellowList !=null && yellowList!=undefined && yellowList.length>0){
+						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
+								var obj = $($(this).find(".del2_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+								PostHelp.AjaxDeleteData(obj);
+								$($(this).find(".del2_ch").parent().parent()).hide();
+						});
+						
+		}
+	},
+	BetButtonEvent:function(){
+		var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
+		if(greenList!=null && greenList!=undefined && greenList.length>0 ){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+						var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+						PostHelp.AjaxDeleteData(obj);
+						$($(this).find(".del_ch").parent().parent()).hide();
+				});
+				
+		}
 	},
 	HtmlAddDragEvent:function(){
 			_IsMove = 0; 
@@ -372,6 +474,268 @@ ContentScript={
 			}); 
 	}
 }
+
+PostHelp={
+	urlX: "http://"+window.location.host,
+	fcfrm1 :  $("#fcfrm1"),
+	fcfrm2 :  $("#fcfrm2"),
+	chkKBBet:function(f){
+		f = PostHelp.fcfrm1;
+		if(f.find("input[name='fctype']").val()  == "0"){
+			PostHelp.chkKB1(f);
+		} else if(f.find("input[name='fctype']").val() == "1"){
+			PostHelp.chkKB3(f);
+		}
+	},
+    chkKBEat:function(f){
+		f = PostHelp.fcfrm2;
+		if(f.find("input[name='fctype']").val()  == "0"){
+			PostHelp.chkKB2(f);
+		} else if(f.find("input[name='fctype']").val() == "1"){
+			PostHelp.chkKB4(f);
+		}
+	},
+    chkKB1:function(f){
+		f=PostHelp.fcfrm1;
+		var combo;
+		var hssA = "";
+		if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined
+		   && f.find("input[name='Hss']").val() != undefined
+		){
+			hssA = f.find("input[name='Hss']").val();
+		}
+		if(hssA.indexOf('>')>-1) {
+			combo=1;
+		} else {
+			combo=0;
+		}
+		if(true){
+			//f.Order.disabled = true;
+			var hss = "";
+			if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined
+			   && f.find("input[name='Hss']").val() != undefined	
+			){
+				if(f.find("input[name='Hss']").val().length>0){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}
+			if(hss=="")
+			{
+				hss=  f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
+		}
+	},
+    chkKB2:function(f){
+		f=PostHelp.fcfrm2;
+		var combo=f.find("input[name='banker2']").val();
+		if(true){
+			//f.Order.disabled = true;
+			//PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			//f.Order.disabled = true;
+			var hss = "";
+			if(f.find("input[name='Hss']")){
+				if(f.find("input[name='Hss']").val().length>0){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}	
+			if(hss=="")
+			{
+				hss= f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
+		
+		}
+	},
+    chkKB3:function(f){
+		f=PostHelp.fcfrm1;
+		var combo;
+		var hssA = "";
+		if(f.find("input[name='Hss']") !=null && f.find("input[name='Hss']") != undefined
+			&& f.find("input[name='Hss']").val() != undefined
+		){
+			hssA = f.find("input[name='Hss']").val()
+		}
+		if(hssA.indexOf('>')>-1) {
+			combo=1;
+		} else {
+			combo=0;
+		}
+		if(true){
+			//f.Order.disabled = true;
+			//PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			var hss = "";
+			if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined
+			   && f.find("input[name='Hss']").val() != undefined
+			){
+				if(f.find("input[name='Hss']").val()!=""){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}			
+			if(hss=="")
+			{
+				hss=  f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
+		
+		}
+	},
+	chkKB4:function(f){
+		f=PostHelp.fcfrm2;
+		var combo= f.find("input[name='banker2']").val();
+		if(true){
+			f.Order.disabled = true;
+			//PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.Tix.value + '&Race=' + f.Race.value + '&Hss=' + f.Hss.value.replace(/\+/g,'_')+'&fctype=' + f.fctype.value + '&Q=' + f.Q.value + '&type=' + f.type.value+ '&overflow=' + f.overflow.value + '&amount=' + f.amount.value + '&fclmt=' + f.fclmt.value  + '&race_type=' + f.race_type.value + '&race_date=' + f.race_date.value );
+			var hss = "";
+			if(f.find("input[name='Hss']")!=null && f.find("input[name='Hss']")!= undefined){
+				if(f.find("input[name='Hss']").val()!=""){
+					hss = f.find("input[name='Hss']").val().replace(/\+/g,'_');
+				}
+			}		
+			if(hss=="")
+			{
+				hss = f.find("input[name='Hs1']").val()+"_"+ f.find("input[name='Hs2']").val();
+			}
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + f.find("input[name='Tix']").val() + '&Race=' + f.find("input[name='Race']").val()+ '&Hss=' + hss + '&fctype=' + f.find("input[name='fctype']").val() + '&Q=' + f.find("input[name='Q']").val() + '&type=' + f.find("input[name='type']").val() + '&overflow=' + f.find("input[name='overflow']").val() + '&amount=' + f.find("input[name='amount']").val() + '&fclmt=' + f.find("input[name='fclmt']").val()  + '&race_type=' +  f.find("input[name='race_type']").val() + '&race_date=' + f.find("input[name='race_date']").val() );
+		}
+	},
+	chkActBet:function(f){
+		f = PostHelp.fcfrm1;
+		var combo;
+		var check = f.find("input[name='banker1'] :checked");
+		if(check) {
+			combo=1;
+		} else {
+			combo=0;
+		}
+		if(true){
+			//f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + 
+			f.find("input[name='Tix']").val() + '&Race=' + 
+			f.find("input[name='Race']").val() + '&Hs1=' + 
+			f.find("input[name='Hs1']").val() + '&Hs2=' + 
+			f.find("input[name='Hs2']").val()  + '&Hs3=' + 
+			f.find("input[name='Hs3']").val() + '&Hs4=' + 
+			f.find("input[name='Hs4']").val() + '&Hs5=' + 
+			f.find("input[name='Hs5']").val()  + '&Hs6=' + 
+			f.find("input[name='Hs6']").val() + '&Hs7=' + 
+			f.find("input[name='Hs7']").val() + '&Hs8=' + 
+			f.find("input[name='Hs8']").val() +'&fctype=' + 
+			f.find("input[name='fctype']").val()  + '&Q=' + 
+			f.find("input[name='Q']").val() + '&type=' + 
+			f.find("input[name='type']").val() + '&overflow=' + 
+			f.find("input[name='overflow']").val() + '&amount=' + 
+			f.find("input[name='amount']").val() + '&fclmt=' + 
+			f.find("input[name='fclmt']").val()  + '&race_type=' + 
+			f.find("input[name='race_type']").val()  + '&race_date=' + 
+			f.find("input[name='race_date']").val()  );	
+		}
+	},
+	chkActEat:function(f){
+		f = PostHelp.fcfrm2;
+		var combo= f.find("input[name='banker2']").val();
+		if(true){
+			//f.Order.disabled = true;
+			PostHelp.postData(PostHelp.urlX+'/forecast?task=betBox&combo='+combo+'&Tix=' + 
+			f.find("input[name='Tix']").val() + '&Race=' + 
+			f.find("input[name='Race']").val() + '&Hs1=' + 
+			f.find("input[name='Hs1']").val() + '&Hs2=' + 
+			f.find("input[name='Hs2']").val()  + '&Hs3=' + 
+			f.find("input[name='Hs3']").val() + '&Hs4=' + 
+			f.find("input[name='Hs4']").val() + '&Hs5=' + 
+			f.find("input[name='Hs5']").val()  + '&Hs6=' + 
+			f.find("input[name='Hs6']").val() + '&Hs7=' + 
+			f.find("input[name='Hs7']").val() + '&Hs8=' + 
+			f.find("input[name='Hs8']").val() +'&fctype=' + 
+			f.find("input[name='fctype']").val()  + '&Q=' + 
+			f.find("input[name='Q']").val() + '&type=' + 
+			f.find("input[name='type']").val() + '&overflow=' + 
+			f.find("input[name='overflow']").val() + '&amount=' + 
+			f.find("input[name='amount']").val() + '&fclmt=' + 
+			f.find("input[name='fclmt']").val()  + '&race_type=' + 
+			f.find("input[name='race_type']").val()  + '&race_date=' + 
+			f.find("input[name='race_date']").val()  );
+		}
+	},
+	postData:function(url){
+		var view1 = $("#view1");
+		if(view1) {
+				var y = $("#view1").val();
+				var postion = url  + "&show="+y+ "&rd=" + Math.random();
+				var postionArray = postion.split("?");
+				var postUrl = postionArray[0];
+				var dataUrl = postionArray[1];
+				var dataArray = dataUrl.split('&');
+				var postString ='{';
+				for(var i=0;i< dataArray.length;i++){
+					var itemArray = dataArray[i].split('=');
+					postString +='"'+itemArray[0]+'": "'+itemArray[1]+'",';
+				}
+				postString = postString.substr(0,postString.length-1);
+				postString+='}';
+				var dataJson = $.parseJSON(postString);
+				$.ajax(
+				{
+		             type: "GET",
+		             url: postUrl,		             
+		             data: dataJson,
+		             dataType: "text",
+		             success: function(da)
+		             {
+		             },
+		             error:function (da, status, e){   
+	   				 }
+	     		});
+		}
+	},
+	PostDeleteData:function(info){
+		var id,x,type,date,race_type,race
+		var li=info.split(",");
+		id=li[0];x=li[1];type=li[2];date=li[3];race_type=li[4];race=li[5];
+		document.getElementById('boxFcBET').style.display = "none";
+		document.getElementById('boxFcEAT').style.display = "none";
+		document.getElementById('boxPfcBET').style.display = "none";
+		document.getElementById('boxPfcEAT').style.display = "none";
+		PostHelp.postData(PostHelp.urlX + '/transactions?type=del&bid='+id+'&x='+x+'&betType='+type+'&race_date='+date+'&race_type='+race_type+'&q=q&race='+race);
+	},
+	AjaxDeleteData:function(info){
+		var id,x,type,date,race_type,race
+		var li=info.split(",");
+		var y = 0;
+		try{
+			y = view1.options[view1.selectedIndex].value;
+		}catch(e){
+			y = $(".dd-selected-value").val();
+		}
+		
+		id=li[0];x=li[1];type=li[2];date=li[3];race_type=li[4];race=li[5];
+		$.ajax(
+				{
+		             type: "GET",
+		             url: PostHelp.urlX +"/transactions",		             
+		             data: {
+		             	"type":"del",
+		             	"bid":id,
+		             	"x":x,
+		             	"betType":type,
+		             	"race_date":date,
+		             	"race_type":race_type,
+		             	"q":"q",
+						"race":race,
+						"show":y,
+						"rd":Math.random()
+		             },
+		             dataType: "text",
+		             success: function(da)
+		             {
+		             },
+		             error:function (da, status, e){   
+	   				 }   
+	   				 
+	     });
+	}
+}
+
 
 var host =window.location.href;
 if(host.indexOf("playerhk.jsp")>=0 || host.indexOf("Q.jsp")>=0){
