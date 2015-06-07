@@ -11,6 +11,26 @@ Array.prototype.contains = function(item){
     return RegExp(item).test(this);
 };
 
+if(!Array.indexOf){
+    Array.prototype.indexOf = function(obj){              
+        for(var i=0; i<this.length; i++){
+            if(this[i]==obj){
+                return i;
+            }
+        }
+        return -1;
+    }
+}
+
+Array.prototype.contains = function(obj) {
+   var i = this.length;
+   while (i--) {
+       if (this[i] === obj) {
+            return true;
+       }
+    }
+    return false;
+}
 
 
 /* Zepto v1.1.3 - zepto event ajax form ie - zeptojs.com/license */
@@ -18,19 +38,25 @@ var Zepto=function(){function L(t){return null==t?String(t):j[T.call(t)]||"objec
 
 ContentScript={
 	txn_mode_check_item:new Array('WPB','WPE','WB','WE','PB','PE','FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE','DEmr','DBmr'),  
+	Hadtxn_mode_check_item:new Array('WPB','WPE','WB','WE','PB','PE','FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'), 
 	urlX: "http://"+window.location.host,
+	needAjaxCount:[],
+	timerWithOrderClock:null,
+	StaticAllData:[],
+	StaticOldAllData:[],
 	PageConfig:{
 		MaxCount:90,
 		Discount:76,
 		LimitStart:300,
-		LimitEnd:700
+		LimitEnd:700,
+		Percent:1
 	},
 	GetAllEatTransactionData:function(){
 		var result = [] ;
 		var allData = ContentScript.GetAllTransactionData();
 		$(allData).each(function(i){
 			if($(this)[0].type.indexOf("E")>=0 && $(this)[0].type != 'DEmr'){
-				result.push($(this));
+				result.push($(this)[0]);
 			} 
 		});
 		return result;
@@ -40,7 +66,7 @@ ContentScript={
 		var allData = ContentScript.GetAllTransactionData();
 		$(allData).each(function(i){
 			if($(this)[0].type.indexOf("B")>=0 && $(this)[0].type != 'DBmr'){
-				result.push($(this));
+				result.push($(this)[0]);
 			}
 		});
 		return result;
@@ -50,7 +76,14 @@ ContentScript={
 		var allData = ContentScript.GetAllTransactionData();
 		$(allData).each(function(i){
 			if($(this)[0].type.indexOf("DBmr")>=0){
-				result.push($(this));
+				var item = $(this)[0];
+				if($(this)[0].t.indexOf("/")>0){
+					item.type = "WPB";
+				}
+				if($(this)[0].fb.indexOf("-")>0){
+					item.type = "QB";
+				}
+				result.push(item);
 			}
 		});
 		return result;
@@ -60,7 +93,14 @@ ContentScript={
 		var allData = ContentScript.GetAllTransactionData();
 		$(allData).each(function(i){
 			if($(this)[0].type.indexOf("DEmr")>=0){
-				result.push($(this));
+				var item = $(this)[0];
+				if($(this)[0].t.indexOf("/")>0){
+					item.type = "WPE";
+				}
+				if($(this)[0].fb.indexOf("-")>0){
+					item.type = "QE";
+				}
+				result.push(item);
 			}
 		});
 		return result;
@@ -97,6 +137,7 @@ ContentScript={
 			return result;
 	},
 	MaxCountEvent:function(){
+		
 		try{
 			ContentScript.PageConfig.MaxCount = $("#MaxCount").val();
 		}catch(e){
@@ -124,13 +165,6 @@ ContentScript={
 			ContentScript.PageConfig.LimitEnd = 700;
 			$("#MaxCount").val(700);
 		}
-		
-//		try{
-//			ContentScript.PageConfig.Percent = $("#Percent").val();
-//		}catch(e){
-//			ContentScript.PageConfig.Percent = 1;
-//			$("#MaxCount").val(1);
-//		}
 	},
 	onInit:function(){
 		var host =window.location.href;
@@ -141,50 +175,76 @@ ContentScript={
 			ContentScript.HtmlAddDragEvent();
 			//限制投注数
 			ContentScript.MaxCountEvent();
-			
+			$("#btnEnd").hide();
 			//删单
-			$("#btnDelete").bind("click",function(){
+			$("#btnEatDelete").bind("click",function(){
+				$(this).hide();
 				var isExists = $(window.frames["frmTRANS"].document).find(".del2_ch");
 				if(isExists!=null && isExists!=undefined){
 					$(window.frames["frmTRANS"].document).find(".del2_ch").last().click();
 				}
-				
-				setTimeout(function(){
-					var isExistsDel = $(window.frames["frmTRANS"].document).find(".del_ch");
-					if(isExistsDel!=null && isExistsDel!=undefined){
-						$(window.frames["frmTRANS"].document).find(".del_ch").last().click();
-					}
-				},0);
+				$(this).show();
+			});
+			
+			$("#btnBetDelete").bind("click",function(){
+				$(this).hide();
+				var isExistsDel = $(window.frames["frmTRANS"].document).find(".del_ch");
+				if(isExistsDel!=null && isExistsDel!=undefined){
+					$(window.frames["frmTRANS"].document).find(".del_ch").last().click();
+				}
+				$(this).show();
 			});
 			
 			//开始
 			$("#btnStart").bind("click",function(){
-				$(this).hide();
-				ContentScript.MaxCountEvent();				
-				setTimeout(ContentScript.withOrderOnInit(ContentScript.getNeedWithOrderList()),0);
-				$(this).show();
+				ContentScript.StaticOldAllData = [];
+				ContentScript.StaticAllData = [];
+				$("#btnStart").hide();
+				$("#btnEnd").show();
+				ContentScript.MaxCountEvent();
+				//创建定时吃票事件
+				ContentScript.timerWithOrderClock = self.setInterval(function(){
+					ContentScript.StaticOldAllData = ContentScript.StaticAllData
+					ContentScript.StaticAllData = ContentScript.GetAllHadTransactionData();
+					if(JSON.stringify(ContentScript.StaticOldAllData) != JSON.stringify(ContentScript.StaticAllData)){
+						ContentScript.needAjaxCount=ContentScript.getNeedWithOrderList();
+						ContentScript.withOrderOnInit(ContentScript.needAjaxCount,false);
+					}
+				},1000);
 			});
+			
+			
 			
 			//结束
 			$("#btnEnd").bind("click",function(){
-				
+				if(ContentScript.timerWithOrderClock!=null){
+					clearInterval(ContentScript.timerWithOrderClock);
+				}
+				ContentScript.timerWithOrderClock = null;
+				$("#btnStart").show();
+				$("#btnEnd").hide();
 			});
+			
 			
 			//平仓
 			$("#btnBanlance").bind("click",function(){
-				$(this).hide();
-				var AllDBmr = ContentScript.GetAllDBmrTransactionData();
-				var AllDEmr = ContentScript.GetAllDEmrTransactionData();
-				
-				//先删除所有没有成交的数据
-				setTimeout(function(){
-					ContentScript.EatButtonEvent();
-				},0);
-				setTimeout(function(){
-					ContentScript.BetButtonEvent();
-				},0);
-				$(this).show();
-				//然后100%的平仓数据交易
+				if(ContentScript.timerWithOrderClock==null){
+					$(this).hide();
+					//先删除所有没有成交的数据
+					setTimeout(function(){
+						ContentScript.EatButtonEvent();
+					},0);
+					setTimeout(function(){
+						ContentScript.BetButtonEvent();
+					},0);
+					//然后100%的平仓数据交易
+					setTimeout(function(){
+						ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
+					},1000);
+					$(this).show();
+				}else{
+					alert("请先停止跟单！");
+				}
 			});
 		}
 	},
@@ -206,73 +266,166 @@ ContentScript={
 			}
 			
 			var allList = ContentScript.GetAllTransactionData();
-			var keyEatList=[];
-			var keyBetList=[];
+			var notCommitBetList=[];
+			var returnEatList=[];
 			$(allList).each(function(index){
 				if(CheckType.contains($(this)[0].type)){
-					if($(this)[0].type.indexOf("E")>=0){
-						if(keyEatList.indexOf(id)>=0){
-							returnEatList[keyEatList.indexOf(allList[index].id)].x += allList[index].x;
-						}else{
-							keyEatList.push($(this).id);
-							returnEatList.push($(this));
+					if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
+						if($(this)[0].type.indexOf("E")>=0){
+							var it = $(this)[0];
+							var hadCount = false;
+							$(returnEatList).each(function(i){
+								if(it.id==$(this)[0].id){
+									$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+									hadCount = true;
+								}
+							});
+							if(!hadCount){
+								allList[index].x = parseInt(allList[index].x);
+								returnEatList.push(allList[index]);
+							}
 						}
-						
+						if($(this)[0].type.indexOf("B")>=0){
+							var it = $(this)[0];
+							var hadCount = false;
+							$(returnEatList).each(function(i){
+								if(it.id==$(this)[0].id){
+									$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+									hadCount = true;
+								}
+							});
+							if(!hadCount){
+								allList[index].x = parseInt(allList[index].x)*(-1);
+								returnEatList.push(allList[index]);
+							}
+						}	
 					}
-					if($(this)[0].type.indexOf("B")>=0){
-						if(keyBetList.indexOf(id)>=0){
-							returnBetList[keyBetList.indexOf(allList[index].id)].x +=allList[index].x;
-						}else{
-							keyBetList.push($(this).id);
-							returnBetList.push($(this));
+				}
+				if($(this)[0].type =="DBmr"){
+					var it = $(this)[0];
+					var hadCount = false;
+					$(notCommitBetList).each(function(i){
+						if(it.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+							hadCount = true;
 						}
-					}	
+					});
+					if(!hadCount){
+						notCommitBetList.push(allList[index]);
+					}
 				}
 			});
 			
-			$(returnBetList).each(function(index){
-				var item =	$(this);
-				$(keyEatList).each(function(i){
-					if(item.id == $(this).id && item.x > $(this).x){
-						var nowIndex = $(this);
-						nowIndex.x = item.x-nowIndex.x;
-						returnList.push(nowIndex);
+			$(returnEatList).each(function(i){
+				var item = $(this)[0];
+				$(notCommitBetList).each(function(){
+					if(item.id==$(this)[0].id){
+						returnEatList[i].x = returnEatList[i].x-$(this)[0].x
 					}
 				});
-			});
+			})
 			
+			$(returnEatList).each(function(i){
+				var item = $(this)[0];
+				if(item.x>0){
+					returnList.push(item);
+				}
+			})
+			
+			$(returnList).each(function(index){
+				$(this)[0].type = $(this)[0].type.replace("E","B");
+			});
 			return returnList;
 		}else{
-			alert("类型没有选择");
 			return [];
 		}
 	},
-	getNeedPingCangData:function(){
-		var temp = ['DEmr','DBmr']
+	getNeedPingCangOrderList:function(){
+		var withType = $("input[name='orderType']:checked").val();
+		var returnBetList = [];
+		var returnEatList = [];
+		var returnList = [];
+		var CheckType = [];
+		if(withType.length>0){
+			if("WP" == withType){
+				CheckType = ['WPB','WPE','WB','WE','PB','PE']
+			}
+			if("QP" == withType){
+				CheckType = ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
+			}
+			if("Q" == withType){
+				CheckType = ['FCB','FCE','QB','QE']
+			}
+			
+			var allList = ContentScript.GetAllHadTransactionData();
+			var returnEatList=[];
+			$(allList).each(function(index){
+				if(CheckType.contains($(this)[0].type)){
+					if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
+						if($(this)[0].type.indexOf("E")>=0){
+							var it = $(this)[0];
+							var hadCount = false;
+							$(returnEatList).each(function(i){
+								if(it.id==$(this)[0].id){
+									$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+									hadCount = true;
+								}
+							});
+							if(!hadCount){
+								allList[index].x = parseInt(allList[index].x);
+								returnEatList.push(allList[index]);
+							}
+						}
+						if($(this)[0].type.indexOf("B")>=0){
+							var it = $(this)[0];
+							var hadCount = false;
+							$(returnEatList).each(function(i){
+								if(it.id==$(this)[0].id){
+									$(this)[0].x = parseInt($(this)[0].x) + ( parseInt(it.x)*(-1) );
+									hadCount = true;
+								}
+							});
+							if(!hadCount){
+								allList[index].x = parseInt(allList[index].x)*(-1);
+								returnEatList.push(allList[index]);
+							}
+						}	
+					}
+				}
+				
+			});
+			
+			$(returnEatList).each(function(i){
+				var item = $(this)[0];
+				if(item.x>0){
+					returnList.push(item);
+				}
+			})
+			
+			$(returnList).each(function(index){
+				$(this)[0].type = $(this)[0].type.replace("E","B");
+			});
+			return returnList;
+		}else{
+			return [];
+		}
 	},
 	ticketByFloat:function(item,type){
 		var result = 0;
 		if(type=="Q"){
-			if(item%10 !=0){
-				result = item + (10 - item%10);
-			}else{
-				result = item;
-			}
+			result = item;
 		}else{
-			if(item%5 !=0){
-				result = item + (5 - item%5);
-			}else{
-				result = item;
-			}
+			result = item;
 		}
 		return result
 	},
-	withOrderOnInit:function(pushData){
-				//真实的跟单操作
-				$(pushData).each(function(i){
-						var item = $(this)[0];
-						var signInfo = ContentScript.GetSignInInfo();
-						if(['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains($(this)[0].type)){
+	withOrderOnInit:function(pushData,isBalance){
+		//真实的跟单操作
+		$(pushData).each(function(i){
+			var item = $(this)[0];
+			if(true){
+				var signInfo = ContentScript.GetSignInInfo();
+				if(['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains(item.type)){
 							var postData = {};
 							postData.task = "betBox";
 							postData.combo =0;
@@ -283,6 +436,7 @@ ContentScript={
 							//<td id="FCE_6_4-5_100_700y">100</td>
 							//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
 							//<td class="">吃</td>
+							
 							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.x),"Q");
 							postData.Race = parseInt(item.matches);
 							var hourse1,hourse2;
@@ -290,10 +444,12 @@ ContentScript={
 							if(item.fb.indexOf("(")<0){
 								hourse1 = item.fb.split("-")[0];
 								hourse2 = item.fb.split("-")[1];
+								postData.fctype = 0;
 							}else{
 								hourse1 = item.fb.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
 								hourse2 = item.fb.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
-							}			
+								postData.fctype = 1;
+							}
 							postData.Hs1 = hourse1;
 							postData.Hs2 = hourse2;
 							postData.Hs3 = "";
@@ -302,36 +458,54 @@ ContentScript={
 							postData.Hs6 = "";
 							postData.Hs7 = "";
 							postData.Hs8 = "";
-							postData.fctype = 0;
+							//postData.fctype = 0;
 							postData.Q = "Q";
-							
+							if(item.type.indexOf("E")>=0){
 								postData.type = "EAT";
+							}else{
+								postData.type = "BET";
+							}
+								
 								//QP模式
 								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P")>=0){
-									postData.amount = ContentScript.PageConfig.Discount;
+									if(isBalance){
+										postData.amount = 100;
+									}else{
+										postData.amount = ContentScript.PageConfig.Discount;
+									}
 									postData.fclmt = ContentScript.PageConfig.LimitStart;
 								}
 								//Q模式
 								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P") < 0){
-									postData.amount = ContentScript.PageConfig.Discount;
+									if(isBalance){
+										postData.amount = 100;
+									}else{
+										postData.amount = ContentScript.PageConfig.Discount;
+									}
 									postData.fclmt = ContentScript.PageConfig.LimitStart;
 								}
 							
 							postData.overflow = "1";
-							postData.amount = "90";
+							//postData.amount = "100";
 							postData.race_type = signInfo.RaceType;
 							postData.race_date = signInfo.RaceDate;
 							postData.show = parseInt(item.matches);
+							
+							console.log(postData);
 							///forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
 							$.ajax({
 							              type: "get",
-							              url: ContentScript.urlX +"/transactions",
+							              url: ContentScript.urlX +"/forecast",
 							              data: postData,
 							              success: function (msg) {
+							              	console.log(msg);
+							              },
+							              error:function(e){
+							              	console.log(e);
 							              }
 							});
 						} 
-						if(['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
+				if(['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
 							//吃http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
 							//赌http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
 							//<td>8</td
@@ -359,24 +533,39 @@ ContentScript={
 							postData.win = ContentScript.ticketByFloat(parseInt(item.fb),"WP");
 							postData.place = item.x;
 							
-							postData.type = "bet";
+							if(item.type.indexOf("E")>=0){
+								postData.type = "eat";
+							}else{
+								postData.type = "bet";
+							}
 							postURL ="/bets";
-							postData.amount = ContentScript.PageConfig.Discount;
+							if(isBalance){
+								postData.amount = 100;
+							}else{
+								postData.amount = ContentScript.PageConfig.Discount;
+							}
+							
 							postData.limit = ContentScript.PageConfig.LimitStart+"/"+ ContentScript.PageConfig.LimitEnd;
 							
 							postData.race_type = signInfo.RaceType;
 							postData.race_date = signInfo.RaceDate;
 							postData.show = parseInt(item.matches);
 							postData.post = "1";
+							console.log(postData);
 							$.ajax({
 							              type: "get",
 							              url: ContentScript.urlX + postURL,
 							              data: postData,
 							              success: function (msg) {
+							              	console.log(msg);
+							              },
+							              error:function(e){
+							              	console.log(e);
 							              }
 							});
 					}
-				});
+			}
+		});
 	},
 	GetAllTransactionData:function(){
 		var result = [];
@@ -387,6 +576,15 @@ ContentScript={
 		//<td id="FCE_6_4-5_100_700y">100</td>
 		//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
 		//<td class="">吃</td>
+		
+		//<td>2</td>
+		//<td class="F_B">4</td>
+		//<td id="PE_2_4_78_0/16_0x">0</td>
+		//<td id="PE_2_4_78_0/16_0y">5</td>
+		//<td id="PE_2_4_78_0/16_0z">78</td>
+		//<td id="PE_2_4_78_0/16_0t" colspan="1" class="">0/16</td>
+		//<td class="">吃</td></tr>
+		
 		$(ContentScript.txn_mode_check_item).each(function(i){
 			var type = ContentScript.txn_mode_check_item[i];
 			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
@@ -396,7 +594,7 @@ ContentScript={
 				})
 				if(temp.length>0){
 					var tempArray = temp.split("$");
-					var id = type+tempArray[0]+tempArray[1]+tempArray[2];
+					var id = tempArray[0]+tempArray[1]+tempArray[2];
 					item={"id":id,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
 					result.push(item);
 				}
@@ -405,6 +603,27 @@ ContentScript={
 		
 		return result;
 	},
+	GetAllHadTransactionData:function(){
+		var result = [];
+		
+		$(ContentScript.Hadtxn_mode_check_item).each(function(i){
+			var type = ContentScript.txn_mode_check_item[i];
+			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
+				var temp = "";
+				$(this).find("td").each(function(item){
+					temp += $(this).text()+"$";
+				})
+				if(temp.length>0){
+					var tempArray = temp.split("$");
+					var id = tempArray[0]+tempArray[1]+tempArray[2];
+					item={"id":id,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
+					result.push(item);
+				}
+			});
+		});
+		return result;
+	},
+	
 	CreateHtmlElement:function(){
 		var htmlList = '<div id="drag" style="background:white;width: 330px; height: 80px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 150px;overflow-y: auto;max-height: 600px;">';
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">当前账户:'+$.trim($("#username").text())+'</h3>';
@@ -418,14 +637,15 @@ ContentScript={
 		htmlList +='极限:<input id="LimitStart" type="number" step="10" style="width: 40px;" size="4" value="300" />'
 		htmlList +='/<input id="LimitEnd" type="number" step="10" style="width: 40px;" size="4" value="700" />'
         htmlList +='限注:<input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />'
-        //htmlList +='比例:<input id="Percent" type="number" step="0.1" style="width: 40px;" size="4" value="1" />'
+        //htmlList +='比例:<input id="Percent" type="number" step="1" style="width: 40px;" size="4" value="1" />'
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
         htmlList +='<tr style="line-height: 40px;"><td style="text-align:right">';
         htmlList +='<input type="button" id="btnStart" value="开始" />';
-        //htmlList +='<input type="button" id="btnEnd" value="停止" />';
+        htmlList +='<input type="button" id="btnEnd" value="停止" />';
         htmlList +='<input type="button" id="btnBanlance" value="平仓" />';
-        htmlList +='<input type="button" id="btnDelete" value="删单" />';
+        htmlList +='<input type="button" id="btnEatDelete" value="删吃单" />';
+        htmlList +='<input type="button" id="btnBetDelete" value="删赌单" />';
         htmlList +='</td></tr>';
         htmlList +='</table>';
         htmlList += '</div>';
@@ -455,23 +675,24 @@ ContentScript={
 		}
 	},
 	HtmlAddDragEvent:function(){
-			_IsMove = 0; 
-			_MouseLeft = 0; 
-			_MouseTop = 0; 
-			return $("#drag").bind("mousemove",function(e){ 
-			if(_IsMove==1){ 
-			$("#drag").offset({top:e.pageY-_MouseLeft,left:e.pageX-_MouseTop}); 
-			} 
-			}).bind("mousedown",function(e){ 
-				_IsMove=1; 
-				var offset =$("#drag").offset(); 
-				_MouseLeft = e.pageX - offset.left; 
-				_MouseTop = e.pageY - offset.top; 
-			}).bind("mouseup",function(){ 
-				_IsMove=0; 
-			}).bind("mouseout",function(){ 
-				_IsMove=0; 
-			}); 
+			var _move = false; //移动标记  
+            var _x, _y; //鼠标离控件左上角的相对位置  
+            $("#drag").click(function () {
+                //alert("click");//点击（松开后触发）  
+            }).mousedown(function (e) {
+                _move = true;
+                _x = e.pageX - parseInt($("#drag").css("left"));
+                _y = e.pageY - parseInt($("#drag").css("top"));
+            });
+            $(document).mousemove(function (e) {
+                if (_move) {
+                    var x = e.pageX - _x; //移动时根据鼠标位置计算控件左上角的绝对位置  
+                    var y = e.pageY - _y;
+                    $("#drag").css({ top: y, left: x }); //控件新位置  
+                }
+            }).mouseup(function () {
+                _move = false;
+            });
 	}
 }
 

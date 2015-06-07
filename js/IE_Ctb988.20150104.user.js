@@ -300,7 +300,7 @@ ContentScript ={
 		   	if(val==""){
 		   		oldResult = [];
 		   	}else{
-		   		oldResult = $.parseJSON($("#hidTransactionCountData").val());
+		   		oldResult = $.parse($("#hidTransactionCountData").val());
 		   	}
 		}
 		
