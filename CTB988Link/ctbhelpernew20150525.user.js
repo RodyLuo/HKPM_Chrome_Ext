@@ -42,14 +42,78 @@ ContentScript={
 	urlX: "http://"+window.location.host,
 	needAjaxCount:[],
 	timerWithOrderClock:null,
+	timerCountPageEatAndBet:null,
 	StaticAllData:[],
 	StaticOldAllData:[],
+	StaticCountShowData:[],
+	StaticOldCountShowData:[],
 	PageConfig:{
 		MaxCount:90,
-		Discount:76,
-		LimitStart:300,
+		Discount:80,
+		LimitStart:700,
 		LimitEnd:700,
 		Percent:1
+	},
+	showCountWithWhere:function(){
+		ContentScript.StaticOldCountShowData = ContentScript.StaticCountShowData;
+		ContentScript.StaticCountShowData = ContentScript.GetAllHadTransactionData();
+		if(JSON.stringify(ContentScript.StaticOldCountShowData) != JSON.stringify(ContentScript.StaticCountShowData)){
+			ContentScript.showCountPageEatAndBet();
+		}			
+	},
+	setLimitAndDiscount:function(){
+		var withType = $("input[name='orderType']:checked").val();
+		if("WP" == withType){
+			$("#MaxCount").val(90);
+			$("#Discount").val(82);
+			$("#LimitStart").val(240);
+			$("#LimitEnd").val(60);
+		}
+		if("QP" == withType){
+			$("#MaxCount").val(90);
+			$("#Discount").val(80);
+			$("#LimitStart").val(400);
+			$("#LimitEnd").val(400);
+		}
+		if("Q" == withType){
+			$("#MaxCount").val(90);
+			$("#Discount").val(80);
+			$("#LimitStart").val(700);
+			$("#LimitEnd").val(700);
+		}
+	},
+	showCountPageEatAndBet:function(){
+			var CheckType = [];
+			var withType = $("input[name='orderType']:checked").val();
+			var eat =0;
+			var bet =0;
+			var betIds =[];
+			var eatIds =[];
+			if("WP" == withType){
+				CheckType = ['WPB','WPE','WB','WE','PB','PE']
+			}
+			if("QP" == withType){
+				CheckType = ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
+			}
+			if("Q" == withType){
+				CheckType = ['FCB','FCE','QB','QE']
+			}
+			
+			$(ContentScript.StaticCountShowData).each(function(i){
+				if(CheckType.contains($(this)[0].type)){
+					if($(this)[0].type.indexOf("B")>=0 && !betIds.contains($(this)[0].id)){
+						bet++;
+						betIds.push($(this)[0].id);
+					}
+					if($(this)[0].type.indexOf("E")>=0 && !eatIds.contains($(this)[0].id)){
+						eat++;
+						eatIds.push($(this)[0].id);
+					}
+				}
+			})
+			$("#eatCount").text(eat);
+			$("#betCount").text(bet);
+		
 	},
 	GetAllEatTransactionData:function(){
 		var result = [] ;
@@ -148,22 +212,22 @@ ContentScript={
 		try{
 			ContentScript.PageConfig.Discount = $("#Discount").val();
 		}catch(e){
-			ContentScript.PageConfig.Discount = 76;
-			$("#MaxCount").val(76);
+			ContentScript.PageConfig.Discount = 80;
+			$("#Discount").val(80);
 		}
 		
 		try{
 			ContentScript.PageConfig.LimitStart = $("#LimitStart").val();
 		}catch(e){
-			ContentScript.PageConfig.LimitStart = 300;
-			$("#MaxCount").val(300);
+			ContentScript.PageConfig.LimitStart = 700;
+			$("#LimitStart").val(700);
 		}
 		
 		try{
 			ContentScript.PageConfig.LimitEnd = $("#LimitEnd").val();
 		}catch(e){
 			ContentScript.PageConfig.LimitEnd = 700;
-			$("#MaxCount").val(700);
+			$("#LimitEnd").val(700);
 		}
 	},
 	onInit:function(){
@@ -175,7 +239,14 @@ ContentScript={
 			ContentScript.HtmlAddDragEvent();
 			//限制投注数
 			ContentScript.MaxCountEvent();
+			//统计吃票的计时器
+			ContentScript.timerCountPageEatAndBet = self.setInterval(function(){ContentScript.showCountWithWhere()},1000);
+			
 			$("#btnEnd").hide();
+			$("input[name='orderType']").bind("click",function(){
+				ContentScript.showCountPageEatAndBet();
+				ContentScript.setLimitAndDiscount();
+			});
 			//删单
 			$("#btnEatDelete").bind("click",function(){
 				$(this).hide();
@@ -204,16 +275,16 @@ ContentScript={
 				ContentScript.MaxCountEvent();
 				//创建定时吃票事件
 				ContentScript.timerWithOrderClock = self.setInterval(function(){
+					clearInterval(ContentScript.timerCountPageEatAndBet);
 					ContentScript.StaticOldAllData = ContentScript.StaticAllData
 					ContentScript.StaticAllData = ContentScript.GetAllHadTransactionData();
 					if(JSON.stringify(ContentScript.StaticOldAllData) != JSON.stringify(ContentScript.StaticAllData)){
+						ContentScript.showCountPageEatAndBet();
 						ContentScript.needAjaxCount=ContentScript.getNeedWithOrderList();
 						ContentScript.withOrderOnInit(ContentScript.needAjaxCount,false);
 					}
 				},1000);
 			});
-			
-			
 			
 			//结束
 			$("#btnEnd").bind("click",function(){
@@ -221,6 +292,7 @@ ContentScript={
 					clearInterval(ContentScript.timerWithOrderClock);
 				}
 				ContentScript.timerWithOrderClock = null;
+				ContentScript.timerCountPageEatAndBet = self.setInterval(function(){ContentScript.showCountWithWhere()()},1000);
 				$("#btnStart").show();
 				$("#btnEnd").hide();
 			});
@@ -484,12 +556,22 @@ ContentScript={
 									}
 									postData.fclmt = ContentScript.PageConfig.LimitStart;
 								}
+								//FC模式
+								if(item.type.indexOf("FC")>=0){
+									if(isBalance){
+										postData.amount = 100;
+									}else{
+										postData.amount = ContentScript.PageConfig.Discount;
+									}
+									postData.fclmt = ContentScript.PageConfig.LimitStart;
+								}
 							
 							postData.overflow = "1";
 							//postData.amount = "100";
 							postData.race_type = signInfo.RaceType;
 							postData.race_date = signInfo.RaceDate;
 							postData.show = parseInt(item.matches);
+							postData.rd = Math.random();
 							
 							console.log(postData);
 							///forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
@@ -525,20 +607,22 @@ ContentScript={
 							//<td class="">吃</td>
 							
 							var postURL = "";
-							
+							var postData = {};
 							postData.t = "frm";
 							postData.race = item.matches;
 							postData.horse = item.rdfb;
 							//var Proportion = parseInt(ContentScript.PageConfig.Percent);
 							postData.win = ContentScript.ticketByFloat(parseInt(item.fb),"WP");
 							postData.place = item.x;
-							
+							var postURL ="";
 							if(item.type.indexOf("E")>=0){
 								postData.type = "eat";
+								postURL ="/bets";
 							}else{
 								postData.type = "bet";
+								postURL = "/bookings";
 							}
-							postURL ="/bets";
+							
 							if(isBalance){
 								postData.amount = 100;
 							}else{
@@ -551,6 +635,7 @@ ContentScript={
 							postData.race_date = signInfo.RaceDate;
 							postData.show = parseInt(item.matches);
 							postData.post = "1";
+							postData.rd = Math.random();
 							console.log(postData);
 							$.ajax({
 							              type: "get",
@@ -605,7 +690,6 @@ ContentScript={
 	},
 	GetAllHadTransactionData:function(){
 		var result = [];
-		
 		$(ContentScript.Hadtxn_mode_check_item).each(function(i){
 			var type = ContentScript.txn_mode_check_item[i];
 			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
@@ -621,6 +705,7 @@ ContentScript={
 				}
 			});
 		});
+		
 		return result;
 	},
 	
@@ -628,19 +713,21 @@ ContentScript={
 		var htmlList = '<div id="drag" style="background:white;width: 330px; height: 80px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 150px;overflow-y: auto;max-height: 600px;">';
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">当前账户:'+$.trim($("#username").text())+'</h3>';
         htmlList +='<table style="width:100%">';
-        htmlList +='<tr style="line-height: 30px;"><td>';
-        htmlList +='<input type= "radio" name="orderType" value="Q" checked="checked" id="QType"/>Q';
-        htmlList +='<input type= "radio" name="orderType" value="WP" id="WPType"/>WP';
-        htmlList +='<input type= "radio" name="orderType" value="QP" id="QPType"/>QP';
+        htmlList +='<tr style="line-height: 30px;"><td colspan="2">';
+        htmlList +='<input type= "radio" name="orderType"  value="Q" checked="checked" id="QType"/>Q';
+        htmlList +='<input type= "radio" name="orderType"  value="WP" id="WPType"/>WP';
+        htmlList +='<input type= "radio" name="orderType"  value="QP" id="QPType"/>QP';
         htmlList +='</td></tr>' 
-        htmlList +='<tr style="line-height: 30px;"><td>折头:<input id="Discount" type="number" step="10" style="width: 40px;" size="4" value="76" />'
+        htmlList +='<tr style="line-height: 30px;" ><td colspan="2">折头:<input id="Discount" type="number" step="10" style="width: 40px;" size="4" value="76" />'
 		htmlList +='极限:<input id="LimitStart" type="number" step="10" style="width: 40px;" size="4" value="300" />'
 		htmlList +='/<input id="LimitEnd" type="number" step="10" style="width: 40px;" size="4" value="700" />'
         htmlList +='限注:<input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />'
         //htmlList +='比例:<input id="Percent" type="number" step="1" style="width: 40px;" size="4" value="1" />'
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
-        htmlList +='<tr style="line-height: 40px;"><td style="text-align:right">';
+        htmlList +='<tr style="line-height: 40px;"><td style="text-align:left;font-size:20px">';
+        htmlList +='&nbsp;&nbsp;吃:<span id="eatCount" style="color:red"></span>&nbsp;&nbsp;&nbsp;赌:<span id="betCount" style="color:red" ></span>&nbsp;';
+        htmlList +='</td><td style="text-align:right">';
         htmlList +='<input type="button" id="btnStart" value="开始" />';
         htmlList +='<input type="button" id="btnEnd" value="停止" />';
         htmlList +='<input type="button" id="btnBanlance" value="平仓" />';

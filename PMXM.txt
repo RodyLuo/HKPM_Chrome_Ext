@@ -6,6 +6,10 @@ var txn_mode_check_item=new Array('WPB','WPE','WB','WE','PB','PE','FCB','FCE','P
 
 新增赌交易
 http://cqfexhv.ctb988.com/forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=5&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=BET&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.5189470457844436
+http://data.ctb988.com/forecast?flag=0&Tix=10&Race=12&Hs1=1&Hs2=2&fctype=0&Q=Q&type=BET&overflow=0&amount=92.5&fclmt=700&race_type=67A&race_date=09-06-2015&show=12&rd=0.07091577723622322
+http://ksifvch.ctb988.com/forecast?task=betBox&combo=0&Tix=90&Race=12&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=BET&overflow=1&amount=90&fclmt=700&race_type=67A&race_date=09-06-2015&show=12&rd=0.17121897102333605
+http://ksifvch.ctb988.com/forecast?task=betBox&combo=0&Tix=10&Race=2&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=BET&overflow=1&amount=100&fclmt=700&race_type=215T&race_date=09-06-2015&show=2&rd=0.9812707821478185
+http://ksifvch.ctb988.com/forecast?task=betBox&combo=0&Tix=10&Race=2&fctype=0&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&Q=Q&type=BET&overflow=1&race_type=215T&race_date=09-06-2015&show=2
 赌交易反馈
 <script>document.domain = 'ctb988.com';</script><script>top.reply('bets','你的下注交易已所有被证实');</script>
 
@@ -18,6 +22,8 @@ http://cqfexhv.ctb988.com/forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&
 http://cqfexhv.ctb988.com/transactions?type=del&bid=1045022801&x=3&betType=1&race_date=12-04-2015&race_type=330E&q=q&race=8&show=8&rd=0.37321557523682714
 <script>document.domain = 'ctb988.com';</script><script>top.reply('transactions','#取消预测彩吃注成功');</script>
 
+http://ksifvch.ctb988.com/bets?t=frm&race=5&horse=1&win=5&place=5&amount=76&l_win=110&l_place=30&race_type=21Z&race_date=09-06-2015&wptck=1&show=5&post=1&rd=0.38485487923026085
+
 WP playerhk
 http://cqfexhv.ctb988.com/bets?t=frm&race=6&horse=2&win=5&place=5&amount=76&l_win=110&l_place=30&race_type=224T&race_date=12-04-2015&wptck=1&show=6&post=1&rd=0.9082353711128235
 <script>document.domain = 'ctb988.com';</script><script>top.reply('bets','#要求下注成功');</script>
@@ -27,7 +33,7 @@ http://cqfexhv.ctb988.com/bets?t=frm&race=6&horse=2&win=5&place=5&amount=82&l_wi
 
 http://cqfexhv.ctb988.com/bookings?t=frm&race=6&horse=2&win=5&place=5&amount=76&l_win=240&l_place=60&race_type=224T&race_date=12-04-2015&wptck=1&show=6&post=1&rd=0.48656415077857673
 <script>document.domain = 'ctb988.com';</script><script>top.reply('bookings','你的吃票交易已所有被证实<br><br>场: &nbsp;&nbsp;<span style="color:#FF0000"><strong>6</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;马:&nbsp;&nbsp;<span style="color:#FF0000"><strong>2</strong></span>&nbsp;&nbsp;&nbsp;&nbsp;头:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>&nbsp;&nbsp;&nbsp;脚:&nbsp;&nbsp;<span style="color:#FF0000"><strong>5</strong></span>');</script>
-
+l_win=110&l_place=30
 http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&l_win=110&l_place=0&race_type=34J&race_date=16-04-2015&wptck=1&show=8&post=1&rd=0.9396663182415068
 吃
 http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
