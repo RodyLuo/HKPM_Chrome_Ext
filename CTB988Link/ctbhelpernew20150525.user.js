@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name       Rody WaiGua Programming
-// @version    20150104
+// @version    20150613
 // @include    http://*.ctb988.com/*  
 // @include    http://*.ctb988.net/*  
 // @copyright  2014+, CH3CHO <luotingkk@163.com>
