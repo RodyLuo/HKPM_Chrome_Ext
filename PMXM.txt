@@ -1,7 +1,10 @@
+http://tool.lu/js/ js 混淆压缩工具
+
+
 http://kimercs.ctb988.com/bookings?t=frm&race=1&horse=2&win=0&place=5&type=bet&amount=82&limit=240%2F60&race_type=3H&race_date=14-06-2015&show=1&post=1&rd=0.40690097864717245
 http://kimercs.ctb988.com/bets?t=frm&race=1&horse=2&win=0&place=5&amount=76&l_win=0&l_place=30&race_type=3H&race_date=14-06-2015&wptck=1&show=1&post=1&rd=0.47373824124224484
-
-
+http://creywvs.ctb988.com/forecast?task=betBox&combo=0&Tix=10&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=80&fclmt=700&race_type=2S&race_date=14-06-2015&show=6&rd=0.7672886084765196
+http://data.ctb988.com/forecast?task=betBox&combo=0&Tix=10&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=1&Q=Q&type=EAT&overflow=1&amount=90&fclmt=400&race_type=2S&race_date=14-06-2015&show=6&rd=0.4313574698753655
 
 
 

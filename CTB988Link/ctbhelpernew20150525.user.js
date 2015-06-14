@@ -261,6 +261,8 @@ ContentScript={
 			ContentScript.PageConfig.LimitEnd = 700;
 			$("#LimitEnd").val(700);
 		}
+		
+		ContentScript.PageConfig.Percent = $("#Percent").val();
 	},
 	onInit:function(){
 		var host =window.location.href;
@@ -285,6 +287,16 @@ ContentScript={
 			}
 		}
 	},
+	PrecentChangeEvent:function(){
+		$("#Percent").bind("change",function(){
+			if($("#Percent").val() == 1 || $("#Percent").val()=="1" ){
+				$("#btnBanlance").show();
+			}else{
+				$("#btnBanlance").hide();
+			}
+			ContentScript.PageConfig.Percent =$("#Percent").val();
+		});
+	},
 	allOnitEvent:function(){
 		//创建用户界面
 						ContentScript.CreateHtmlElement();
@@ -293,6 +305,8 @@ ContentScript={
 						$("#daoqitime").text(ContentScript.DaoQiTime);
 						//限制投注数
 						ContentScript.MaxCountEvent();
+						//多倍控制
+						ContentScript.PrecentChangeEvent();
 						//统计吃票的计时器
 						ContentScript.timerCountPageEatAndBet = self.setInterval(function(){ContentScript.showCountWithWhere()},1000);
 						
@@ -354,22 +368,26 @@ ContentScript={
 						
 						//平仓
 						$("#btnBanlance").bind("click",function(){
-							if(ContentScript.timerWithOrderClock==null){
-								$(this).hide();
-								//先删除所有没有成交的数据
-								setTimeout(function(){
-									ContentScript.EatButtonEvent();
-								},0);
-								setTimeout(function(){
-									ContentScript.BetButtonEvent();
-								},0);
-								//然后100%的平仓数据交易
-								setTimeout(function(){
-									ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
-								},1000);
-								$(this).show();
+							if($("#Percent").val() == 1 || $("#Percent").val()=="1" ){
+								if(ContentScript.timerWithOrderClock==null){
+									$(this).hide();
+									//先删除所有没有成交的数据
+									setTimeout(function(){
+										ContentScript.EatButtonEvent();
+									},0);
+									setTimeout(function(){
+										ContentScript.BetButtonEvent();
+									},0);
+									//然后100%的平仓数据交易
+									setTimeout(function(){
+										ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
+									},1000);
+									$(this).show();
+								}else{
+									alert("请先停止跟单！");
+								}
 							}else{
-								alert("请先停止跟单！");
+								alert("平仓功能只能在倍率是1的情况下使用！");
 							}
 						});
 				
@@ -442,8 +460,8 @@ ContentScript={
 							}
 							case "WPE": {
 								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1);
-						   		temp.x =  parseInt(temp.x)*(1);
+								temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
+						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
 								WPEList.push(temp);
 								break;
 							}
@@ -456,15 +474,15 @@ ContentScript={
 							}
 							case "WE": {
 								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1);
-						   		temp.x =  parseInt(temp.x)*(1);
+								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
 								WEList.push(temp);
 								break;
 							}
 							case "PE": {
 								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1);
-						   		temp.x =  parseInt(temp.x)*(1);
+								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
 								PEList.push(temp);
 								break;
 							}
@@ -490,8 +508,8 @@ ContentScript={
 					var hadCount = false;
 					$(notWPERepterList).each(function(i){
 						if(it.id==$(this)[0].id){
-							$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
-							$(this)[0].fb = parseInt($(this)[0].fb) + parseInt(it.fb);
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(it.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(it.fb);
 							hadCount = true;
 						}
 					});
@@ -505,8 +523,8 @@ ContentScript={
 					var hadCount = false;
 					$(notPERepterList).each(function(i){
 						if(its.id==$(this)[0].id){
-							$(this)[0].x = parseInt($(this)[0].x) + parseInt(its.x);
-							$(this)[0].fb = parseInt($(this)[0].fb) + parseInt(its.fb);
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(its.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(its.fb);
 							hadCount = true;
 						}
 					});
@@ -520,8 +538,8 @@ ContentScript={
 					var hadCount = false;
 					$(notWERepterList).each(function(i){
 						if(itw.id==$(this)[0].id){
-							$(this)[0].x = parseInt($(this)[0].x) + parseInt(itw.x);
-							$(this)[0].fb = parseInt($(this)[0].fb) + parseInt(itw.fb);
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
 							hadCount = true;
 						}
 					});
@@ -580,6 +598,7 @@ ContentScript={
 						if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
 							if($(this)[0].type.indexOf("E")>=0){
 								var it = $(this)[0];
+								it.x = parseInt(it.x)*parseInt($("#Percent").val())
 								var hadCount = false;
 								$(returnEatList).each(function(i){
 									if(it.id==$(this)[0].id){
@@ -588,8 +607,7 @@ ContentScript={
 									}
 								});
 								if(!hadCount){
-									allList[index].x = parseInt(allList[index].x);
-									returnEatList.push(allList[index]);
+									returnEatList.push(it);
 								}
 							}
 							if($(this)[0].type.indexOf("B")>=0){
@@ -627,7 +645,7 @@ ContentScript={
 					var item = $(this)[0];
 					$(notCommitBetList).each(function(){
 						if(item.id==$(this)[0].id){
-							returnEatList[i].x = returnEatList[i].x-$(this)[0].x
+							returnEatList[i].x = item.x-$(this)[0].x
 						}
 					});
 				});
@@ -773,35 +791,14 @@ ContentScript={
 							}else{
 								postData.type = "BET";
 							}
-								
-								//QP模式
-								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P")>=0){
-									if(isBalance){
-										postData.amount = 100;
-									}else{
-										postData.amount = ContentScript.PageConfig.Discount;
-									}
-									postData.fclmt = ContentScript.PageConfig.LimitStart;
-								}
-								//Q模式
-								if(item.type.indexOf("Q")>=0 && item.type.indexOf("P") < 0){
-									if(isBalance){
-										postData.amount = 100;
-									}else{
-										postData.amount = ContentScript.PageConfig.Discount;
-									}
-									postData.fclmt = ContentScript.PageConfig.LimitStart;
-								}
-								//FC模式
-								if(item.type.indexOf("FC")>=0){
-									if(isBalance){
-										postData.amount = 100;
-									}else{
-										postData.amount = ContentScript.PageConfig.Discount;
-									}
-									postData.fclmt = ContentScript.PageConfig.LimitStart;
-								}
 							
+							if(isBalance){
+								postData.amount = 100;
+							}else{
+								postData.amount = ContentScript.PageConfig.Discount;
+							}
+							postData.fclmt = ContentScript.PageConfig.LimitStart;
+								
 							postData.overflow = "1";
 							//postData.amount = "100";
 							postData.race_type = signInfo.RaceType;
@@ -954,13 +951,13 @@ ContentScript={
         htmlList +='<input type= "radio" name="orderType"  value="WP" id="WPType"/>WP';
         htmlList +='<input type= "radio" name="orderType"  value="QP" id="QPType"/>QP';
         htmlList +='&nbsp;&nbsp;限注:<input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />';
+        htmlList +='&nbsp;倍率:<select id="Percent"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>20</option><option>50</option><option>100</option></select>';
         htmlList +='</td></tr>';
         htmlList +='<tr style="line-height: 30px;" ><td colspan="2">'
         htmlList +='<input type= "radio" name="DiscountType"  value="F1" checked="checked" id="DiscountType1"/>'
         htmlList +='折头:<input id="Discount1" type="number" step="10" style="width: 40px;" size="4" value="80" />'
 		htmlList +='极限:<input id="LimitStart1" type="number" step="10" style="width: 40px;" size="4" value="700" />'
 		htmlList +='/<input id="LimitEnd1" type="number" step="10" style="width: 40px;" size="4" value="700" />'
-        //htmlList +='比例:<input id="Percent" type="number" step="1" style="width: 40px;" size="4" value="1" />'
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
         htmlList +='<tr style="line-height: 30px;" ><td colspan="2">';
