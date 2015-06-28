@@ -1,4 +1,78 @@
+columnc frmEAT EAT_DATA
+
+amount: "82"
+horse: "3"
+l_place: "60"
+l_win: "240"
+limit: "240/60"
+place: 5
+post: "1"
+race: "2"
+race_date: "27-06-2015"
+race_type: "275E"
+rd: 0.4798239632509649
+show: 2
+t: "frm"
+type: "bet"
+win: 5
+wptck: 1
+
+t=frm--
+&race=2--
+&horse=3--
+&win=5--
+&place=5--
+&amount=76--
+&l_win=110--
+&l_place=30--
+&race_type=275E--
+&race_date=27-06-2015--
+&wptck=1--
+&show=2--
+&post=1--
+&rd=0.5942856122273952--
+
+
+amount: "82"
+horse: "3"
+l_place: "60"
+l_win: "240"
+limit: "240/60"
+place: 5
+post: "1"
+race: "2"
+race_date: "27-06-2015"
+race_type: "275E"
+rd: 0.016808481188490987
+show: 2
+t: "frm"
+type: "bet"
+win: 5
+wptck: 1
+
+t=frm&race=3&horse=1&win=5&place=5&amount=76&l_win=110&l_place=30&race_type=275E&race_date=27-06-2015&wptck=1&show=3&post=1&rd=0.2512704557739198
+
+t=frm--
+&race=2--
+&horse=3--
+&win=5--
+&place=5--
+&amount=82--
+&l_win=240--
+&l_place=60--
+&race_type=275E--
+&race_date=27-06-2015--
+&wptck=1--
+&show=2--
+&post=1--
+&rd=0.26066974829882383--
+
 http://tool.lu/js/ js 混淆压缩工具
+
+
+http://kihtjkk.ctb988.com/bets?t=frm&race=3&horse=1&win=5&place=5&amount=76&limit=38/18&type=bet&race_type=275E&race_date=27-06-2015&show=3&post=1&rd=0.5577404221985489
+http://data.ctb988.com/bets?t=frm&race=3&horse=1&win=5&place=5&amount=76&l_win=110&l_place=30&race_type=275E&race_date=27-06-2015&wptck=1&show=3&post=1&rd=0.06968376482836902
+http://data.ctb988.com/bets?t=frm&race=3&horse=1&win=5&place=5&amount=76&l_win=110&l_place=30&race_type=275E&race_date=27-06-2015&wptck=1&show=3&post=1&rd=0.2512704557739198
 
 
 http://kimercs.ctb988.com/bookings?t=frm&race=1&horse=2&win=0&place=5&type=bet&amount=82&limit=240%2F60&race_type=3H&race_date=14-06-2015&show=1&post=1&rd=0.40690097864717245

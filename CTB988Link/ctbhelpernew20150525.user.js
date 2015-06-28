@@ -51,7 +51,7 @@ ContentScript={
 	StaticOldAllData:[],
 	StaticCountShowData:[],
 	StaticOldCountShowData:[],
-	HelloKitty:"58a90eab40adfd639fa198cdf99ffaa6",
+	HelloKitty:"81dc9bdb52d04dc20036dbd8313ed055",
 	HelloKittyTime:["fa29e79105dc1fd3e9a7b54d9ae0e2f1","519edc8db508d1c088f793f2c3647e6f"],
 	DaoQiTime:"2015-07-31",
 	PageConfig:{
@@ -420,7 +420,6 @@ ContentScript={
 				var WEList =[];
 				var PBList =[];
 				var PEList =[];
-				var DBmrList=[];
 				$(allList).each(function(index){
 					var temp = $(this)[0];
 					if($(this)[0].type =="DBmr"){
@@ -444,7 +443,7 @@ ContentScript={
 							temp.id = temp.matches + temp.rdfb;
 							temp.fb = parseInt(temp.fb)*(-1);
 						   	temp.x =  parseInt(temp.x)*(-1);
-						    PBList.push(temp);
+						    WBList.push(temp);
 						}
 					}
 					if(CheckType.contains($(this)[0].type)){
@@ -497,11 +496,57 @@ ContentScript={
 						}
 					}
 				});
+				  
+				var NoRepeatWPBList = [];
+				var NoRepeatWBList = [];
+				var NoRepeatPBList = [];
+				$(WPBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWPBList.push(WPBList[index]);
+					}
+				});
+				$(PBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatPBList.push(PBList[index]);
+					}
+				});
+				$(WBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWBList.push(WBList[index]);
+					}
+				});
 				
 				var wpeListid =[];
 				var notWPERepterList = [];
 				var notWERepterList = [];
-				var notPERepterList = [];
+				var notPERepterList = []; 
 				
 				$(WPEList).each(function(index){
 					var it = $(this)[0];
@@ -548,9 +593,9 @@ ContentScript={
 					}
 				});
 				
-				$(WPEList).each(function(index){
+				$(notWPERepterList).each(function(index){
 					var temp = $(this)[0];
-					$(WPBList).each(function(i){
+					$(NoRepeatWPBList).each(function(i){
 						if(temp.id == $(this)[0].id){
 							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
 							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
@@ -560,9 +605,9 @@ ContentScript={
 						returnList.push(temp);
 					}
 				});
-				$(WEList).each(function(index){
+				$(notWERepterList).each(function(index){
 					var temp = $(this)[0];
-					$(WBList).each(function(i){
+					$(NoRepeatWBList).each(function(i){
 						if(temp.id == $(this)[0].id){
 							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
 							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
@@ -573,9 +618,9 @@ ContentScript={
 					}
 				});
 				
-				$(PEList).each(function(index){
+				$(notPERepterList).each(function(index){
 					var temp = $(this)[0];
-					$(PBList).each(function(i){
+					$(NoRepeatPBList).each(function(i){
 						if(temp.id == $(this)[0].id){
 							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
 							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
@@ -684,54 +729,281 @@ ContentScript={
 			}
 			
 			var allList = ContentScript.GetAllHadTransactionData();
-			var returnEatList=[];
-			$(allList).each(function(index){
-				if(CheckType.contains($(this)[0].type)){
-					if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
-						if($(this)[0].type.indexOf("E")>=0){
-							var it = $(this)[0];
-							var hadCount = false;
-							$(returnEatList).each(function(i){
-								if(it.id==$(this)[0].id){
-									$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
-									hadCount = true;
-								}
-							});
-							if(!hadCount){
-								allList[index].x = parseInt(allList[index].x);
-								returnEatList.push(allList[index]);
+			
+			if("WP" == withType){
+				var WPBList =[];
+				var WPEList =[];
+				var WBList =[];
+				var WEList =[];
+				var PBList =[];
+				var PEList =[];
+				$(allList).each(function(index){
+					var temp = $(this)[0];
+					if($(this)[0].type =="DBmr"){
+						//matches rdfb fb x y t 2 4 5 5 78 0/16
+						if(parseInt($(this)[0].fb) >0 && parseInt($(this)[0].x)>0){
+						   temp.type= "WPB";
+						   temp.id = temp.matches + temp.rdfb;
+						   temp.fb = parseInt(temp.fb)*(-1);
+						   temp.x =  parseInt(temp.x)*(-1);
+						   WPBList.push(temp);
+						}
+						if(parseInt($(this)[0].fb) == 0 && parseInt($(this)[0].x)>0){
+						   temp.type= "PB";
+						   temp.id = temp.matches + temp.rdfb;
+						   temp.fb = parseInt(temp.fb)*(-1);
+						   temp.x =  parseInt(temp.x)*(-1);
+						   PBList.push(temp);
+						}
+						if(parseInt($(this)[0].fb) > 0 && parseInt($(this)[0].x) == 0){
+							temp.type= "WB";
+							temp.id = temp.matches + temp.rdfb;
+							temp.fb = parseInt(temp.fb)*(-1);
+						   	temp.x =  parseInt(temp.x)*(-1);
+						    WBList.push(temp);
+						}
+					}
+					if(CheckType.contains($(this)[0].type)){
+						var temp = $(this)[0];
+						//matches rdfb fb x y t 2 4 5 5 78 0/16
+						switch($(this)[0].type){
+							case "WPB": {
+								temp.id = temp.matches + temp.rdfb;
+								temp.fb = parseInt(temp.fb)*(-1);
+						   		temp.x =  parseInt(temp.x)*(-1);
+								WPBList.push(temp);
+								break;
+							}
+							case "WPE": {
+								temp.id = temp.matches + temp.rdfb;
+								temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
+						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+								WPEList.push(temp);
+								break;
+							}
+							case "WB": {
+								temp.id = temp.matches + temp.rdfb;
+								temp.fb = parseInt(temp.fb)*(-1);
+						   		temp.x =  parseInt(temp.x)*(-1);
+								WBList.push(temp);
+								break;
+							}
+							case "WE": {
+								temp.id = temp.matches + temp.rdfb;
+								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+								WEList.push(temp);
+								break;
+							}
+							case "PE": {
+								temp.id = temp.matches + temp.rdfb;
+								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+								PEList.push(temp);
+								break;
+							}
+							case "PB": {
+								temp.id = temp.matches + temp.rdfb;
+								temp.fb = parseInt(temp.fb)*(-1);
+						   		temp.x =  parseInt(temp.x)*(-1);
+								PBList.push(temp);
+								break;
+								
 							}
 						}
-						if($(this)[0].type.indexOf("B")>=0){
-							var it = $(this)[0];
-							var hadCount = false;
-							$(returnEatList).each(function(i){
-								if(it.id==$(this)[0].id){
-									$(this)[0].x = parseInt($(this)[0].x) + ( parseInt(it.x)*(-1) );
-									hadCount = true;
-								}
-							});
-							if(!hadCount){
-								allList[index].x = parseInt(allList[index].x)*(-1);
-								returnEatList.push(allList[index]);
-							}
-						}	
 					}
-				}
+				});
+				  
+				var NoRepeatWPBList = [];
+				var NoRepeatWBList = [];
+				var NoRepeatPBList = [];
+				$(WPBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWPBList.push(WPBList[index]);
+					}
+				});
+				$(PBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatPBList.push(PBList[index]);
+					}
+				});
+				$(WBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWBList.push(WBList[index]);
+					}
+				});
 				
-			});
-			
-			$(returnEatList).each(function(i){
-				var item = $(this)[0];
-				if(item.x>0){
-					returnList.push(item);
-				}
-			})
-			
-			$(returnList).each(function(index){
-				$(this)[0].type = $(this)[0].type.replace("E","B");
-			});
-			return returnList;
+				var wpeListid =[];
+				var notWPERepterList = [];
+				var notWERepterList = [];
+				var notPERepterList = []; 
+				
+				$(WPEList).each(function(index){
+					var it = $(this)[0];
+					var hadCount = false;
+					$(notWPERepterList).each(function(i){
+						if(it.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(it.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(it.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notWPERepterList.push(WPEList[index]);
+					}
+				});
+				
+				$(PEList).each(function(index){
+					var its = $(this)[0];
+					var hadCount = false;
+					$(notPERepterList).each(function(i){
+						if(its.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(its.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(its.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notPERepterList.push(PEList[index]);
+					}
+				});
+				
+				$(WEList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(notWERepterList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notWERepterList.push(WEList[index]);
+					}
+				});
+				
+				$(notWPERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatWPBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb>0 && temp.x>0){
+						returnList.push(temp);
+					}
+				});
+				$(notWERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatWBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb>0 && temp.x==0){
+						returnList.push(temp);
+					}
+				});
+				
+				$(notPERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatPBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb==0 && temp.x>0){
+						returnList.push(temp);
+					}
+				});
+				
+				$(returnList).each(function(index){
+					$(this)[0].type = $(this)[0].type.replace("E","B");
+				});
+				
+				return returnList;
+				
+			}else{
+				var returnEatList=[];
+				$(allList).each(function(index){
+					if(CheckType.contains($(this)[0].type)){
+						if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
+							if($(this)[0].type.indexOf("E")>=0){
+								var it = $(this)[0];
+								var hadCount = false;
+								$(returnEatList).each(function(i){
+									if(it.id==$(this)[0].id){
+										$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+										hadCount = true;
+									}
+								});
+								if(!hadCount){
+									allList[index].x = parseInt(allList[index].x);
+									returnEatList.push(allList[index]);
+								}
+							}
+							if($(this)[0].type.indexOf("B")>=0){
+								var it = $(this)[0];
+								var hadCount = false;
+								$(returnEatList).each(function(i){
+									if(it.id==$(this)[0].id){
+										$(this)[0].x = parseInt($(this)[0].x) + ( parseInt(it.x)*(-1) );
+										hadCount = true;
+									}
+								});
+								if(!hadCount){
+									allList[index].x = parseInt(allList[index].x)*(-1);
+									returnEatList.push(allList[index]);
+								}
+							}	
+						}
+					}
+					
+				});
+				
+				$(returnEatList).each(function(i){
+					var item = $(this)[0];
+					if(item.x>0){
+						returnList.push(item);
+					}
+				})
+				
+				$(returnList).each(function(index){
+					$(this)[0].type = $(this)[0].type.replace("E","B");
+				});
+				return returnList;
+			}
 		}else{
 			return [];
 		}
@@ -821,24 +1093,7 @@ ContentScript={
 							});
 						} 
 				if(['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
-							//吃http://ksifvch.ctb988.com/bets?t=frm&race=8&horse=2&win=5&place=0&amount=76&limit=110/0&type=bet&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.6326403634157032
-							//赌http://ksifvch.ctb988.com/bookings?t=frm&race=8&horse=1&win=5&place=0&amount=84&limit=300/0&type=book&race_type=34J&race_date=16-04-2015&show=8&post=1&rd=0.5024963289033622
-							//<td>8</td
-							//<td class="F_B">2</td>
-							//<td id="WE_8_2_76_110/0_0x">5</td>
-							//<td id="WE_8_2_76_110/0_0y">0</td>
-							//<td id="WE_8_2_76_110/0_0z">76</td>
-							//<td id="WE_8_2_76_110/0_0t" colspan="1" class="">110/0</td>
-							//<td class="">吃</td>
-							
-							//<td>6</td>
-							//<td class="RD F_B">FC</td>
-							//<td class="F_B ">4-5</td>
-							//<td id="FCE_6_4-5_100_700x">2</td>
-							//<td id="FCE_6_4-5_100_700y">100</td>
-							//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
-							//<td class="">吃</td>
-							
+					
 							var postURL = "";
 							var postData = {};
 							postData.t = "frm";
@@ -847,26 +1102,44 @@ ContentScript={
 							//var Proportion = parseInt(ContentScript.PageConfig.Percent);
 							postData.win = ContentScript.ticketByFloat(parseInt(item.fb),"WP");
 							postData.place = item.x;
+							
 							var postURL ="";
-							if(item.type.indexOf("E")>=0){
-								postData.type = "eat";
-								postURL ="/bets";
-							}else{
-								postData.type = "bet";
-								postURL = "/bookings";
-							}
+							postURL ="/bets";
+							//if(item.type.indexOf("E")>=0){
+							//postData.type = "eat";
+							//postURL ="/bets";
+							//}else{
+							//postData.type = "bet";
+							//postURL = "/bookings";
+							//}
 							
 							if(isBalance){
-								postData.amount = 100;
+								postData.amount = 99;
 							}else{
 								postData.amount = ContentScript.PageConfig.Discount;
 							}
 							
-							postData.limit = ContentScript.PageConfig.LimitStart+"/"+ ContentScript.PageConfig.LimitEnd;
-							
+							//postData.limit = ContentScript.PageConfig.LimitStart+"/"+ ContentScript.PageConfig.LimitEnd;
+							postData.l_win = ContentScript.PageConfig.LimitStart;
+							postData.l_place = ContentScript.PageConfig.LimitEnd;
 							postData.race_type = signInfo.RaceType;
 							postData.race_date = signInfo.RaceDate;
 							postData.show = parseInt(item.matches);
+							
+							if(parseInt(postData.win)>0 && parseInt(postData.place)>0){
+								postData.wptck=1;
+							}else{
+								postData.wptck=0;
+							} 
+							if(parseInt(postData.win)>0 && parseInt(postData.place)==0){
+								postData.wtck=1;
+								postData.l_place = "0";
+							}
+							if(parseInt(postData.win)==0 && parseInt(postData.place)>0){
+								postData.ptck=1;
+								postData.l_win = "0";
+							}
+							
 							postData.post = "1";
 							postData.rd = Math.random();
 							console.log(postData);
@@ -952,6 +1225,7 @@ ContentScript={
         htmlList +='<input type= "radio" name="orderType"  value="QP" id="QPType"/>QP';
         htmlList +='&nbsp;&nbsp;限注:<input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />';
         htmlList +='&nbsp;倍率:<select id="Percent"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>20</option><option>50</option><option>100</option></select>';
+        //htmlList +='&nbsp;倍率:<input id="Percent" type="number" step="0.1" value="1" style="width: 40px;" size="4">';
         htmlList +='</td></tr>';
         htmlList +='<tr style="line-height: 30px;" ><td colspan="2">'
         htmlList +='<input type= "radio" name="DiscountType"  value="F1" checked="checked" id="DiscountType1"/>'
