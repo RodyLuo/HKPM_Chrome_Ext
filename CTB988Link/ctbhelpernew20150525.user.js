@@ -445,53 +445,54 @@ ContentScript={
 						   	temp.x =  parseInt(temp.x)*(-1);
 						    WBList.push(temp);
 						}
-					}
-					if(CheckType.contains($(this)[0].type)){
-						var temp = $(this)[0];
-						//matches rdfb fb x y t 2 4 5 5 78 0/16
-						switch($(this)[0].type){
-							case "WPB": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(-1);
-						   		temp.x =  parseInt(temp.x)*(-1);
-								WPBList.push(temp);
-								break;
-							}
-							case "WPE": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
-						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
-								WPEList.push(temp);
-								break;
-							}
-							case "WB": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(-1);
-						   		temp.x =  parseInt(temp.x)*(-1);
-								WBList.push(temp);
-								break;
-							}
-							case "WE": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
-						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
-								WEList.push(temp);
-								break;
-							}
-							case "PE": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
-						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
-								PEList.push(temp);
-								break;
-							}
-							case "PB": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(-1);
-						   		temp.x =  parseInt(temp.x)*(-1);
-								PBList.push(temp);
-								break;
-								
+					}else{
+						if(CheckType.contains($(this)[0].type)){
+							var temp = $(this)[0];
+							//matches rdfb fb x y t 2 4 5 5 78 0/16
+							switch($(this)[0].type){
+								case "WPB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WPBList.push(temp);
+									break;
+								}
+								case "WPE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WPEList.push(temp);
+									break;
+								}
+								case "WB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WBList.push(temp);
+									break;
+								}
+								case "WE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WEList.push(temp);
+									break;
+								}
+								case "PE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									PEList.push(temp);
+									break;
+								}
+								case "PB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									PBList.push(temp);
+									break;
+									
+								}
 							}
 						}
 					}
@@ -762,53 +763,54 @@ ContentScript={
 						   	temp.x =  parseInt(temp.x)*(-1);
 						    WBList.push(temp);
 						}
-					}
-					if(CheckType.contains($(this)[0].type)){
-						var temp = $(this)[0];
-						//matches rdfb fb x y t 2 4 5 5 78 0/16
-						switch($(this)[0].type){
-							case "WPB": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(-1);
-						   		temp.x =  parseInt(temp.x)*(-1);
-								WPBList.push(temp);
-								break;
-							}
-							case "WPE": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
-						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
-								WPEList.push(temp);
-								break;
-							}
-							case "WB": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(-1);
-						   		temp.x =  parseInt(temp.x)*(-1);
-								WBList.push(temp);
-								break;
-							}
-							case "WE": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
-						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
-								WEList.push(temp);
-								break;
-							}
-							case "PE": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
-						   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
-								PEList.push(temp);
-								break;
-							}
-							case "PB": {
-								temp.id = temp.matches + temp.rdfb;
-								temp.fb = parseInt(temp.fb)*(-1);
-						   		temp.x =  parseInt(temp.x)*(-1);
-								PBList.push(temp);
-								break;
-								
+					}else{
+						if(CheckType.contains($(this)[0].type)){
+							var temp = $(this)[0];
+							//matches rdfb fb x y t 2 4 5 5 78 0/16
+							switch($(this)[0].type){
+								case "WPB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WPBList.push(temp);
+									break;
+								}
+								case "WPE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WPEList.push(temp);
+									break;
+								}
+								case "WB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WBList.push(temp);
+									break;
+								}
+								case "WE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WEList.push(temp);
+									break;
+								}
+								case "PE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									PEList.push(temp);
+									break;
+								}
+								case "PB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									PBList.push(temp);
+									break;
+									
+								}
 							}
 						}
 					}
