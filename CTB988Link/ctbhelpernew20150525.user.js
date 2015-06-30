@@ -1015,7 +1015,15 @@ ContentScript={
 		if(type=="Q"){
 			result = item;
 		}else{
-			result = item;
+			if(item==0){
+				result = 0;
+			}else{
+				if(item%5 !=0){
+					result = item + (5 - item%5);
+				}else{
+					result = item;
+				}
+			}
 		}
 		return result
 	},
@@ -1103,7 +1111,7 @@ ContentScript={
 							postData.horse = item.rdfb;
 							//var Proportion = parseInt(ContentScript.PageConfig.Percent);
 							postData.win = ContentScript.ticketByFloat(parseInt(item.fb),"WP");
-							postData.place = item.x;
+							postData.place = ContentScript.ticketByFloat(parseInt(item.x),"WP");
 							
 							var postURL ="";
 							postURL ="/bets";
