@@ -55,6 +55,7 @@ ContentScript={
 	HelloKittyTime:["fa29e79105dc1fd3e9a7b54d9ae0e2f1","519edc8db508d1c088f793f2c3647e6f"],
 	DaoQiTime:"2015-07-31",
 	PageConfig:{
+		AutoPingCang:0,
 		MaxCount:90,
 		Discount:80,
 		LimitStart:700,
@@ -70,6 +71,7 @@ ContentScript={
 	},
 	setLimitAndDiscount:function(){
 		var withType = $("input[name='orderType']:checked").val();
+	 	var autoPingCang = $("input[id='AutoPingCang']:checked").val();
 		if("WP" == withType){
 			$("#MaxCount").val(90);
 			$("#Discount1").val(82);
@@ -261,6 +263,8 @@ ContentScript={
 			ContentScript.PageConfig.LimitEnd = 700;
 			$("#LimitEnd").val(700);
 		}
+		var autoPingCang = $("input[id='AutoPingCang']:checked").val();
+		ContentScript.PageConfig.AutoPingCang = autoPingCang;
 		
 		ContentScript.PageConfig.Percent = $("#Percent").val();
 	},
@@ -1249,6 +1253,7 @@ ContentScript={
         htmlList +='折头:<input id="Discount2" type="number" step="10" style="width: 40px;" size="4" value="80" />'
 		htmlList +='极限:<input id="LimitStart2" type="number" step="10" style="width: 40px;" size="4" value="700" />'
 		htmlList +='/<input id="LimitEnd2" type="number" step="10" style="width: 40px;" size="4" value="700" />'
+        htmlList +='&nbsp;<input id="AutoPingCang" type="checkbox" value="1" />自动平仓'
         //htmlList +='比例:<input id="Percent" type="number" step="1" style="width: 40px;" size="4" value="1" />'
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
