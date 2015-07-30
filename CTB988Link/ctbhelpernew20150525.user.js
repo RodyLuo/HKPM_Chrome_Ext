@@ -51,11 +51,11 @@ ContentScript={
 	StaticOldAllData:[],
 	StaticCountShowData:[],
 	StaticOldCountShowData:[],
+	HadAutoPingCang:false,
 	HelloKitty:"81dc9bdb52d04dc20036dbd8313ed055",
 	HelloKittyTime:["fa29e79105dc1fd3e9a7b54d9ae0e2f1","519edc8db508d1c088f793f2c3647e6f"],
 	DaoQiTime:"2015-07-31",
 	PageConfig:{
-		AutoPingCang:0,
 		MaxCount:90,
 		Discount:80,
 		LimitStart:700,
@@ -71,7 +71,6 @@ ContentScript={
 	},
 	setLimitAndDiscount:function(){
 		var withType = $("input[name='orderType']:checked").val();
-	 	var autoPingCang = $("input[id='AutoPingCang']:checked").val();
 		if("WP" == withType){
 			$("#MaxCount").val(90);
 			$("#Discount1").val(82);
@@ -263,9 +262,6 @@ ContentScript={
 			ContentScript.PageConfig.LimitEnd = 700;
 			$("#LimitEnd").val(700);
 		}
-		var autoPingCang = $("input[id='AutoPingCang']:checked").val();
-		ContentScript.PageConfig.AutoPingCang = autoPingCang;
-		
 		ContentScript.PageConfig.Percent = $("#Percent").val();
 	},
 	onInit:function(){
@@ -355,6 +351,41 @@ ContentScript={
 									ContentScript.showCountPageEatAndBet();
 									ContentScript.needAjaxCount=ContentScript.getNeedWithOrderList();
 									ContentScript.withOrderOnInit(ContentScript.needAjaxCount,false);
+								}
+								var showTitle = $("#newsLineByLoc").text();
+								if(showTitle.indexOf("马进闸完毕")>=0 
+								   && showTitle.indexOf("准备开跑")>=0
+								   && $("input[id='AutoPingCang']:checked").val() == "1"
+								){
+									var regexp = /场.\.\./
+									var firststring = regexp.exec($("#newsLineByLoc").text());
+									var match = firststring[0].replace("场","").replace("..","")
+									if(match!=undefined && match.length>0){
+										//先删除所有没有成交的数据
+										setTimeout(function(){
+											ContentScript.EatButtonEventByMatches(match);
+										},0);
+										setTimeout(function(){
+											ContentScript.BetButtonEventByMatches(match);
+										},0);
+										//然后100%的平仓数据交易
+										setTimeout(function(){
+											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderListByMatches(match),true);
+										},1000);
+									}
+								}
+								if(showTitle.indexOf("剩")>=0 
+								   && $("input[id='AutoPingCang']:checked").val() == "1"
+								){
+									var regexp = /场.\.\./
+									var firststring = regexp.exec($("#newsLineByLoc").text());
+									var match = firststring[0].replace("场","").replace("..","")
+									if(match!=undefined && match.length>0){
+										//先删除所有没有成交的数据
+										setTimeout(function(){
+											ContentScript.EatButtonEventByMatches(match);
+										},0);
+									}
 								}
 							},1000);
 						});
@@ -712,6 +743,304 @@ ContentScript={
 				$(this)[0].type = $(this)[0].type.replace("E","B");
 			});
 			return returnList;
+		}else{
+			return [];
+		}
+	},
+	getNeedPingCangOrderListByMatches:function(match){
+		var withType = $("input[name='orderType']:checked").val();
+		var returnBetList = [];
+		var returnEatList = [];
+		var returnList = [];
+		var CheckType = [];
+		if(withType.length>0){
+			if("WP" == withType){
+				CheckType = ['WPB','WPE','WB','WE','PB','PE']
+			}
+			if("QP" == withType){
+				CheckType = ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
+			}
+			if("Q" == withType){
+				CheckType = ['FCB','FCE','QB','QE']
+			}
+			
+			var allList = ContentScript.GetAllHadTransactionDataByMatches(match);
+			
+			if("WP" == withType){
+				var WPBList =[];
+				var WPEList =[];
+				var WBList =[];
+				var WEList =[];
+				var PBList =[];
+				var PEList =[];
+				$(allList).each(function(index){
+					var temp = $(this)[0];
+					if($(this)[0].type =="DBmr"){
+						//matches rdfb fb x y t 2 4 5 5 78 0/16
+						if(parseInt($(this)[0].fb) >0 && parseInt($(this)[0].x)>0){
+						   temp.type= "WPB";
+						   temp.id = temp.matches + temp.rdfb;
+						   temp.fb = parseInt(temp.fb)*(-1);
+						   temp.x =  parseInt(temp.x)*(-1);
+						   WPBList.push(temp);
+						}
+						if(parseInt($(this)[0].fb) == 0 && parseInt($(this)[0].x)>0){
+						   temp.type= "PB";
+						   temp.id = temp.matches + temp.rdfb;
+						   temp.fb = parseInt(temp.fb)*(-1);
+						   temp.x =  parseInt(temp.x)*(-1);
+						   PBList.push(temp);
+						}
+						if(parseInt($(this)[0].fb) > 0 && parseInt($(this)[0].x) == 0){
+							temp.type= "WB";
+							temp.id = temp.matches + temp.rdfb;
+							temp.fb = parseInt(temp.fb)*(-1);
+						   	temp.x =  parseInt(temp.x)*(-1);
+						    WBList.push(temp);
+						}
+					}else{
+						if(CheckType.contains($(this)[0].type)){
+							var temp = $(this)[0];
+							//matches rdfb fb x y t 2 4 5 5 78 0/16
+							switch($(this)[0].type){
+								case "WPB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WPBList.push(temp);
+									break;
+								}
+								case "WPE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WPEList.push(temp);
+									break;
+								}
+								case "WB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WBList.push(temp);
+									break;
+								}
+								case "WE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WEList.push(temp);
+									break;
+								}
+								case "PE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									PEList.push(temp);
+									break;
+								}
+								case "PB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									PBList.push(temp);
+									break;
+									
+								}
+							}
+						}
+					}
+				});
+				  
+				var NoRepeatWPBList = [];
+				var NoRepeatWBList = [];
+				var NoRepeatPBList = [];
+				$(WPBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWPBList.push(WPBList[index]);
+					}
+				});
+				$(PBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatPBList.push(PBList[index]);
+					}
+				});
+				$(WBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWBList.push(WBList[index]);
+					}
+				});
+				
+				var wpeListid =[];
+				var notWPERepterList = [];
+				var notWERepterList = [];
+				var notPERepterList = []; 
+				
+				$(WPEList).each(function(index){
+					var it = $(this)[0];
+					var hadCount = false;
+					$(notWPERepterList).each(function(i){
+						if(it.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(it.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(it.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notWPERepterList.push(WPEList[index]);
+					}
+				});
+				
+				$(PEList).each(function(index){
+					var its = $(this)[0];
+					var hadCount = false;
+					$(notPERepterList).each(function(i){
+						if(its.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(its.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(its.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notPERepterList.push(PEList[index]);
+					}
+				});
+				
+				$(WEList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(notWERepterList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notWERepterList.push(WEList[index]);
+					}
+				});
+				
+				$(notWPERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatWPBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb>0 && temp.x>0){
+						returnList.push(temp);
+					}
+				});
+				$(notWERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatWBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb>0 && temp.x==0){
+						returnList.push(temp);
+					}
+				});
+				
+				$(notPERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatPBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb==0 && temp.x>0){
+						returnList.push(temp);
+					}
+				});
+				
+				$(returnList).each(function(index){
+					$(this)[0].type = $(this)[0].type.replace("E","B");
+				});
+				
+				return returnList;
+				
+			}else{
+				var returnEatList=[];
+				$(allList).each(function(index){
+					if(CheckType.contains($(this)[0].type)){
+						if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
+							if($(this)[0].type.indexOf("E")>=0){
+								var it = $(this)[0];
+								var hadCount = false;
+								$(returnEatList).each(function(i){
+									if(it.id==$(this)[0].id){
+										$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+										hadCount = true;
+									}
+								});
+								if(!hadCount){
+									allList[index].x = parseInt(allList[index].x);
+									returnEatList.push(allList[index]);
+								}
+							}
+							if($(this)[0].type.indexOf("B")>=0){
+								var it = $(this)[0];
+								var hadCount = false;
+								$(returnEatList).each(function(i){
+									if(it.id==$(this)[0].id){
+										$(this)[0].x = parseInt($(this)[0].x) + ( parseInt(it.x)*(-1) );
+										hadCount = true;
+									}
+								});
+								if(!hadCount){
+									allList[index].x = parseInt(allList[index].x)*(-1);
+									returnEatList.push(allList[index]);
+								}
+							}	
+						}
+					}
+					
+				});
+				
+				$(returnEatList).each(function(i){
+					var item = $(this)[0];
+					if(item.x>0){
+						returnList.push(item);
+					}
+				})
+				
+				$(returnList).each(function(index){
+					$(this)[0].type = $(this)[0].type.replace("E","B");
+				});
+				return returnList;
+			}
 		}else{
 			return [];
 		}
@@ -1228,6 +1557,29 @@ ContentScript={
 		
 		return result;
 	},
+	GetAllHadTransactionDataByMatches:function(match){
+		var result = [];
+		$(ContentScript.Hadtxn_mode_check_item).each(function(i){
+			var type = ContentScript.txn_mode_check_item[i];
+			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
+				var temp = "";
+				$(this).find("td").each(function(item){
+					temp += $(this).text()+"$";
+				})
+				if(temp.length>0){
+					var tempArray = temp.split("$");
+					var id = tempArray[0]+tempArray[1]+tempArray[2];
+					item={"id":id,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
+					if(match == tempArray[0]){
+						result.push(item);
+					}
+				}
+			});
+		});
+		
+		return result;
+	},
+	
 	
 	CreateHtmlElement:function(){
 		var htmlList = '<div id="drag" style="background:white;width: 330px; height: 180px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 180px;overflow-y: auto;max-height: 600px;">';
@@ -1238,7 +1590,7 @@ ContentScript={
         htmlList +='<input type= "radio" name="orderType"  value="WP" id="WPType"/>WP';
         htmlList +='<input type= "radio" name="orderType"  value="QP" id="QPType"/>QP';
         htmlList +='&nbsp;&nbsp;限注:<input id="MaxCount" type="number" step="1" style="width: 40px;" size="4" value="90" />';
-        htmlList +='&nbsp;倍率:<select id="Percent"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>20</option><option>50</option><option>100</option></select>';
+        htmlList +='&nbsp;倍率:<select id="Percent"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>20</option><option>50</option><option>100</option><option>200</option><option>500</option><option>1000</option><option>2000</option></select>';
         //htmlList +='&nbsp;倍率:<input id="Percent" type="number" step="0.1" value="1" style="width: 40px;" size="4">';
         htmlList +='</td></tr>';
         htmlList +='<tr style="line-height: 30px;" ><td colspan="2">'
@@ -1291,6 +1643,35 @@ ContentScript={
 						$($(this).find(".del_ch").parent().parent()).hide();
 				});
 				
+		}
+	},
+	EatButtonEventByMatches:function(match){
+		var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
+		if(yellowList !=null && yellowList!=undefined && yellowList.length>0){
+						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
+								var obj = $($(this).find(".del2_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+								var li=obj.split(",");
+								var race=li[5];
+								if(match==race){
+									PostHelp.AjaxDeleteData(obj);
+									$($(this).find(".del2_ch").first().parent().parent()).hide();
+								}
+						});
+						
+		}
+	},
+	BetButtonEventByMatches:function(match){
+		var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
+		if(greenList!=null && greenList!=undefined && greenList.length>0 ){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+						var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+						var li=obj.split(",");
+						var race=li[5];
+						if(match==race){
+							PostHelp.AjaxDeleteData(obj);
+							$($(this).find(".del_ch").first().parent().parent()).hide();
+						}
+				});
 		}
 	},
 	HtmlAddDragEvent:function(){
