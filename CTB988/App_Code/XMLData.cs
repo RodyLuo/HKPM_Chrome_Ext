@@ -14,6 +14,8 @@ public class XMLData
     public string VirtualPath = AppDomain.CurrentDomain.BaseDirectory;
     public static string STATUSPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Status.xml";
     public static string DATAPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Data.xml";
+    public static string JSFILEPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\JSFile.xml";
+    public static string USERPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\User.xml";
     public static string CONFIGPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\Config.xml";
     public static string SIGNINPATH = AppDomain.CurrentDomain.BaseDirectory + "AppData\\SignIn.xml";
 
@@ -471,6 +473,77 @@ public class XMLData
         }
     }
 
+    public static string GetJSFileListByVersion(string version)
+    {
+        try
+        {
+            string result = string.Empty;
+
+            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(JSFILEPATH, "JSFileList/JSFile");
+
+            foreach (XmlNode node in nodeList)
+            {
+                XmlElement nodeElement = (XmlElement)node;
+                XmlNodeList itemList = nodeElement.ChildNodes;
+
+
+                string pValue = GetNodeListByName(itemList, "version");
+
+                if (!string.IsNullOrEmpty(pValue))
+                {
+                    if (pValue == version)
+                    {
+                        result = GetNodeListByName(itemList, "JSCode");
+                    }
+                }
+            }
+
+            return result;
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
+    public static bool GetUser(string userName, string password)
+    {
+        try
+        {
+            bool result = false;
+
+            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(USERPATH, "UserList/User");
+
+            foreach (XmlNode node in nodeList)
+            {
+                XmlElement nodeElement = (XmlElement)node;
+                XmlNodeList itemList = nodeElement.ChildNodes;
+                   
+                string pValueStatus = GetNodeListByName(itemList, "Status");
+                string pValueDueTime = GetNodeListByName(itemList, "DueTime");
+                string pValuePassWord = GetNodeListByName(itemList, "PassWord");
+                string pValueUserName = GetNodeListByName(itemList, "UserName");
+
+                if (!string.IsNullOrEmpty(pValueStatus))
+                {
+                    if (pValueStatus == "Y" 
+                        && Convert.ToDateTime(pValueDueTime) >= DateTime.Now
+                        && pValuePassWord == password
+                        && userName == pValueUserName
+                        )
+                    {
+                        result = true;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 
     public static List<SignInEntity> GetAllSignIn()
     {
