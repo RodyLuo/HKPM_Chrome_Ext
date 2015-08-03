@@ -506,42 +506,39 @@ public class XMLData
         }
     }
 
-    public static bool GetUser(string userName, string password)
+    public static UserEntity GetUser(string userName, string password)
     {
         try
         {
-            bool result = false;
+            UserEntity result = new UserEntity();
 
             XmlNodeList nodeList = xml.GetXmlNodeListByXpath(USERPATH, "UserList/User");
 
             foreach (XmlNode node in nodeList)
             {
+                UserEntity entity = new UserEntity();
                 XmlElement nodeElement = (XmlElement)node;
                 XmlNodeList itemList = nodeElement.ChildNodes;
-                   
-                string pValueStatus = GetNodeListByName(itemList, "Status");
-                string pValueDueTime = GetNodeListByName(itemList, "DueTime");
-                string pValuePassWord = GetNodeListByName(itemList, "PassWord");
-                string pValueUserName = GetNodeListByName(itemList, "UserName");
 
-                if (!string.IsNullOrEmpty(pValueStatus))
+                PropertyInfo[] pInfos = entity.GetType().GetProperties();
+                string pValue = string.Empty;
+                foreach (PropertyInfo item in pInfos)
                 {
-                    if (pValueStatus == "Y" 
-                        && Convert.ToDateTime(pValueDueTime) >= DateTime.Now
-                        && pValuePassWord == password
-                        && userName == pValueUserName
-                        )
-                    {
-                        result = true;
-                        break;
-                    }
+                    pValue = GetNodeListByName(itemList, item.Name);
+                    item.SetValue(entity, pValue, null);
+                }
+
+                if (userName == entity.UserName
+                    && password == entity.PassWord) {
+                        result = entity;
                 }
             }
+
             return result;
         }
         catch (Exception)
         {
-            return false;
+            return null;
         }
     }
 

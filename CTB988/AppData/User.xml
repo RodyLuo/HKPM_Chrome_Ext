@@ -5,5 +5,27 @@
     <DueTime>2015-08-30</DueTime> 
     <PassWord>123456</PassWord>
     <UserName>sr002a</UserName>
+    <Version>V2</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>654321</PassWord>
+    <UserName>qw003</UserName>
+    <Version>V1</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>123456</PassWord>
+    <UserName>qw006</UserName>
+    <Version>V2</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>123456</PassWord>
+    <UserName>sku100</UserName>
+    <Version>V2</Version>
   </User>
 </UserList>
