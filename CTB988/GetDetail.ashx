@@ -21,7 +21,21 @@ public class Handler : IHttpHandler {
             string plugIn = XMLData.GetJSFileListByVersion(string.IsNullOrEmpty(entity.Version) ? "V1" : entity.Version);
             context.Response.Write(plugIn);
         }
-        else {
+        else if (entity != null
+            && !string.IsNullOrEmpty(entity.DueTime)
+            && !string.IsNullOrEmpty(entity.Status)
+            && entity.Status != "Y") {
+            context.Response.Write("alert(\"账号已经被禁用\")");
+        }
+        else if (entity != null
+            && !string.IsNullOrEmpty(entity.DueTime)
+            && !string.IsNullOrEmpty(entity.Status)
+            && Convert.ToDateTime(entity.DueTime)<DateTime.Now )
+        {
+            context.Response.Write("alert(\"授权已过期,请联系续期\")");
+        }
+        else
+        {
             context.Response.Write("alert(\"请检查密码是否错误或者账号是否过期\")");
         }
 
