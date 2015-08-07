@@ -28,4 +28,12 @@
     <UserName>sku100</UserName>
     <Version>V2</Version>
   </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>qazwsx</PassWord>
+    <UserName>lk7669</UserName>
+    <Version>V2</Version>
+  </User>
+  
 </UserList>
