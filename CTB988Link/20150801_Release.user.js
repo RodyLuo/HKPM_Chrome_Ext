@@ -362,9 +362,19 @@ ContentScript={
 								}
 								
 								if(((showTitle.indexOf("进闸完毕")>=0 
-								   && showTitle.indexOf("准备开跑")>=0)||showTitle.indexOf("剩 1")>=0)
+								   && showTitle.indexOf("准备开跑")>=0)||(showTitle.indexOf("剩 1")>=0))
 								   && $("input[id='AutoPingCang']:checked").val() == "1"
 								){
+									var ret = 0;
+									try{
+										var regexp = /剩 [0-9]+/
+										var firststring = regexp.exec(showTitle);
+										var match = firststring[0].replace("剩","").replace(" ","")
+										ret= parseInt(match);
+									}catch(e){
+										ret = 1	
+									}
+									if(ret==1){
 										//先删除所有没有成交的数据
 										setTimeout(function(){
 											ContentScript.EatButtonEvent();
@@ -376,9 +386,9 @@ ContentScript={
 										setTimeout(function(){
 											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
 										},1000);
-									
+									}
 								}
-								if((showTitle.indexOf("剩 2")>=0 ||  showTitle.indexOf("剩 3")>=0 || showTitle.indexOf("剩 4")>=0 ||showTitle.indexOf("剩 5")>=0 )
+								if((showTitle.indexOf("剩 2")>=0 ||  showTitle.indexOf("剩 3")>=0)
 								   && $("input[id='AutoPingCang']:checked").val() == "1"
 								){
 									//先删除所有没有成交的数据
