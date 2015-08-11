@@ -381,11 +381,44 @@ ContentScript={
 										},0);
 										setTimeout(function(){
 											ContentScript.BetButtonEvent();
-										},0);
+										},100);
 										//然后100%的平仓数据交易
 										setTimeout(function(){
 											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
 										},1000);
+										
+										//先删除所有没有成交的数据
+										setTimeout(function(){
+											ContentScript.EatButtonEvent();
+										},2000);
+										setTimeout(function(){
+											ContentScript.BetButtonEvent();
+										},2100);
+										//然后100%的平仓数据交易
+										setTimeout(function(){
+											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
+										},3000);
+										
+										//先删除所有没有成交的数据
+										setTimeout(function(){
+											ContentScript.EatButtonEvent();
+										},3100);
+										setTimeout(function(){
+											ContentScript.BetButtonEvent();
+										},3200);
+										//然后100%的平仓数据交易
+										setTimeout(function(){
+											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
+										},4000);
+										
+										//平仓后结束
+										if(ContentScript.timerWithOrderClock!=null){
+											clearInterval(ContentScript.timerWithOrderClock);
+										}
+										ContentScript.timerWithOrderClock = null;
+										ContentScript.timerCountPageEatAndBet = self.setInterval(function(){ContentScript.showCountWithWhere()},1000);
+										$("#btnStart").show();
+										$("#btnEnd").hide();
 									}
 								}
 								if((showTitle.indexOf("剩 2")>=0 ||  showTitle.indexOf("剩 3")>=0)
@@ -1081,14 +1114,6 @@ ContentScript={
 							var postData = {};
 							postData.task = "betBox";
 							postData.combo =0;
-							//<td>6</td>
-							//<td class="RD F_B">FC</td>
-							//<td class="F_B ">4-5</td>
-							//<td id="FCE_6_4-5_100_700x">2</td>
-							//<td id="FCE_6_4-5_100_700y">100</td>
-							//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
-							//<td class="">吃</td>
-							
 							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.x),"Q");
 							postData.Race = parseInt(item.matches);
 							var hourse1,hourse2;
@@ -1159,13 +1184,6 @@ ContentScript={
 							
 							var postURL ="";
 							postURL ="/bets";
-							//if(item.type.indexOf("E")>=0){
-							//postData.type = "eat";
-							//postURL ="/bets";
-							//}else{
-							//postData.type = "bet";
-							//postURL = "/bookings";
-							//}
 							
 							if(isBalance){
 								postData.amount = 99;
@@ -1173,7 +1191,6 @@ ContentScript={
 								postData.amount = ContentScript.PageConfig.Discount;
 							}
 							
-							//postData.limit = ContentScript.PageConfig.LimitStart+"/"+ ContentScript.PageConfig.LimitEnd;
 							postData.l_win = ContentScript.PageConfig.LimitStart;
 							postData.l_place = ContentScript.PageConfig.LimitEnd;
 							postData.race_type = signInfo.RaceType;

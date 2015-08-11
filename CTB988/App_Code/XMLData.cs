@@ -574,4 +574,42 @@ public class XMLData
             return null;
         }
     }
+
+    public static bool AddUser(UserEntity entity) {
+        try
+        {
+            Hashtable hashTable = new Hashtable();
+            PropertyInfo[] pInfos = entity.GetType().GetProperties();
+            string pValue = string.Empty;
+            foreach (PropertyInfo item in pInfos)
+            {
+                if (!(item.GetValue(entity, null) == null))
+                {
+                    pValue = item.GetValue(entity, null).ToString();
+                }
+                else
+                {
+                    pValue = string.Empty;
+                }
+                hashTable.Add(item.Name, string.IsNullOrEmpty(pValue) ? string.Empty : pValue);
+            }
+            bool node = false;
+            lock (dataObj)
+            {
+                node = xml.InsertNode(USERPATH, "User", false, "UserList", null, hashTable);
+            }
+            if (node)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }
