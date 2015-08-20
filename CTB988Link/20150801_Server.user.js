@@ -273,6 +273,32 @@ ContentScript={
 			ContentScript.PageConfig.Percent =$("#Percent").val();
 		});
 	},
+	checkPingCangData:function(){
+		ContentScript.timerCheckPingCangData = self.setInterval(function(){
+			//先删除所有没有成交的数据
+			ContentScript.EatButtonEvent();
+			ContentScript.BetButtonEvent();
+			ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
+			
+			var needRool = false;
+			var betData = ContentScript.GetAllDBmrTransactionData();
+			if(betData !=null && betData!=undefined && betData.length>0){
+				$(betData).each(function(index){
+					if($(this)[0].y!="100"){
+						needRool=true;
+					}
+				});
+			}
+			var checkPcData = ContentScript.getNeedPingCangOrderList()
+			if(!needRool && (checkPcData == null || checkPcData == undefined || checkPcData.length==0)){
+				if(ContentScript.timerCheckPingCangData!=null){
+					clearInterval(ContentScript.timerCheckPingCangData);
+				}
+				ContentScript.timerCheckPingCangData =null;
+			}
+		},1000);
+		
+	},
 	allOnitEvent:function(){
 		//创建用户界面
 						ContentScript.CreateHtmlElement();

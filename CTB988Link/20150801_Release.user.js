@@ -49,6 +49,7 @@ ContentScript={
 	AlertPassToLater:"软件过期",
 	PassError:"密码错误",
 	StaticOldAllData:[],
+	SinglePath:false,
 	StaticCountShowData:[],
 	StaticOldCountShowData:[],
 	HelloKitty:"81dc9bdb52d04dc20036dbd8313ed055",
@@ -347,10 +348,15 @@ ContentScript={
 								ContentScript.StaticOldAllData = ContentScript.StaticAllData
 								ContentScript.StaticAllData = ContentScript.GetAllHadTransactionData();
 								if(JSON.stringify(ContentScript.StaticOldAllData) != JSON.stringify(ContentScript.StaticAllData)){
-									ContentScript.StaticCountShowData = ContentScript.StaticAllData;
-									ContentScript.showCountPageEatAndBet();
-									ContentScript.needAjaxCount=ContentScript.getNeedWithOrderList();
-									ContentScript.withOrderOnInit(ContentScript.needAjaxCount,false);
+									if(ContentScript.SinglePath){
+									 	//nothing
+									}else{
+										ContentScript.StaticCountShowData = ContentScript.StaticAllData;
+										ContentScript.showCountPageEatAndBet();
+										ContentScript.needAjaxCount=ContentScript.getNeedWithOrderList();
+										ContentScript.withOrderOnInit(ContentScript.needAjaxCount,false);
+									}
+									
 								}
 								
 								var showTitle = "";
@@ -375,6 +381,7 @@ ContentScript={
 										ret = 1	
 									}
 									if(ret==1){
+										ContentScript.SinglePath = true;
 										//先删除所有没有成交的数据
 										setTimeout(function(){
 											ContentScript.EatButtonEvent();
@@ -399,18 +406,6 @@ ContentScript={
 											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
 										},3000);
 										
-										//先删除所有没有成交的数据
-										setTimeout(function(){
-											ContentScript.EatButtonEvent();
-										},3100);
-										setTimeout(function(){
-											ContentScript.BetButtonEvent();
-										},3200);
-										//然后100%的平仓数据交易
-										setTimeout(function(){
-											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
-										},4000);
-										
 										//平仓后结束
 										if(ContentScript.timerWithOrderClock!=null){
 											clearInterval(ContentScript.timerWithOrderClock);
@@ -428,6 +423,7 @@ ContentScript={
 									setTimeout(function(){
 										ContentScript.EatButtonEvent();
 									},0);
+									ContentScript.SinglePath = true;
 								}
 							},1000);
 						});
