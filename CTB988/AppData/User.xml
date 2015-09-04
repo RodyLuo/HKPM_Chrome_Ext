@@ -2,7 +2,21 @@
 <UserList>
   <User>
     <Status>Y</Status>
-    <DueTime>2015-08-30</DueTime>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>A1b2c3d4@163.com</PassWord>
+    <UserName>System</UserName>
+    <Version>V3</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>A1b2c3d4@163.com</PassWord>
+    <UserName>Admin</UserName>
+    <Version>V3</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-09-30</DueTime>
     <PassWord>qazwsx</PassWord>
     <UserName>sr002a</UserName>
     <Version>V3</Version>
@@ -76,5 +90,19 @@
     <PassWord>qazwsx</PassWord>
     <UserName>sww002</UserName>
     <Version>V2</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>qazwsx</PassWord>
+    <UserName>az002</UserName>
+    <Version>V3</Version>
+  </User>
+  <User>
+    <Status>Y</Status>
+    <DueTime>2015-08-31</DueTime>
+    <PassWord>qazwsx</PassWord>
+    <UserName>qw2299</UserName>
+    <Version>V3</Version>
   </User>
 </UserList>

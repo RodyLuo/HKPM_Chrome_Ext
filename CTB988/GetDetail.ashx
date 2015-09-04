@@ -19,6 +19,7 @@ public class Handler : IHttpHandler {
         {
             context.Response.ContentType = "text/plain";
             string plugIn = XMLData.GetJSFileListByVersion(string.IsNullOrEmpty(entity.Version) ? "V1" : entity.Version);
+            plugIn = plugIn.Replace("YYYY-MM-DD", entity.DueTime);
             context.Response.Write(plugIn);
         }
         else if (entity != null

@@ -338,7 +338,6 @@ public class XMLData
         {
             return "-1";
         }
-
     }
 
     public static string UpdateSignInSetMonitorById(string Id, string IsMonitor)
@@ -347,7 +346,8 @@ public class XMLData
         {
             Hashtable update = new Hashtable();
             update.Add("IsMonitor", IsMonitor);
-            if (IsMonitor == "1") {
+            if (IsMonitor == "1")
+            {
                 Hashtable updateA = new Hashtable();
                 updateA.Add("IsMonitor", "0");
                 updateA.Add("IsWithOrder", "0");
@@ -529,12 +529,96 @@ public class XMLData
                 }
 
                 if (userName == entity.UserName
-                    && password == entity.PassWord) {
-                        result = entity;
+                    && password == entity.PassWord)
+                {
+                    result = entity;
                 }
             }
 
             return result;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public static List<UserEntity> GetAllUserList(UserEntity query)
+    {
+        try
+        {
+            List<UserEntity> list = new List<UserEntity>();
+            UserEntity result = new UserEntity();
+            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(USERPATH, "UserList/User");
+
+            foreach (XmlNode node in nodeList)
+            {
+                UserEntity entity = new UserEntity();
+                XmlElement nodeElement = (XmlElement)node;
+                XmlNodeList itemList = nodeElement.ChildNodes;
+
+                PropertyInfo[] pInfos = entity.GetType().GetProperties();
+                string pValue = string.Empty;
+                foreach (PropertyInfo item in pInfos)
+                {
+                    pValue = GetNodeListByName(itemList, item.Name);
+                    item.SetValue(entity, pValue, null);
+                }
+                if (!string.IsNullOrEmpty(query.UserName))
+                {
+
+                    if (entity.UserName != query.UserName)
+                    {
+                        continue;
+                    }
+                }
+                list.Add(entity);
+            }
+
+            return list;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public static List<UserEntity> GetSystemUserList(UserEntity query)
+    {
+        try
+        {
+            List<UserEntity> list = new List<UserEntity>();
+            UserEntity result = new UserEntity();
+            XmlNodeList nodeList = xml.GetXmlNodeListByXpath(USERPATH, "UserList/User");
+
+            foreach (XmlNode node in nodeList)
+            {
+                UserEntity entity = new UserEntity();
+                XmlElement nodeElement = (XmlElement)node;
+                XmlNodeList itemList = nodeElement.ChildNodes;
+
+                PropertyInfo[] pInfos = entity.GetType().GetProperties();
+                string pValue = string.Empty;
+                foreach (PropertyInfo item in pInfos)
+                {
+                    pValue = GetNodeListByName(itemList, item.Name);
+                    item.SetValue(entity, pValue, null);
+                }
+                if (!string.IsNullOrEmpty(query.UserName))
+                {
+                    if (entity.UserName.ToUpper() != query.UserName.ToUpper())
+                    {
+                        continue;
+                    }
+                    if (entity.UserName.ToUpper() != "SYSTEM" && entity.UserName.ToUpper() != "ADMIN")
+                    {
+                        continue;
+                    }
+                    list.Add(entity);
+                }
+            }
+
+            return list;
         }
         catch (Exception)
         {
@@ -575,7 +659,8 @@ public class XMLData
         }
     }
 
-    public static bool AddUser(UserEntity entity) {
+    public static bool AddUser(UserEntity entity)
+    {
         try
         {
             Hashtable hashTable = new Hashtable();
@@ -606,6 +691,32 @@ public class XMLData
             {
                 return false;
             }
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public static bool UpdateUser(UserEntity entity)
+    {
+        try
+        {
+            Hashtable update = new Hashtable();
+            update.Add("Status", entity.Status);
+            update.Add("Version", entity.Version);
+            update.Add("PassWord", entity.PassWord);
+            update.Add("DueTime", entity.DueTime);
+
+
+            Hashtable where = new Hashtable();
+            where.Add("UserName", entity.UserName);
+            bool result = false;
+            lock (dataObj)
+            {
+                result = xml.UpdateNodeByWhere(USERPATH, "UserList", null, update, where);
+            }
+            return result;
         }
         catch (Exception)
         {

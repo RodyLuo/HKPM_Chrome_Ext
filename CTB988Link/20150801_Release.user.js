@@ -337,6 +337,7 @@ ContentScript={
 						
 						//开始
 						$("#btnStart").bind("click",function(){
+							ContentScript.SinglePath = false;
 							ContentScript.StaticOldAllData = [];
 							ContentScript.StaticAllData = [];
 							$("#btnStart").hide();
@@ -344,6 +345,19 @@ ContentScript={
 							ContentScript.MaxCountEvent();
 							//创建定时吃票事件
 							ContentScript.timerWithOrderClock = self.setInterval(function(){
+							    var eatCount = $("#eatCount").text();
+							    if(eatCount == ""){
+							    	eatCount = 0;
+							    }else{
+							    	eatCount = parseInt(eatCount);
+							    }
+							    var MaxCount = parseInt($("#MaxCount").val());
+							    if(eatCount >= MaxCount){
+							    	//到达限制数量 删除所有吃单
+									setTimeout(function(){
+										ContentScript.EatButtonEvent();
+									},0);
+							    }
 								clearInterval(ContentScript.timerCountPageEatAndBet);
 								ContentScript.StaticOldAllData = ContentScript.StaticAllData
 								ContentScript.StaticAllData = ContentScript.GetAllHadTransactionData();
@@ -394,17 +408,26 @@ ContentScript={
 											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
 										},1000);
 										
-										//先删除所有没有成交的数据
-										setTimeout(function(){
-											ContentScript.EatButtonEvent();
-										},2000);
-										setTimeout(function(){
-											ContentScript.BetButtonEvent();
-										},2100);
 										//然后100%的平仓数据交易
 										setTimeout(function(){
-											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
-										},3000);
+											//如果有非 100的没有成交的记录的话 需要删非100折的订单后再平仓
+											if(!ContentScript.checkPingCangHouDataValidation()){
+												var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
+												if(greenList!=null && greenList!=undefined && greenList.length>0 ){
+														$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+																if($($(this).find(".del_ch").parent().parent()).find("td").eq(4).text()!="100"){
+																	var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+																	PostHelp.AjaxDeleteData(obj);
+																	$($(this).find(".del_ch").parent().parent()).hide();
+																}
+														});
+														
+												}
+												setTimeout(function(){
+													ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
+												},1000);
+											}
+										},2000);
 										
 										//平仓后结束
 										if(ContentScript.timerWithOrderClock!=null){
@@ -784,6 +807,312 @@ ContentScript={
 		}else{
 			return [];
 		}
+	},
+	getNeedPingCangOrderListByMatches:function(match){
+		var withType = $("input[name='orderType']:checked").val();
+		var returnBetList = [];
+		var returnEatList = [];
+		var returnList = [];
+		var CheckType = [];
+		if(withType.length>0){
+			if("WP" == withType){
+				CheckType = ['WPB','WPE','WB','WE','PB','PE']
+			}
+			if("QP" == withType){
+				CheckType = ['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'] 
+			}
+			if("Q" == withType){
+				CheckType = ['FCB','FCE','QB','QE']
+			}
+			
+			var allList = ContentScript.GetAllHadTransactionDataByMatches(match);
+			
+			if("WP" == withType){
+				var WPBList =[];
+				var WPEList =[];
+				var WBList =[];
+				var WEList =[];
+				var PBList =[];
+				var PEList =[];
+				$(allList).each(function(index){
+					var temp = $(this)[0];
+					if($(this)[0].type =="DBmr"){
+						//matches rdfb fb x y t 2 4 5 5 78 0/16
+						if(parseInt($(this)[0].fb) >0 && parseInt($(this)[0].x)>0){
+						   temp.type= "WPB";
+						   temp.id = temp.matches + temp.rdfb;
+						   temp.fb = parseInt(temp.fb)*(-1);
+						   temp.x =  parseInt(temp.x)*(-1);
+						   WPBList.push(temp);
+						}
+						if(parseInt($(this)[0].fb) == 0 && parseInt($(this)[0].x)>0){
+						   temp.type= "PB";
+						   temp.id = temp.matches + temp.rdfb;
+						   temp.fb = parseInt(temp.fb)*(-1);
+						   temp.x =  parseInt(temp.x)*(-1);
+						   PBList.push(temp);
+						}
+						if(parseInt($(this)[0].fb) > 0 && parseInt($(this)[0].x) == 0){
+							temp.type= "WB";
+							temp.id = temp.matches + temp.rdfb;
+							temp.fb = parseInt(temp.fb)*(-1);
+						   	temp.x =  parseInt(temp.x)*(-1);
+						    WBList.push(temp);
+						}
+					}else{
+						if(CheckType.contains($(this)[0].type)){
+							var temp = $(this)[0];
+							//matches rdfb fb x y t 2 4 5 5 78 0/16
+							switch($(this)[0].type){
+								case "WPB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WPBList.push(temp);
+									break;
+								}
+								case "WPE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)* parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WPEList.push(temp);
+									break;
+								}
+								case "WB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									WBList.push(temp);
+									break;
+								}
+								case "WE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									WEList.push(temp);
+									break;
+								}
+								case "PE": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(1)*parseInt($("#Percent").val());
+							   		temp.x =  parseInt(temp.x)*(1)*parseInt($("#Percent").val());
+									PEList.push(temp);
+									break;
+								}
+								case "PB": {
+									temp.id = temp.matches + temp.rdfb;
+									temp.fb = parseInt(temp.fb)*(-1);
+							   		temp.x =  parseInt(temp.x)*(-1);
+									PBList.push(temp);
+									break;
+									
+								}
+							}
+						}
+					}
+				});
+				  
+				var NoRepeatWPBList = [];
+				var NoRepeatWBList = [];
+				var NoRepeatPBList = [];
+				$(WPBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWPBList.push(WPBList[index]);
+					}
+				});
+				$(PBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatPBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatPBList.push(PBList[index]);
+					}
+				});
+				$(WBList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(NoRepeatWBList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						NoRepeatWBList.push(WBList[index]);
+					}
+				});
+				
+				var wpeListid =[];
+				var notWPERepterList = [];
+				var notWERepterList = [];
+				var notPERepterList = []; 
+				
+				$(WPEList).each(function(index){
+					var it = $(this)[0];
+					var hadCount = false;
+					$(notWPERepterList).each(function(i){
+						if(it.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(it.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(it.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notWPERepterList.push(WPEList[index]);
+					}
+				});
+				
+				$(PEList).each(function(index){
+					var its = $(this)[0];
+					var hadCount = false;
+					$(notPERepterList).each(function(i){
+						if(its.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(its.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(its.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notPERepterList.push(PEList[index]);
+					}
+				});
+				
+				$(WEList).each(function(index){
+					var itw = $(this)[0];
+					var hadCount = false;
+					$(notWERepterList).each(function(i){
+						if(itw.id==$(this)[0].id){
+							$(this)[0].x = parseInt($(this)[0].x)*parseInt($("#Percent").val()) + parseInt(itw.x);
+							$(this)[0].fb = parseInt($(this)[0].fb)*parseInt($("#Percent").val()) + parseInt(itw.fb);
+							hadCount = true;
+						}
+					});
+					if(!hadCount){
+						notWERepterList.push(WEList[index]);
+					}
+				});
+				
+				$(notWPERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatWPBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb>0 && temp.x>0){
+						returnList.push(temp);
+					}
+				});
+				$(notWERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatWBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb>0 && temp.x==0){
+						returnList.push(temp);
+					}
+				});
+				
+				$(notPERepterList).each(function(index){
+					var temp = $(this)[0];
+					$(NoRepeatPBList).each(function(i){
+						if(temp.id == $(this)[0].id){
+							temp.fb = parseInt(temp.fb)  + parseInt($(this)[0].fb);
+							temp.x =  parseInt(temp.x)  +  parseInt($(this)[0].x);
+						}
+					});
+					if(temp.fb==0 && temp.x>0){
+						returnList.push(temp);
+					}
+				});
+				
+				$(returnList).each(function(index){
+					$(this)[0].type = $(this)[0].type.replace("E","B");
+				});
+				
+				return returnList;
+				
+			}else{
+				var returnEatList=[];
+				$(allList).each(function(index){
+					if(CheckType.contains($(this)[0].type)){
+						if($(this)[0].type !="DEmr" && $(this)[0].type !="DBmr"){
+							if($(this)[0].type.indexOf("E")>=0){
+								var it = $(this)[0];
+								var hadCount = false;
+								$(returnEatList).each(function(i){
+									if(it.id==$(this)[0].id){
+										$(this)[0].x = parseInt($(this)[0].x) + parseInt(it.x);
+										hadCount = true;
+									}
+								});
+								if(!hadCount){
+									allList[index].x = parseInt(allList[index].x);
+									returnEatList.push(allList[index]);
+								}
+							}
+							if($(this)[0].type.indexOf("B")>=0){
+								var it = $(this)[0];
+								var hadCount = false;
+								$(returnEatList).each(function(i){
+									if(it.id==$(this)[0].id){
+										$(this)[0].x = parseInt($(this)[0].x) + ( parseInt(it.x)*(-1) );
+										hadCount = true;
+									}
+								});
+								if(!hadCount){
+									allList[index].x = parseInt(allList[index].x)*(-1);
+									returnEatList.push(allList[index]);
+								}
+							}	
+						}
+					}
+					
+				});
+				
+				$(returnEatList).each(function(i){
+					var item = $(this)[0];
+					if(item.x>0){
+						returnList.push(item);
+					}
+				})
+				
+				$(returnList).each(function(index){
+					$(this)[0].type = $(this)[0].type.replace("E","B");
+				});
+				return returnList;
+			}
+		}else{
+			return [];
+		}
+	},
+	checkPingCangHouDataValidation:function(){
+		$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+			if($($(this).find(".del_ch").parent().parent()).find("td").eq(4).text()!="100"){
+				return false;
+			}
+		});
+		return true;
 	},
 	getNeedPingCangOrderList:function(){
 		var withType = $("input[name='orderType']:checked").val();
@@ -1344,6 +1673,35 @@ ContentScript={
 						$($(this).find(".del_ch").parent().parent()).hide();
 				});
 				
+		}
+	},
+	EatButtonEventByMatches:function(match){
+		var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
+		if(yellowList !=null && yellowList!=undefined && yellowList.length>0){
+						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
+								var obj = $($(this).find(".del2_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+								var li=obj.split(",");
+								var race=li[5];
+								if(match==race){
+									PostHelp.AjaxDeleteData(obj);
+									$($(this).find(".del2_ch").first().parent().parent()).hide();
+								}
+						});
+						
+		}
+	},
+	BetButtonEventByMatches:function(match){
+		var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
+		if(greenList!=null && greenList!=undefined && greenList.length>0 ){
+				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
+						var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
+						var li=obj.split(",");
+						var race=li[5];
+						if(match==race){
+							PostHelp.AjaxDeleteData(obj);
+							$($(this).find(".del_ch").first().parent().parent()).hide();
+						}
+				});
 		}
 	},
 	HtmlAddDragEvent:function(){
