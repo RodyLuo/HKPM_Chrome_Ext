@@ -63,6 +63,7 @@
                     </td>
                     <td>
                         <a href="javascript:void(0)" class="UpdateUser">修改</a>
+                        <a href="javascript:void(0)" class="DeleteUser">删除</a>
                     </td>
                 </tr>
                 <%} %>
@@ -157,6 +158,30 @@
                 });
             }
         });
+        $(".DeleteUser").bind("click", function () {
+            if (confirm("确定删除账号吗？")) {
+                var UserName = $(this).parent().parent().find(".UserName").text();
+                var PassWord = $(this).parent().parent().find(".PassWord").val();
+                var Status = "D";
+                var DueTime = $(this).parent().parent().find(".DueTime").val();
+                var Version = $(this).parent().parent().find(".Version").val();
+                var Type = "UPDATE";
+                var AuthID = Request("AuthID");
+                var postData = { UserName: UserName, PassWord: PassWord, Status: Status, DueTime: DueTime, Version: Version, Type: Type, AuthID: AuthID };
+                $.ajax({
+                    type: "get",
+                    url: "AddUser.ashx",
+                    data: postData,
+                    success: function (msg) {
+                        self.location.reload();
+                    },
+                    error: function (msg) {
+                        alert("操作失败,请联系开发者");
+                    }
+                });
+            }
+        });
+        
     </script>
 </body>
 </html>

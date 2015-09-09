@@ -529,7 +529,7 @@ public class XMLData
                 }
 
                 if (userName == entity.UserName
-                    && password == entity.PassWord)
+                    && password == entity.PassWord && entity.Status != "D")
                 {
                     result = entity;
                 }
@@ -572,7 +572,11 @@ public class XMLData
                         continue;
                     }
                 }
-                list.Add(entity);
+                //代表已经删除了
+                if (entity.Status != "D")
+                {
+                    list.Add(entity);
+                }
             }
 
             return list;

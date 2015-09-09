@@ -15,28 +15,28 @@
     <Version>V3</Version>
   </User>
   <User>
-    <Status>Y</Status>
+    <Status>D</Status>
     <DueTime>2015-09-30</DueTime>
     <PassWord>qazwsx</PassWord>
     <UserName>sr002a</UserName>
     <Version>V3</Version>
   </User>
   <User>
-    <Status>Y</Status>
+    <Status>D</Status>
     <DueTime>2015-08-31</DueTime>
     <PassWord>qazwsx</PassWord>
     <UserName>qw003</UserName>
     <Version>V1</Version>
   </User>
   <User>
-    <Status>Y</Status>
+    <Status>D</Status>
     <DueTime>2015-08-31</DueTime>
     <PassWord>qazwsx</PassWord>
     <UserName>qw006</UserName>
     <Version>V3</Version>
   </User>
   <User>
-    <Status>Y</Status>
+    <Status>D</Status>
     <DueTime>2015-08-31</DueTime>
     <PassWord>qazwsx</PassWord>
     <UserName>sku100</UserName>
@@ -104,5 +104,12 @@
     <PassWord>qazwsx</PassWord>
     <UserName>qw2299</UserName>
     <Version>V3</Version>
+  </User>
+  <User>
+    <Version>V2</Version>
+    <DueTime>2015-08-31</DueTime>
+    <Status>Y</Status>
+    <UserName>sku100</UserName>
+    <PassWord>qazwsx</PassWord>
   </User>
 </UserList>

@@ -27,7 +27,6 @@ public class Handler : IHttpHandler {
                 || string.IsNullOrEmpty(Version)
                 || string.IsNullOrEmpty(AuthID)
                 || string.IsNullOrEmpty(Type)
-                || dt <= DateTime.Now
                 )
             {
                 context.Response.Write("请检查数据是否合法！");
