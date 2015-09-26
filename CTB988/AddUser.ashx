@@ -51,11 +51,11 @@ public class Handler : IHttpHandler {
                 {
                     UserEntity item = new UserEntity();
                     item.UserName = UserName;
+                    item.PassWord = PassWord;
                     List<UserEntity> aa = XMLData.GetAllUserList(item);
                     if (aa != null && aa.Count > 0)
                     {
                         checkSuccess = "用户名重复";
-
                     }
                     else
                     {
@@ -77,9 +77,17 @@ public class Handler : IHttpHandler {
                     }
                     else
                     {
-                        if (XMLData.UpdateUser(entity))
+                        item.PassWord = PassWord;
+                        List<UserEntity> bb = XMLData.GetAllUserList(item);
+                        if (bb != null && bb.Count == 1)
                         {
-                            checkSuccess = "操作成功";
+                            if (XMLData.UpdateUser(entity))
+                            {
+                                checkSuccess = "操作成功";
+                            }
+                        }
+                        else {
+                            checkSuccess = "没有本账号！";
                         }
                     }
                 }

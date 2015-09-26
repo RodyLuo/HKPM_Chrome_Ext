@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name       Rody WaiGua Programming
+// @name       Rody KongWei Programming
 // @version    20150613
 // @include    http://*.ctb988.com/*  
 // @include    http://*.ctb988.net/*  
-// @copyright  2014+, CH3CHO <luotingkk@163.com>
+// @copyright  2015+, CH3CHO <luotingkk@163.com>
 // @grant      none
 // ==/UserScript==
 
@@ -52,8 +52,6 @@ ContentScript={
 	SinglePath:false,
 	StaticCountShowData:[],
 	StaticOldCountShowData:[],
-	HelloKitty:"81dc9bdb52d04dc20036dbd8313ed055",
-	HelloKittyTime:["212112eece862ca4a3da112f217288fb","519edc8db508d1c088f793f2c3647e6f"],
 	DaoQiTime:"2015-08-31",
 	PageConfig:{
 		Discount:80,
@@ -65,7 +63,8 @@ ContentScript={
 		LimitWhere1:$("#LimitWhere1").val(),
 		LimitWhere2:$("#LimitWhere2").val(),
 		EatDiscount:$("#EatDiscount").val(),
-		BetDiscount:$("#EatDiscount").val()
+		BetDiscount:$("#BetDiscount").val(),
+		OrderType:$("input[name='orderType']:checked").val()
 	},
 	showCountWithWhere:function(){
 		ContentScript.StaticOldCountShowData = ContentScript.StaticCountShowData;
@@ -115,6 +114,7 @@ ContentScript={
 			item.pl1 = parseFloat($(this).parent().prev().text());
 			item.pl2 = parseFloat($(this).parent().next().text());
 			item.cc =  $(this).text();
+			item.type="WP";
 			result.push(item);
 		});
 		return result;
@@ -122,16 +122,16 @@ ContentScript={
 	setLimitAndDiscount:function(){
 		var withType = $("input[name='orderType']:checked").val();
 		if("WP" == withType){
-			$("#LimitStart")val(300);
-			$("#LimitEnd")val(0);
+			$("#LimitStart").val(300);
+			$("#LimitEnd").val(0);
 		}
 		if("QP" == withType){
-			$("#LimitStart")val(400);
-			$("#LimitEnd")val(400);
+			$("#LimitStart").val(400);
+			$("#LimitEnd").val(400);
 		}
 		if("Q" == withType){
-			$("#LimitStart")val(700);
-			$("#LimitEnd")val(700);
+			$("#LimitStart").val(700);
+			$("#LimitEnd").val(700);
 		}
 	},
 	showCountPageEatAndBet:function(){
@@ -254,7 +254,7 @@ ContentScript={
 	},
 	onInit:function(){
 		var host =window.location.href;
-		if(host.indexOf("playerhk.jsp")>=0 || host.indexOf("Q.jsp")>=0){
+		if(host.indexOf("Q.jsp")>=0){
 			ContentScript.allOnitEvent();
 		}
 	},
@@ -268,35 +268,118 @@ ContentScript={
 			ContentScript.PageConfig.Percent =$("#Percent").val();
 		});
 	},
-	ComputeSubmitData:function(){
+	GetSubmitData:function(){
+		ContentScript.PageConfig = {
+			Discount:80,
+			LimitStart:$("#LimitStart").val(),
+			LimitEnd:$("#LimitEnd").val(),
+			Percent: 1,
+			EatBetType:$("input[name='EatBetType']:checked").val(),
+			KW:$("#KongWei").val(),
+			LimitWhere1:$("#LimitWhere1").val(),
+			LimitWhere2:$("#LimitWhere2").val(),
+			EatDiscount:$("#EatDiscount").val(),
+			BetDiscount:$("#BetDiscount").val(),
+			OrderType:$("input[name='orderType']:checked").val()
+		}
 		var eatBetType = ContentScript.PageConfig.EatBetType;
+		var processData = [];
 		if(eatBetType == "Eat"){
-			var eatData = ContentScript.GetAllEatTransactionData();
+			processData = ContentScript.GetAllEatTransactionData();
 		}
 		if(eatBetType == "Bet"){
-			var betData = ContentScript.GetAllBetTransactionData();
+			processData = ContentScript.GetAllBetTransactionData();
 		}
+		var PLData =[];
+		if(ContentScript.PageConfig.OrderType=="WP"){
+			PLData = ContentScript.getWPPLDataList();
+		}
+		if(ContentScript.PageConfig.OrderType=="Q" || ContentScript.PageConfig.OrderType=="QP"){
+			for(var i = 1 ;i<=20;i++){
+				for(var j = i+1;j<=20;j++){
+					var pl = ContentScript.getQPLData(i,j);
+					if(pl>0){
+						var item = {};
+						item.pl1 = parseFloat(pl);
+						item.pl2 = 0;
+						item.cc =  i;
+						item.cc2 = j;
+						item.type = ContentScript.PageConfig.OrderType;
+						PLData.push(item);
+					}
+				}
+			}
+		}
+		//item={"id":id,"type":type,"matches":tempArray[0],"rdfb":tempArray[1],"fb":tempArray[2],"x":tempArray[3],"y":tempArray[4],"t":tempArray[5]}
+		var whereData = [];
+		$(PLData).each(function(index){
+			if(parseFloat(ContentScript.PageConfig.LimitWhere1)<= parseFloat(PLData[index].pl1) 
+				&& parseFloat(ContentScript.PageConfig.LimitWhere2) >= parseFloat(PLData[index].pl1)){
+				whereData.push(PLData[index]);
+			}
+		});
+		var preCount = 0.0;
+		var result = [];
+		$(whereData).each(function(index){
+			var curr = $(this)[0];
+			curr.ticket = parseFloat(ContentScript.PageConfig.KW)/curr.pl1;
+			preCount += curr.ticket;
+			var ticketed = 0.0;
+			$(processData).each(function(item){
+				if(ContentScript.PageConfig.OrderType =="Q"){
+					if(processData[item].fb == (curr.cc + "-"+curr.cc2)){
+						ticketed += parseFloat(processData[item].x);
+					}
+				}
+				if(ContentScript.PageConfig.OrderType =="QP"){
+					if(processData[item].fb == ("("+curr.cc + "-"+curr.cc2+")")){
+						ticketed += parseFloat(processData[item].x);
+					}
+				}
+			});
+			if(ticketed < curr.ticket){
+				curr.ticket = curr.ticket - ticketed;
+				result.push(curr);
+			}
+		});
+		$("#GJCount").val(preCount);
+		$("#CJCount").val(ContentScript.GetCJCount());
+		
+		return result;
 	}
 	,allOnitEvent:function(){
 		//创建用户界面
 						ContentScript.CreateHtmlElement();
 						//绑定拖拽事件
 						ContentScript.HtmlAddDragEvent();
+						
 						$("#daoqitime").text(ContentScript.DaoQiTime);
 						
 						$("input[name='orderType']").bind("click",function(){
-							setLimitAndDiscount();
+							ContentScript.setLimitAndDiscount();
 						});
 						$("input[name='EatBetType']").bind("click",function(){
 							
 						});
+						ContentScript.timerCheckCJCount = setInterval(function(){
+							if($("#KongWei").val()!="" && 
+								($("#LimitWhere1").val()!="") || $("#LimitWhere2").val()!=""){
+								ContentScript.GetSubmitData();
+							}
+						},2000);
 						//开始
 						$("#btnStart").bind("click",function(){
-							
-						});
-						//结束
-						$("#btnEnd").bind("click",function(){
-							
+							$("#btnStart").hide();
+							var data = ContentScript.GetSubmitData();
+							console.log(data);
+							if($("#GJCount")!=undefined && $("#GJCount").val()!="" && ((ContentScript.PageConfig.EatBetType=="Eat" && ContentScript.PageConfig.EatDiscount!="")
+							||(ContentScript.PageConfig.EatBetType=="Bet" && ContentScript.PageConfig.BetDiscount!="")))
+							{
+								setTimeout(ContentScript.withOrderOnInit(data),0);
+							}else{
+								alert("数据不合法！");
+								$("#btnStart").show();
+							}
 						});
 	},
 	getNeedWithOrderList:function(){
@@ -1240,27 +1323,25 @@ ContentScript={
 		}
 		return result
 	},
-	withOrderOnInit:function(pushData,isBalance){
+	withOrderOnInit:function(pushData){
 		//真实的跟单操作
 		$(pushData).each(function(i){
 			var item = $(this)[0];
-			if(true){
 				var signInfo = ContentScript.GetSignInInfo();
-				if(['FCB','FCE','PFTB','PFTE','QB','QE','QPB','QPE'].contains(item.type)){
 							var postData = {};
 							postData.task = "betBox";
 							postData.combo =0;
-							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.x),"Q");
-							postData.Race = parseInt(item.matches);
+							postData.Tix =  ContentScript.ticketByFloat(parseInt(item.ticket),"Q");
+							postData.Race = parseInt($("#view1").val());
 							var hourse1,hourse2;
 							//如果含有括号特殊处理一下
-							if(item.fb.indexOf("(")<0){
-								hourse1 = item.fb.split("-")[0];
-								hourse2 = item.fb.split("-")[1];
+							if(item.type == "Q"){
+								hourse1 = item.cc;
+								hourse2 = item.cc2;
 								postData.fctype = 0;
 							}else{
-								hourse1 = item.fb.replace(/\(/g,"").replace(/\)/g,"").split("-")[0];
-								hourse2 = item.fb.replace(/\(/g,"").replace(/\)/g,"").split("-")[1];
+								hourse1 = item.cc;
+								hourse2 = item.cc2;
 								postData.fctype = 1;
 							}
 							postData.Hs1 = hourse1;
@@ -1273,16 +1354,12 @@ ContentScript={
 							postData.Hs8 = "";
 							//postData.fctype = 0;
 							postData.Q = "Q";
-							if(item.type.indexOf("E")>=0){
+							if(ContentScript.PageConfig.EatBetType == "Eat"){
 								postData.type = "EAT";
+								postData.amount = ContentScript.PageConfig.EatDiscount;
 							}else{
 								postData.type = "BET";
-							}
-							
-							if(isBalance){
-								postData.amount = 100;
-							}else{
-								postData.amount = ContentScript.PageConfig.Discount;
+								postData.amount = ContentScript.PageConfig.BetDiscount;
 							}
 							postData.fclmt = ContentScript.PageConfig.LimitStart;
 								
@@ -1290,15 +1367,15 @@ ContentScript={
 							//postData.amount = "100";
 							postData.race_type = signInfo.RaceType;
 							postData.race_date = signInfo.RaceDate;
-							postData.show = parseInt(item.matches);
+							postData.show = parseInt($("#view1").val());
 							postData.rd = Math.random();
 							
 							console.log(postData);
-							///forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
+							//forecast?task=betBox&combo=0&Tix=2&Race=6&Hs1=1&Hs2=2&Hs3=&Hs4=&Hs5=&Hs6=&Hs7=&Hs8=&fctype=0&Q=Q&type=EAT&overflow=1&amount=90&fclmt=700&race_type=330E&race_date=12-04-2015&show=6&rd=0.05655713961459696
 							$.ajax({
 							              type: "get",
 							              url: ContentScript.urlX +"/forecast",
-							              data: postData,
+							             data: postData,
 							              success: function (msg) {
 							              	console.log(msg);
 							              },
@@ -1306,68 +1383,27 @@ ContentScript={
 							              	console.log(e);
 							              }
 							});
-						} 
-				if(['WPB','WPE','WB','WE','PB','PE'].contains($(this)[0].type)){
-					
-							var postURL = "";
-							var postData = {};
-							postData.t = "frm";
-							postData.race = item.matches;
-							postData.horse = item.rdfb;
-							//var Proportion = parseInt(ContentScript.PageConfig.Percent);
-							postData.win = ContentScript.ticketByFloat(parseInt(item.fb),"WP");
-							postData.place = ContentScript.ticketByFloat(parseInt(item.x),"WP");
-							
-							var postURL ="";
-							postURL ="/bets";
-							
-							if(isBalance){
-								postData.amount = 99;
-							}else{
-								postData.amount = ContentScript.PageConfig.Discount;
-							}
-							
-							postData.l_win = ContentScript.PageConfig.LimitStart;
-							postData.l_place = ContentScript.PageConfig.LimitEnd;
-							postData.race_type = signInfo.RaceType;
-							postData.race_date = signInfo.RaceDate;
-							postData.show = parseInt(item.matches);
-							
-							if(parseInt(postData.win)>0 && parseInt(postData.place)>0){
-								postData.wptck=1;
-							}else{
-								postData.wptck=0;
-							} 
-							if(parseInt(postData.win)>0 && parseInt(postData.place)==0){
-								postData.wtck=1;
-								postData.l_place = "0";
-							}
-							if(parseInt(postData.win)==0 && parseInt(postData.place)>0){
-								postData.ptck=1;
-								postData.l_win = "0";
-							}
-							
-							postData.post = "1";
-							postData.rd = Math.random();
-							console.log(postData);
-							$.ajax({
-							              type: "get",
-							              url: ContentScript.urlX + postURL,
-							              data: postData,
-							              success: function (msg) {
-							              	console.log(msg);
-							              },
-							              error:function(e){
-							              	console.log(e);
-							              }
-							});
-					}
-			}
+						 
 		});
+		$("#btnStart").show();
 	},
 	GetAllTransactionData:function(){
 		var result = [];
+		//<td>6</td>
+		//<td class="RD F_B">FC</td>
+		//<td class="F_B ">4-5</td>
+		//<td id="FCE_6_4-5_100_700x">2</td>
+		//<td id="FCE_6_4-5_100_700y">100</td>
+		//<td id="FCE_6_4-5_100_700t" colspan="1" class="">700</td>
+		//<td class="">吃</td>
 		
+		//<td>2</td>
+		//<td class="F_B">4</td>
+		//<td id="PE_2_4_78_0/16_0x">0</td>
+		//<td id="PE_2_4_78_0/16_0y">5</td>
+		//<td id="PE_2_4_78_0/16_0z">78</td>
+		//<td id="PE_2_4_78_0/16_0t" colspan="1" class="">0/16</td>
+		//<td class="">吃</td></tr>
 		$(ContentScript.txn_mode_check_item).each(function(i){
 			var type = ContentScript.txn_mode_check_item[i];
 			$(window.frames["frmTRANS"].document).find("tbody[id^='"+type+"'] tr").each(function(){
@@ -1384,6 +1420,13 @@ ContentScript={
 			});
 		});
 		
+		return result;
+	},
+	GetCJCount:function(){
+		var result = 0;
+			$(window.frames["frmTRANS"].document).find("tbody[id^='C'] tr").each(function(){
+				result += parseFloat($(this).text());
+			});
 		return result;
 	},
 	GetAllHadTransactionData:function(){
@@ -1408,39 +1451,39 @@ ContentScript={
 	},
 	
 	CreateHtmlElement:function(){
-		var htmlList = '<div id="drag" style="background:white;width: 330px; height: 180px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 180px;overflow-y: auto;max-height: 600px;">';
+		var htmlList = '<div id="drag" style="background:white;width: 330px; height: 200px; position: absolute; border: solid 1px #ccc; float: right; z-index: 100;right: 0;top: 0;min-height: 180px;overflow-y: auto;max-height: 600px;">';
         htmlList += '<h3 style="color: #fff; background: none repeat scroll 0 0 rgba(16, 90, 31, 0.7); color: #FFFFFF; height: 30px; line-height: 30px; margin: 0;">当前账户:'+$.trim($("#username").text())+' &nbsp; 到期时间<span id="daoqitime"></span></h3>';
         htmlList +='<table style="width:100%">';
         htmlList +='<tr style="line-height: 30px;"><td colspan="2">';
         htmlList +='<input type= "radio" name="orderType"  value="Q" checked="checked" id="QType"/>Q';
         htmlList +='<input type= "radio" name="orderType"  value="WP" id="WPType"/>WP';
         htmlList +='<input type= "radio" name="orderType"  value="QP" id="QPType"/>QP';
+        htmlList +='&nbsp;&nbsp;孔位:<input id="KongWei" type="number" step="10" style="width: 40px;" size="4" value="" />'
         htmlList +='</td></tr>';
-        htmlList +='<tr style="line-height: 30px;" ><td colspan="2">';
-        htmlList +='孔位:<input id="KongWei" type="number" step="10" style="width: 40px;" size="4" value="" />'
-		htmlList +='过滤条件:<input id="LimitWhere1" type="number" step="10" style="width: 40px;" size="4" value="" />'
-		htmlList +='至<input id="LimitWhere2" type="number" step="10" style="width: 40px;" size="4" value="" />'
+        htmlList +='<tr style="line-height: 30px;" ><td>';
+		htmlList +='&nbsp;&nbsp;过滤:<input id="LimitWhere1" type="number" step="10" style="width: 40px;" size="4" value="" />'
+		htmlList +='-<input id="LimitWhere2" type="number" step="10" style="width: 40px;" size="4" value="" />'
 		htmlList +='</td>'; 
-        htmlList +='</tr>'; 
-        htmlList +='<tr style="line-height: 30px;"><td colspan="2">';
-        htmlList +='估计票数:<input id="GJCount" type="number" step="10" style="width: 40px;" size="4" value="" />';
-        htmlList +='成交票数:<input id="CJCount" type="number" step="10" style="width: 40px;" size="4" value="" />';
+        htmlList +='<td>';
+        htmlList +='估计:<input id="GJCount" type="number" step="10" style="width: 40px;" size="4" value="" />';
+        htmlList +='成交:<input id="CJCount" type="number" step="10" style="width: 40px;" size="4" value="" />';
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
-        htmlList +='<tr style="line-height: 30px;"><td colspan="2">';
+        htmlList +='<tr style="line-height: 30px;"><td>';
         htmlList +='<input type= "radio" name="EatBetType"  value="Eat" checked="checked" id="EatType"/>吃折头:<input id="EatDiscount" type="number" step="10" style="width: 40px;" size="4" value="" />';
+        htmlList +='</td>'; 
+        htmlList +='<td>';
         htmlList +='<input type= "radio" name="EatBetType"  value="Bet" checked="checked" id="BetType"/>赌折头:<input id="BetDiscount" type="number" step="10" style="width: 40px;" size="4" value="" />';
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
-         htmlList +='<tr style="line-height: 30px;"><td colspan="2">';
-        htmlList +='极限:<input id="LimitStart" type="number" step="10" style="width: 40px;" size="4" value="" />';
-        htmlList +='/<input id="LimitEnd" type="number" step="10" style="width: 40px;" size="4" value="" />';
+        htmlList +='<tr style="line-height: 30px;"><td colspan="2">';
+        htmlList +='&nbsp;&nbsp;极限:<input id="LimitStart" type="number" step="10" style="width: 40px;" size="4" value="700" />';
+        htmlList +='/<input id="LimitEnd" type="number" step="10" style="width: 40px;" size="4" value="700" />';
         htmlList +='</td>'; 
         htmlList +='</tr>'; 
         htmlList +='<tr style="line-height: 40px;"><td style="text-align:left;font-size:18px">';
        	htmlList +='</td><td style="text-align:right">';
-        htmlList +='<input type="button" id="btnStart" value="开始" />';
-        htmlList +='<input type="button" id="btnEnd" value="停止" />';
+        htmlList +='<input type="button" id="btnStart" value="购买" />';
         htmlList +='</td></tr>';
         htmlList +='</table>';
         htmlList += '</div>';

@@ -572,6 +572,13 @@ public class XMLData
                         continue;
                     }
                 }
+                if (!string.IsNullOrEmpty(query.PassWord))
+                {
+                    if (entity.PassWord != query.PassWord)
+                    {
+                        continue;
+                    }
+                }
                 //代表已经删除了
                 if (entity.Status != "D")
                 {
@@ -715,6 +722,7 @@ public class XMLData
 
             Hashtable where = new Hashtable();
             where.Add("UserName", entity.UserName);
+            where.Add("PassWord", entity.PassWord);
             bool result = false;
             lock (dataObj)
             {

@@ -47,7 +47,7 @@
                             <%= item.UserName.ToString() %></span>
                     </td>
                     <td>
-                        <input type="text" class="PassWord" value="<%= item.PassWord.ToString() %>" />
+                        <input type="text" disabled="false" class="PassWord" value="<%= item.PassWord.ToString() %>" />
                     </td>
                     <td>
                         <select class="Status">

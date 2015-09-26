@@ -402,33 +402,11 @@ ContentScript={
 										},0);
 										setTimeout(function(){
 											ContentScript.BetButtonEvent();
-										},100);
+										},0);
 										//然后100%的平仓数据交易
 										setTimeout(function(){
 											ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
 										},1000);
-										
-										//然后100%的平仓数据交易
-										setTimeout(function(){
-											//如果有非 100的没有成交的记录的话 需要删非100折的订单后再平仓
-											if(!ContentScript.checkPingCangHouDataValidation()){
-												var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
-												if(greenList!=null && greenList!=undefined && greenList.length>0 ){
-														$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
-																if($($(this).find(".del_ch").parent().parent()).find("td").eq(4).text()!="100"){
-																	var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
-																	PostHelp.AjaxDeleteData(obj);
-																	$($(this).find(".del_ch").parent().parent()).hide();
-																}
-														});
-														
-												}
-												setTimeout(function(){
-													ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
-												},1000);
-											}
-										},2000);
-										
 										//平仓后结束
 										if(ContentScript.timerWithOrderClock!=null){
 											clearInterval(ContentScript.timerWithOrderClock);
@@ -465,7 +443,15 @@ ContentScript={
 						//平仓
 						$("#btnBanlance").bind("click",function(){
 							if($("#Percent").val() == 1 || $("#Percent").val()=="1" ){
-								if(ContentScript.timerWithOrderClock==null){
+									//平仓后结束
+									if(ContentScript.timerWithOrderClock!=null){
+										clearInterval(ContentScript.timerWithOrderClock);
+									}
+									ContentScript.timerWithOrderClock = null;
+									ContentScript.timerCountPageEatAndBet = self.setInterval(function(){ContentScript.showCountWithWhere()},1000);
+									$("#btnStart").show();
+									$("#btnEnd").hide();
+									
 									$(this).hide();
 									//先删除所有没有成交的数据
 									setTimeout(function(){
@@ -479,9 +465,6 @@ ContentScript={
 										ContentScript.withOrderOnInit(ContentScript.getNeedPingCangOrderList(),true);
 									},1000);
 									$(this).show();
-								}else{
-									alert("请先停止跟单！");
-								}
 							}else{
 								alert("平仓功能只能在倍率是1的情况下使用！");
 							}
@@ -1654,27 +1637,19 @@ ContentScript={
         $("body").append(htmlList);
 	},
 	EatButtonEvent:function(){
-		var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
-		if(yellowList !=null && yellowList!=undefined && yellowList.length>0){
-						$(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr").each(function(index){
-								var obj = $($(this).find(".del2_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
-								PostHelp.AjaxDeleteData(obj);
-								$($(this).find(".del2_ch").parent().parent()).hide();
-						});
-						
-		}
-	},
-	BetButtonEvent:function(){
-		var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
-		if(greenList!=null && greenList!=undefined && greenList.length>0 ){
-				$(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr").each(function(index){
-						var obj = $($(this).find(".del_ch").parent().parent()).attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");
-						PostHelp.AjaxDeleteData(obj);
-						$($(this).find(".del_ch").parent().parent()).hide();
-				});
-				
-		}
-	},
+      var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
+      if(yellowList !=null && yellowList!=undefined && yellowList.length>0){
+			var obj = $(window.frames["frmTRANS"].document).find(".del2_ch").last().attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");       
+      		PostHelp.AjaxDeleteData(obj);
+      	}
+    },
+    BetButtonEvent:function(){
+      	var greenList = $(window.frames["frmTRANS"].document).find("tbody[id^='DBmr'] tr");
+      	if(greenList!=null && greenList!=undefined && greenList.length>0 ){
+			var obj = $(window.frames["frmTRANS"].document).find(".del_ch").last().attr("onclick").replace(/mr\(\'/g,"").replace(/\'\)/g,"");       
+			PostHelp.AjaxDeleteData(obj);
+      	}
+    },
 	EatButtonEventByMatches:function(match){
 		var yellowList = $(window.frames["frmTRANS"].document).find("tbody[id^='DEmr'] tr");
 		if(yellowList !=null && yellowList!=undefined && yellowList.length>0){
